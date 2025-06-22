@@ -44,7 +44,11 @@ nav a {
 }
 
 #hero {
-  background-color: #e9ecef;
+  background-image: url('https://gatewaycorporate.org/embed.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  color: white;
   padding: 30px 20px;
   text-align: center;
 }
