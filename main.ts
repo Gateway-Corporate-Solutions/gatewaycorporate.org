@@ -34,8 +34,7 @@ router.post('/request', async (context) => {
   try {
     const form = await context.request.body.form();
     handleUserRequest(form);
-    const indexBody = await Deno.readTextFile('./src/views/index.html');
-    context.response.body = indexBody;
+    context.response.redirect('/');
   } catch (error) {
     console.error('Error processing request:', error);
     context.response.status = 500;
