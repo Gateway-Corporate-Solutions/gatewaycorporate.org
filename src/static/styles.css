@@ -1,0 +1,93 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+header {
+  background-color: #0b0b0b;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 28px;
+  font-weight: semi-bold;
+}
+
+nav a {
+  color: white;
+  margin: 0 15px;
+  text-decoration: none;
+}
+
+#hero {
+  background-color: #e9ecef;
+  padding: 50px 20px;
+  text-align: center;
+}
+
+#tag {
+  margin: 0;
+}
+
+#subtag {
+  padding-bottom: 20px;
+}
+
+.cta-btn {
+  background-color: #00aafa;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+section {
+  padding: 20px;
+}
+
+#services, #about, #contact {
+  background-color: white;
+  text-align: center;
+  margin: 20px auto;
+  max-width: 800px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+ul {
+  font-size: 24px;
+  margin: 10px;
+  font-weight: semi-bold;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+form input, form textarea {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+footer {
+  text-align: center;
+  padding: 10px 0;
+  background-color: #343a40;
+  color: white;
+}
