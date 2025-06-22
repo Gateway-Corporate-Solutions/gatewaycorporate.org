@@ -6,6 +6,20 @@ body {
   color: #333;
 }
 
+@media screen and (max-width: 786px) {
+  #logo {
+    display: none;
+  }
+}
+
+#logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  height: 100px;
+  width: 100px;
+}
+
 header {
   background-color: #0b0b0b;
   color: white;
