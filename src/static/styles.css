@@ -55,7 +55,7 @@ section {
   padding: 20px;
 }
 
-#services, #about, #contact {
+#services, #about, #contact, #projects {
   background-color: white;
   text-align: center;
   margin: 20px auto;
@@ -65,10 +65,19 @@ section {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-ul {
+ul#service-list {
   font-size: 24px;
   margin: 10px;
   font-weight: semi-bold;
+}
+
+ul#project-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+#project-list li {
+  margin: 20px 0;
 }
 
 form {
