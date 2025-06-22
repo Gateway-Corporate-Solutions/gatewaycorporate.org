@@ -45,22 +45,18 @@ nav a {
 
 #hero {
   background-color: #e9ecef;
-  padding: 50px 20px;
+  padding: 30px 20px;
   text-align: center;
-}
-
-#tag {
-  margin: 0;
-}
-
-#subtag {
-  padding-bottom: 20px;
 }
 
 .cta-btn {
   background-color: #00aafa;
   color: white;
+  font-weight: semi-bold;
+  font-size: 18px;
+  border: none;
   padding: 10px 20px;
+  margin: 10px;
   text-decoration: none;
   border-radius: 5px;
 }
@@ -86,11 +82,13 @@ ul#service-list {
 
 ul#project-list {
   list-style-type: none;
+  display: flex;
+  flex-direction: column;
   padding: 0;
 }
 
 #project-list li {
-  margin: 20px 0;
+  margin: 5px;
 }
 
 form {
