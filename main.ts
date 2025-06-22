@@ -19,7 +19,7 @@ function handleUserRequest(r: URLSearchParams) {
   const twilioClient = twilio(accountSid, authToken);
 
   twilioClient.messages.create({
-    body: `New request from ${r.get('name')} (${r.get('email')}): ${r.get('message')}`,
+    body: `New request from ${r.get('name')} (${r.get('email')}): ${r.get('message')}`.slice(0, 1600),
     from: twilioNumber,
     to: notificationNumber
   })
