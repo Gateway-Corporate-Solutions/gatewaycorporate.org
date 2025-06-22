@@ -17,9 +17,14 @@ interface UserRequest {
 
 function handleUserRequest(r: URLSearchParams) {
   const twilioClient = twilio(accountSid, authToken);
-
+  const userRequest: UserRequest = {
+    name: r.get('name') || '',
+    email: r.get('email') || '',
+    message: r.get('message')?.slice(0, 1000) || ''
+  };
+  console.log('Received request: ', userRequest);
   twilioClient.messages.create({
-    body: `New request from ${r.get('name')} (${r.get('email')}): ${r.get('message')}`.slice(0, 1600),
+    body: `New request from ${userRequest.name} (${userRequest.email}): ${userRequest.message}`,
     from: twilioNumber,
     to: notificationNumber
   })
