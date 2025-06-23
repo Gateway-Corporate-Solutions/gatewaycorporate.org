@@ -54,13 +54,13 @@ nav a {
 }
 
 #hero {
-  background-image: url('/embed.jpg');
+  background-image: url('https://gatewaycorporate.org/embed.jpg');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
   color: white;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-  padding: 70px 20px;
+  padding: 30px 20px;
   text-align: center;
 }
 
@@ -76,23 +76,14 @@ nav a {
   border-radius: 5px;
 }
 
-#sections {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(62, 114, 163, 1) 56%, rgba(98, 181, 209, 1) 80%, rgba(255, 255, 255, 1) 100%);
-  background-size: cover;
-}
-
 section {
   padding: 20px;
 }
 
 #services, #about, #contact, #projects {
-  background-color: #eee;
+  background-color: white;
   text-align: center;
   margin: 20px auto;
-  width: 80%;
   max-width: 800px;
   padding: 20px;
   border-radius: 8px;
@@ -118,6 +109,7 @@ ul#project-list {
 form {
   display: flex;
   flex-direction: column;
+  max-width: 400px;
   margin: 0 auto;
 }
 
