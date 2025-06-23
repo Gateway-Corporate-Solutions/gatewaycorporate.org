@@ -54,7 +54,7 @@ nav a {
 }
 
 #hero {
-  background-image: url('https://gatewaycorporate.org/embed.jpg');
+  background-image: url('/embed.jpg');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
