@@ -47,6 +47,11 @@ h4 {
   font-weight: semi-bold;
 }
 
+a {
+  color: rgba(219, 83, 15, 1);
+  text-decoration: none;
+}
+
 nav a {
   color: white;
   margin: 0 15px;
@@ -65,7 +70,7 @@ nav a {
 }
 
 .cta-btn {
-  background-color: #00aafa;
+  background-color: rgba(219, 83, 15, 1);
   color: white;
   font-weight: semi-bold;
   font-size: 18px;
@@ -80,7 +85,8 @@ nav a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(62, 114, 163, 1) 56%, rgba(98, 181, 209, 1) 80%, rgba(255, 255, 255, 1) 100%);
+  background: radial-gradient(rgba(219, 83, 15, 1) 19%, rgba(0, 0, 0, 1) 100%);
+  background-position: center;
   background-size: cover;
 }
 
@@ -131,6 +137,6 @@ form input, form textarea {
 footer {
   text-align: center;
   padding: 10px 0;
-  background-color: #343a40;
+  background-color: #000;
   color: white;
 }
