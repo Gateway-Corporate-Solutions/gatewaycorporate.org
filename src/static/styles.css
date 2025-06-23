@@ -47,6 +47,12 @@ h4 {
   font-weight: semi-bold;
 }
 
+h5 {
+  margin: 10px;
+  font-size: 24px;
+  font-weight: semi-bold;
+}
+
 a {
   color: rgba(219, 83, 15, 1);
   text-decoration: none;
@@ -137,6 +143,7 @@ form {
 }
 
 form input, form textarea {
+  font-size: 14px;
   padding: 10px;
   margin: 10px 0;
   border: 1px solid #ccc;
