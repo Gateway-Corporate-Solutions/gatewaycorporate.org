@@ -23,6 +23,10 @@ function handleUserRequest(r: URLSearchParams) {
     message: r.get('message')?.slice(0, 1000) || ''
   };
   console.log('Received request: ', userRequest);
+  if (!userRequest.name || !userRequest.email || !userRequest.message) {
+    console.error('Incomplete request data:', userRequest);
+    return;
+  }
   twilioClient.messages.create({
     body: `New request from ${userRequest.name} (${userRequest.email}): ${userRequest.message}`,
     from: twilioNumber,
