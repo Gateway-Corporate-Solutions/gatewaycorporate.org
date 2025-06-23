@@ -97,7 +97,7 @@ section {
 #services, #about, #contact, #projects {
   background-color: #eee;
   text-align: center;
-  margin: 20px auto;
+  margin: 15px auto;
   width: 80%;
   max-width: 800px;
   padding: 20px;
@@ -105,9 +105,14 @@ section {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+#services {
+  margin-top: 30px;
+}
+
 ul#service-list {
   font-size: 24px;
   font-weight: semi-bold;
+  list-style-type: none;
 }
 
 ul#project-list {
@@ -119,6 +124,10 @@ ul#project-list {
 
 #project-list li {
   margin: 5px;
+}
+
+#contact {
+  margin-bottom: 30px;
 }
 
 form {
