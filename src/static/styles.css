@@ -6,7 +6,7 @@ body {
   color: #333;
 }
 
-@media screen and (max-width: 786px) {
+@media screen and (max-width: 870px) {
   #logo {
     display: none;
   }
@@ -16,8 +16,8 @@ body {
   position: absolute;
   top: 20px;
   left: 20px;
-  height: 100px;
-  width: 100px;
+  height: 120px;
+  width: 120px;
 }
 
 header {
