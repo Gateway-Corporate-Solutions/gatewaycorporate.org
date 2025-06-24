@@ -34,10 +34,6 @@ header {
   text-align: center;
 }
 
-.anchor {
-  padding-top: 140px;
-}
-
 h1 {
   font-size: 40px;
   font-weight: bold;
@@ -112,8 +108,13 @@ section {
   padding: 20px;
 }
 
+@media screen and (min-width: 870px) {
+  #services, #about, #contact, #projects {
+    scroll-margin-top: 170px;
+  }
+}
+
 #services, #about, #contact, #projects {
-  scroll-margin-top: 170px;
   background-color: rgba(240, 240, 240, 0.8);
   text-align: center;
   margin: 15px auto;
