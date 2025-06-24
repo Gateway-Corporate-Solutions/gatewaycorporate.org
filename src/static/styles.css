@@ -21,10 +21,16 @@ body {
 }
 
 header {
-  background-color: #0b0b0b;
+  background-color: #000;
+  position: sticky;
+  top: 0;
   color: white;
   padding: 20px;
   text-align: center;
+}
+
+.anchor {
+  padding-top: 140px;
 }
 
 h1 {
@@ -102,6 +108,7 @@ section {
 }
 
 #services, #about, #contact, #projects {
+  scroll-margin-top: 170px;
   background-color: rgba(240, 240, 240, 0.8);
   text-align: center;
   margin: 15px auto;
