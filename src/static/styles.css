@@ -20,10 +20,15 @@ body {
   width: 120px;
 }
 
+@media screen and (min-width: 870px) {
+  header {
+    position: sticky;
+    top: 0;
+  }  
+}
+
 header {
   background-color: #000;
-  position: sticky;
-  top: 0;
   color: white;
   padding: 20px;
   text-align: center;
