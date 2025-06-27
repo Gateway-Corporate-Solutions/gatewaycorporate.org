@@ -176,6 +176,12 @@ form button {
   cursor: pointer;
 }
 
+.g-recaptcha {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
 footer {
   text-align: center;
   padding: 10px 0;
