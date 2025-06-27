@@ -27,6 +27,17 @@ function handleUserRequest(r: URLSearchParams) {
     console.error('Incomplete request data:', userRequest);
     return;
   }
+  if (userRequest.email.match(/\.(ru|cn|in|kr)$/)) {
+    console.error('Request contains a blocked email domain:', userRequest.email);
+    return;
+  }
+  if (userRequest.message.match(/(http|https):\/\/[^\s]+\.(ru|cn|in|kr)/)) {
+    console.error('Request contains a blocked URL:', userRequest.message);
+    return;
+  }
+  userRequest.message = userRequest.message.replace(/<[^>]+>/g, '').trim(); // Remove HTML tags
+  userRequest.message = userRequest.message.replace(/[\r\n]+/g, ' ').trim(); // Normalize newlines
+  console.log('Sending notification for request');
   twilioClient.messages.create({
     body: `New request from ${userRequest.name} (${userRequest.email}): ${userRequest.message}`,
     from: twilioNumber,
