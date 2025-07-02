@@ -7,5 +7,9 @@
     "oak": "jsr:@oak/oak",
     "twilio": "npm:twilio"
   },
-  "nodeModulesDir": "auto"
+  "nodeModulesDir": "auto",
+  "exclude": [
+    "node_modules",
+    "**/*.js"
+  ]
 }
