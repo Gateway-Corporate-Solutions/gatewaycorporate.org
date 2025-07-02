@@ -12,6 +12,7 @@ const notificationNumber = Deno.env.get("NOTIFICATION_NUMBER") || "";
 interface UserRequest {
   name: string;
   email: string;
+  referral?: string; // Optional field for how they heard about us
   message: string;
 }
 
@@ -50,6 +51,7 @@ async function handleUserRequest(r: URLSearchParams) {
   const userRequest: UserRequest = {
     name: r.get('name') || '',
     email: r.get('email') || '',
+    referral: r.get('referral')?.slice(0, 100) || '', // Optional field, max length 100
     message: r.get('message')?.slice(0, 1000) || ''
   };
   console.log('Received request: ', userRequest);
@@ -67,9 +69,16 @@ async function handleUserRequest(r: URLSearchParams) {
   }
   userRequest.message = userRequest.message.replace(/<[^>]+>/g, '').trim(); // Remove HTML tags
   userRequest.message = userRequest.message.replace(/[\r\n]+/g, ' ').trim(); // Normalize newlines
+  userRequest.referral = userRequest.referral?.replace(/<[^>]+>/g, '').trim(); // Sanitize referral
+
+  if (userRequest.referral) {
+    userRequest.referral = userRequest.referral.slice(0, 100); // Limit referral length
+    userRequest.message += `\n\nReferral: ${userRequest.referral}`;
+  }
+
   console.log('Sending notification for request');
   twilioClient.messages.create({
-    body: `New request from ${userRequest.name} (${userRequest.email}): ${userRequest.message}`,
+    body: `New request from ${userRequest.name} (${userRequest.email}) : ${userRequest.message}`,
     from: twilioNumber,
     to: notificationNumber
   })
