@@ -63,6 +63,10 @@ async function handleUserRequest(r: URLSearchParams) {
     console.error('Request contains a blocked email domain:', userRequest.email);
     return;
   }
+  if (userRequest.email.match(/(mike7778uk\@gmail.com)/)) {
+    console.error('Request contains a blocked email address:', userRequest.email);
+    return;
+  }
   if (userRequest.message.match(/(http|https):\/\/[^\s]+\.(ru|cn|in|kr)/)) {
     console.error('Request contains a blocked URL:', userRequest.message);
     return;
