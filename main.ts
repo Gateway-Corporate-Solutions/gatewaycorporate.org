@@ -16,6 +16,10 @@ interface UserRequest {
   message: string;
 }
 
+const blockedEmails = [
+  "mike7778uk@gmail.com"
+];
+
 async function handleUserRequest(r: URLSearchParams) {
   const g_recaptchaResponse = r.get('g-recaptcha-response');
   if (!g_recaptchaResponse) {
@@ -63,7 +67,7 @@ async function handleUserRequest(r: URLSearchParams) {
     console.error('Request contains a blocked email domain:', userRequest.email);
     return;
   }
-  if (userRequest.email.match(/(mike7778uk\@gmail.com)/)) {
+  if (blockedEmails.includes(userRequest.email)) {
     console.error('Request contains a blocked email address:', userRequest.email);
     return;
   }
