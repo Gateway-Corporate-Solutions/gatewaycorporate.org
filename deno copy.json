@@ -1,0 +1,22 @@
+{
+  "lock": false,
+  "tasks": {
+    "start": "deno run --allow-all --env-file=.env.list main.ts"
+  },
+  "imports": {
+    "oak": "jsr:@oak/oak",
+    "twilio": "npm:twilio"
+  },
+  "exclude": [
+    "**/*.js"
+  ],
+  "nodeModulesDir": "auto",
+  "deploy": {
+    "project": "e3806b56-c6c7-4d20-9aa3-a69dcfd84f31",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "main.ts"
+  }
+}
