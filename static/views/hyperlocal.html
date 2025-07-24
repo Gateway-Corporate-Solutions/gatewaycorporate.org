@@ -413,6 +413,7 @@
       opacity: 0.8;
       -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
+      z-index: 1000;
     }
 
     .carousel-controls:hover {
@@ -1262,10 +1263,15 @@
 
     // Testimonial carousel
     let currentSlide = 0;
+    let autoScrollTimeout = null;
     const slides = document.querySelectorAll(".testimonial-slide");
     const dots = document.querySelectorAll(".carousel-dot");
     const track = document.getElementById("testimonialTrack");
-    let autoScrollInterval;
+    let autoScrollInterval = setInterval(nextSlide, 5000); // 5 seconds
+
+    // Touch/swipe support
+    let startX = 0;
+    let isSwiping = false;
 
     function updateCarousel() {
       // Update track position for smooth scrolling
@@ -1297,12 +1303,25 @@
       updateCarousel();
     }
 
-    function startAutoScroll() {
-      autoScrollInterval = setInterval(nextSlide, 5000); // Auto-advance every 5 seconds
-    }
-
     function stopAutoScroll() {
       clearInterval(autoScrollInterval);
+    }
+
+    function startAutoScroll() {
+      clearInterval(autoScrollInterval);
+      nextSlide();
+      autoScrollInterval = setInterval(
+        nextSlide,
+        5000 // 5 seconds
+      );
+    }
+
+    function scheduleAutoScroll() {
+      clearTimeout(autoScrollTimeout);
+      // Schedule next auto-scroll after 10 seconds of inactivity
+      autoScrollTimeout = setTimeout(() => {
+        startAutoScroll();
+      }, 10000); // Restart auto-scroll after 10 seconds
     }
 
     // Bind carousel controls
@@ -1310,8 +1329,8 @@
       "click",
       () => {
         prevSlide();
-        stopAutoScroll();
-        setTimeout(startAutoScroll, 10000); // Restart auto-scroll after 10 seconds
+        stopAutoScroll(); // Stop auto-scroll on manual navigation
+        scheduleAutoScroll(); // Restart auto-scroll after 10 seconds
       },
     );
 
@@ -1319,8 +1338,8 @@
       "click",
       () => {
         nextSlide();
-        stopAutoScroll();
-        setTimeout(startAutoScroll, 10000); // Restart auto-scroll after 10 seconds
+        stopAutoScroll(); // Stop auto-scroll on manual navigation
+        scheduleAutoScroll(); // Restart auto-scroll after 10 seconds
       },
     );
 
@@ -1328,8 +1347,8 @@
     dots.forEach((dot, index) => {
       dot.addEventListener("click", () => {
         goToSlide(index);
-        stopAutoScroll();
-        setTimeout(startAutoScroll, 10000); // Restart auto-scroll after 10 seconds
+        stopAutoScroll(); // Stop auto-scroll on manual navigation
+        scheduleAutoScroll(); // Restart auto-scroll after 10 seconds
       });
     });
 
@@ -1338,8 +1357,34 @@
     carousel.addEventListener("mouseenter", stopAutoScroll);
     carousel.addEventListener("mouseleave", startAutoScroll);
 
-    // Start auto-scroll
-    startAutoScroll();
+    carousel.addEventListener("touchstart", function (e) {
+      if (e.touches.length === 1) {
+        startX = e.touches[0].clientX;
+        isSwiping = true;
+      }
+    });
+
+    carousel.addEventListener("touchmove", function (e) {
+      if (isSwiping && e.touches.length === 1) {
+        const currentX = e.touches[0].clientX;
+        const diffX = currentX - startX;
+
+        if (Math.abs(diffX) > 50) { // Swipe threshold
+          isSwiping = false; // Stop swiping
+          if (diffX > 0) {
+            prevSlide(); // Swipe right
+          } else {
+            nextSlide(); // Swipe left
+          }
+          stopAutoScroll(); // Stop auto-scroll on swipe
+          scheduleAutoScroll(); // Restart auto-scroll after 10 seconds
+        }
+      }
+    });
+
+    carousel.addEventListener("touchend", function () {
+      isSwiping = false; // Reset swiping state
+    });
 
     // Smooth scrolling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
