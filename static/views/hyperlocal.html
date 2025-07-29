@@ -805,9 +805,9 @@
 
         <div class="roi-result">
           <h3 class="heading-3 mb-sm">Monthly Time Savings</h3>
-          <div class="stat-number" id="timeSaved">19.2 hours</div>
+          <div class="stat-number" id="timeSaved">At least 19.2 hours</div>
           <p class="text-small">
-            That's <span id="weeksSaved">2.4 work days</span> back in your
+            That's <span id="weeksSaved">at least 2.4 work days</span> back in your
             life!
           </p>
           <p class="text-small mt-md">
@@ -1230,9 +1230,9 @@
       const totalHours = totalMinutes / 60;
       const workDays = totalHours / 8;
 
-      document.getElementById("timeSaved").textContent = `${totalHours.toFixed(1)
+      document.getElementById("timeSaved").textContent = `At least ${totalHours.toFixed(1)
         } hours`;
-      document.getElementById("weeksSaved").textContent = `${workDays.toFixed(1)
+      document.getElementById("weeksSaved").textContent = `at least ${workDays.toFixed(1)
         } work days`;
     }
 
