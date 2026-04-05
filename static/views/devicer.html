@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="components.css">
+	<link rel="stylesheet" href="enhancements.css">
+	<script src="index.js" defer></script>
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+
+	<meta name="author" content="Gateway Corporate Solutions">
+	<meta name="keywords"
+		content="fp-devicer, device fingerprinting, JA4, proxy detection, bot blocking, peer reputation, gateway corporate">
+	<link rel="preconnect" href="https://gatewaycorporate.org/" crossorigin="anonymous">
+	<link rel="dns-prefetch" href="https://gatewaycorporate.org/">
+	<meta property="og:locale" content="en_US">
+
+	<title>FP-Devicer Intelligence Suite | Gateway Corporate Solutions</title>
+	<meta name="title" content="FP-Devicer Intelligence Suite | Gateway Corporate Solutions">
+	<meta name="description"
+		content="Server-side device fingerprinting with an open-source core and enterprise-grade plugins for IP intelligence, TLS enrichment, bot blocking, and peer reputation.">
+
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://gatewaycorporate.org/devicer.html">
+	<meta property="og:title" content="FP-Devicer Intelligence Suite | Gateway Corporate Solutions">
+	<meta property="og:description"
+		content="Open-source fingerprinting middleware with premium plugins for IP geoenrichment, JA4/TLS consistency, bot blocking, and peer reputation networking.">
+	<meta property="og:image" content="https://gatewaycorporate.org/devicer.png">
+
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:url" content="https://gatewaycorporate.org/devicer.html">
+	<meta property="twitter:title" content="FP-Devicer Intelligence Suite | Gateway Corporate Solutions">
+	<meta property="twitter:description"
+		content="Open-source fingerprinting middleware with premium plugins for IP geoenrichment, JA4/TLS consistency, bot blocking, and peer reputation networking.">
+	<meta property="twitter:image" content="https://gatewaycorporate.org/devicer.png">
+
+	<style>
+		.section-header {
+			text-align: center;
+			margin-bottom: 4rem;
+			max-width: 800px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.section-title {
+			margin-bottom: 1rem;
+		}
+
+		.text-lead {
+			font-size: 1.2rem;
+			line-height: 1.6;
+			color: var(--gray-600);
+		}
+
+		.card {
+			margin-bottom: 0;
+		}
+
+		.card-header {
+			margin-bottom: 1.5rem;
+		}
+
+		.card-body {
+			margin-bottom: 1.5rem;
+		}
+
+		.card-footer {
+			margin-top: auto;
+		}
+
+		.grid {
+			display: grid;
+			gap: 2rem;
+		}
+
+		.grid.gap-lg {
+			gap: 2rem;
+		}
+
+		.grid.gap-xl {
+			gap: 3rem;
+		}
+
+		.btn {
+			font-weight: 600;
+			transition: all 0.3s ease;
+		}
+
+		.btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		}
+
+		.hero-stats {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 2rem;
+			margin-top: 3rem;
+			max-width: 900px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.stat-item {
+			text-align: center;
+			padding: 1.5rem;
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 16px;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			-webkit-backdrop-filter: blur(10px);
+			backdrop-filter: blur(10px);
+		}
+
+		.stat-number {
+			font-size: 2.5rem;
+			font-weight: 800;
+			background: linear-gradient(135deg,
+					var(--secondary-light) 0%,
+					var(--accent) 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			display: block;
+			margin-bottom: 0.5rem;
+		}
+
+		.problem-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 2rem;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.problem-card .card-header,
+		.problem-card .card-title {
+			text-align: center;
+		}
+
+		.solution-steps {
+			display: grid;
+			gap: 2rem;
+			max-width: 1000px;
+			margin: 0 auto;
+		}
+
+		.pricing-card {
+			transition: all 0.3s ease;
+			border: 2px solid rgba(255, 255, 255, 0.1);
+			background: var(--primary-light);
+		}
+
+		.pricing-card:hover {
+			transform: translateY(-8px);
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+			border-color: var(--secondary);
+		}
+
+		.pricing-card .card-header {
+			text-align: center;
+			padding-bottom: 1rem;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.pricing-card .heading-2 {
+			margin: 1rem 0;
+			font-weight: 700;
+		}
+
+		.pricing-card .card-footer {
+			padding-top: 1.5rem;
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.plugin-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.35rem 0.8rem;
+			border-radius: 999px;
+			font-size: 0.8rem;
+			font-weight: 700;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			margin-bottom: 1rem;
+		}
+
+		.plugin-badge.open {
+			background: rgba(16, 185, 129, 0.16);
+			color: #86efac;
+		}
+
+		.plugin-badge.premium {
+			background: rgba(66, 153, 225, 0.16);
+			color: #93c5fd;
+		}
+
+		.plugin-card {
+			border-top: 4px solid transparent;
+		}
+
+		.plugin-card.core {
+			border-top-color: #10b981;
+		}
+
+		.plugin-card.ip {
+			border-top-color: #60a5fa;
+		}
+
+		.plugin-card.tls {
+			border-top-color: #22d3ee;
+		}
+
+		.plugin-card.bbas {
+			border-top-color: #f59e0b;
+		}
+
+		.plugin-card.peer {
+			border-top-color: #a78bfa;
+		}
+
+		.pricing-banner {
+			max-width: 1000px;
+			margin: 0 auto 2rem;
+			padding: 1.5rem;
+			border-radius: 20px;
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+			text-align: center;
+		}
+
+		.pricing-grid {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.tier-grid {
+			display: grid;
+			gap: 0.75rem;
+			margin: 1.5rem 0;
+		}
+
+		.tier-row {
+			display: grid;
+			grid-template-columns: 0.9fr 0.8fr 1.7fr;
+			gap: 0.75rem;
+			padding: 0.85rem 1rem;
+			border-radius: 12px;
+			background: rgba(255, 255, 255, 0.04);
+			align-items: center;
+		}
+
+		.tier-row strong,
+		.tier-row span {
+			font-size: 0.95rem;
+		}
+
+		.cta-stack {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1rem;
+			justify-content: center;
+			margin-top: 2rem;
+		}
+
+		.cta-block {
+			max-width: 840px;
+			margin: 3rem auto 0;
+			text-align: center;
+			padding: 2rem;
+			border-radius: 24px;
+			background: linear-gradient(135deg, rgba(66, 153, 225, 0.12) 0%, rgba(124, 58, 237, 0.12) 100%);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.cta-block .btn {
+			min-width: min(100%, 340px);
+		}
+
+		.section-note {
+			max-width: 900px;
+			margin: 2rem auto 0;
+			text-align: center;
+		}
+
+		.micro-copy {
+			font-size: 0.9rem;
+			color: var(--gray-500);
+		}
+
+		.install-snippet {
+			display: inline-block;
+			margin-top: 0.75rem;
+			padding: 0.55rem 0.9rem;
+			border-radius: 12px;
+			background: rgba(15, 23, 42, 0.7);
+			color: #e2e8f0;
+			font-size: 0.9rem;
+			font-weight: 600;
+		}
+
+		@media (max-width: 768px) {
+			.tier-row {
+				grid-template-columns: 1fr;
+				text-align: left;
+			}
+
+			.hero-stats {
+				grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<nav class="navbar">
+		<div class="nav-content">
+			<a href="index.html" class="nav-brand">
+				<img src="logo.png" alt="Gateway Corporate Solutions Logo" class="nav-logo">
+				Gateway Corporate
+			</a>
+			<div class="nav-indicator"></div>
+		</div>
+	</nav>
+	<div class="scroll-progress"></div>
+
+	<button id="menu-btn" class="menu-icon" aria-label="Open Menu">
+		<div class="hamburger">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+	</button>
+
+	<div id="dropdown-menu" class="dropdown-menu">
+		<div class="menu-container">
+			<ul class="nav-list">
+				<li><a href="#problem" class="nav-link">Problem</a></li>
+				<li><a href="#suite" class="nav-link">Suite</a></li>
+				<li><a href="#features" class="nav-link">Features</a></li>
+				<li><a href="#pricing" class="nav-link">Pricing</a></li>
+				<li><a href="#cta" class="nav-link">Get Started</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<section class="hero">
+		<div class="hero-content">
+			<h1 class="hero-title">Devicer Intelligence Suite, From The First Request</h1>
+			<p class="hero-subtitle">
+				An open-source fingerprinting core with premium plugins for production enforcement.
+			</p>
+			<p class="hero-text">
+				FP-Devicer computes a calibrated 0-100 confidence score between fingerprint datasets using recursive weighted
+				comparison, TLSH similarity, evidence richness, field agreement, entropy, and missingness heuristics.
+				Around that core, premium plugins extend identity decisions with IP intelligence, TLS consistency, bot blocking,
+				and peer reputation networking.
+			</p>
+
+			<div class="hero-stats">
+				<div class="stat-item">
+					<span class="stat-number">30+</span>
+					<span class="stat-label">Fingerprint Signals</span>
+				</div>
+				<div class="stat-item">
+					<span class="stat-number">0-100</span>
+					<span class="stat-label">Confidence Score</span>
+				</div>
+				<div class="stat-item">
+					<span class="stat-number">3,200+</span>
+					<span class="stat-label">Lines of TypeScript</span>
+				</div>
+				<div class="stat-item">
+					<span class="stat-number">93+</span>
+					<span class="stat-label">GitHub Commits</span>
+				</div>
+			</div>
+
+			<div class="hero-buttons">
+				<a href="https://github.com/gatewaycorporate/fp-devicer" target="_blank" rel="noopener noreferrer"
+					class="btn btn-outline btn-lg">
+					View Open-Source Core
+				</a>
+				<a href="papers/FP-Devicer.pdf" class="btn btn-primary btn-lg">
+					Read Whitepaper
+				</a>
+				<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+					rel="noopener noreferrer" class="btn btn-accent btn-lg">
+					Buy Plugin License
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section id="problem" class="section">
+		<div class="section-header">
+			<h2 class="section-title">The Challenge of Device Identity</h2>
+			<p class="text-lead">
+				Client-side fingerprints are useful, but production decisions need server-side memory, cross-session correlation,
+				and enrichment from network and behavioral signals.
+			</p>
+		</div>
+
+		<div class="problem-grid">
+			<div class="card problem-card card-centered">
+				<div class="card-header">
+					<div class="icon-circle icon-lg problem-icon">🔄</div>
+					<h3 class="card-title">Browser State Is Ephemeral</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Cookies reset, private mode strips persistence, and the same user can arrive through multiple browsers or
+						sessions. Identity logic needs more than a client-generated hash.
+					</p>
+				</div>
+			</div>
+
+			<div class="card problem-card card-centered">
+				<div class="card-header">
+					<div class="icon-circle icon-lg problem-icon">🤖</div>
+					<h3 class="card-title">Bot Traffic Is Sophisticated</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Modern abuse flows through headless browsers, VPNs, rotating proxies, suspicious TLS stacks, and clustered
+						infrastructure that bypasses shallow checks.
+					</p>
+				</div>
+			</div>
+
+			<div class="card problem-card card-centered">
+				<div class="card-header">
+					<div class="icon-circle icon-lg problem-icon">📊</div>
+					<h3 class="card-title">Raw Similarity Alone Is Not Enough</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Enterprises need confidence calibration, historical drift analysis, candidate indexing, and graph-aware risk
+						propagation before acting on a request.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="suite" class="section">
+		<div class="section-header">
+			<h2 class="section-title">What&apos;s in the Suite</h2>
+			<p class="text-lead">
+				Start with the open-source scoring engine, then add premium middleware modules where you need deeper identity,
+				abuse detection, and trust propagation.
+			</p>
+		</div>
+
+		<div class="solution-steps">
+			<div class="card step-card plugin-card core">
+				<div class="card-header">
+					<div class="plugin-badge open">Open Source Core</div>
+					<h3 class="card-title">FP-Devicer</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						The TypeScript core provides the confidence calculator, DeviceManager orchestration layer, pluggable storage
+						adapters, adaptive stability weighting, temporal decay, drift analysis, and candidate retrieval primitives.
+					</p>
+					<ul class="card-features">
+						<li>Recursive weighted comparison plus TLSH fuzzy similarity</li>
+						<li>Structured score breakdowns for evidence, entropy, and missingness</li>
+						<li>In-memory, SQLite, PostgreSQL, and Redis support</li>
+						<li>Plugin registry for custom comparators and weights</li>
+					</ul>
+					<div class="card-highlight">
+						<p>Build with an open-source core, then layer enterprise middleware only where needed.</p>
+					</div>
+					<span class="install-snippet">npm install devicer.js</span>
+				</div>
+			</div>
+
+			<div class="card step-card plugin-card ip">
+				<div class="card-header">
+					<div class="plugin-badge premium">Premium Plugin</div>
+					<h3 class="card-title">ip-devicer</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Adds MaxMind geo and ASN enrichment, proxy and VPN classification, Tor and hosting detection, AI-agent
+						tagging, impossible-travel alerts, and IP history consistency scoring.
+					</p>
+					<ul class="card-features">
+						<li>Trusted header resolution for real client IP extraction</li>
+						<li>Geo, timezone, ASN, RDAP, and risk factor enrichment</li>
+						<li>Per-identify confidence delta based on network risk</li>
+						<li>Companion to TLS enrichment for network intelligence deployments</li>
+					</ul>
+					<div class="card-highlight">
+						<p>Designed for production IP intelligence, not just IP logging.</p>
+					</div>
+					<span class="install-snippet">npm install ip-devicer</span>
+				</div>
+			</div>
+
+			<div class="card step-card plugin-card tls">
+				<div class="card-header">
+					<div class="plugin-badge premium">Premium Plugin</div>
+					<h3 class="card-title">tls-devicer</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Passively consumes JA4, JA3, JA3S, cipher order, extension order, HTTP/2 settings, and header consistency
+						from your edge so you can compare TLS behavior against historical device snapshots.
+					</p>
+					<ul class="card-features">
+						<li>Works with Cloudflare, HAProxy, Envoy, or another edge that forwards TLS signals</li>
+						<li>Computes protocol similarity and anomaly factor keys</li>
+						<li>Adjusts match confidence based on TLS consistency</li>
+						<li>Supports ordered header and HTTP/2 settings analysis</li>
+					</ul>
+					<div class="card-highlight">
+						<p>Bring JA4-grade network consistency into device matching without moving logic into the browser.</p>
+					</div>
+					<span class="install-snippet">npm install tls-devicer</span>
+				</div>
+			</div>
+
+			<div class="card step-card plugin-card bbas">
+				<div class="card-header">
+					<div class="plugin-badge premium">Premium Plugin</div>
+					<h3 class="card-title">bbas-devicer</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Bot Blocking & Anti-Scrape middleware classifies real browsers, headless browsers, scrapers, and known
+						crawlers, then emits an allow, challenge, or block decision through a configurable rules engine.
+					</p>
+					<ul class="card-features">
+						<li>38 UA patterns plus header anomaly and velocity scoring</li>
+						<li>Composite bot score from up to 13 named factors</li>
+						<li>Cross-plugin scoring with IP, TLS, and peer signals on Pro and Enterprise</li>
+						<li>Observe mode or enforcement mode at the application layer</li>
+					</ul>
+					<div class="card-highlight">
+						<p>Move from ad hoc heuristics to explainable abuse decisions with named scoring factors.</p>
+					</div>
+					<span class="install-snippet">npm install bbas-devicer</span>
+				</div>
+			</div>
+
+			<div class="card step-card plugin-card peer">
+				<div class="card-header">
+					<div class="plugin-badge premium">Premium Plugin</div>
+					<h3 class="card-title">peer-devicer</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Builds a peer graph across shared IP subnets, user IDs, JA4 fingerprints, canvas hashes, and WebGL hashes,
+						then propagates trust and taint signals across related devices.
+					</p>
+					<ul class="card-features">
+						<li>Canonical peer edges linking related device identifiers</li>
+						<li>Weighted taintScore and trustScore propagation</li>
+						<li>Confidence delta from -20 to +10 based on peer cluster quality</li>
+						<li>Runs after IP and TLS plugins so it can reuse cached enrichment data</li>
+					</ul>
+					<div class="card-highlight">
+						<p>Spot suspicious clusters instead of evaluating every request as an isolated event.</p>
+					</div>
+					<span class="install-snippet">npm install peer-devicer</span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="features" class="section" style="max-width: 1200px;">
+		<div class="section-header">
+			<h2 class="section-title">Built for Production</h2>
+			<p class="text-lead">
+				The suite is designed for real traffic, persistent history, and explainable score adjustments across the whole
+				request pipeline.
+			</p>
+		</div>
+
+		<div class="grid grid-auto-fit gap-lg">
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">🔌</div>
+				<div class="card-header">
+					<h3 class="card-title">Framework-Agnostic</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Designed for Express, Fastify, Deno/Oak, and other server environments where the intelligence belongs on the
+						backend.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">🗄️</div>
+				<div class="card-header">
+					<h3 class="card-title">Four Storage Backends</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Run locally with in-memory or SQLite, then scale to PostgreSQL or Redis without rewriting matching logic.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">🔧</div>
+				<div class="card-header">
+					<h3 class="card-title">Extensible Registry</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Register custom comparators and weights per field path so the core score model can reflect your own signals.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">⏱️</div>
+				<div class="card-header">
+					<h3 class="card-title">Temporal Decay</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Confidence fades gracefully as snapshots age, preventing old history from dominating current decisions.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">🔍</div>
+				<div class="card-header">
+					<h3 class="card-title">LSH Candidate Index</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						MinHash locality-sensitive hashing over set-valued fields reduces candidate search costs at higher scale.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">📊</div>
+				<div class="card-header">
+					<h3 class="card-title">Structured Observability</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Inject your own logger and metrics backends while keeping the suite modular and deployment-friendly.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="pricing" class="section">
+		<div class="section-header">
+			<h2 class="section-title">Plugin Licensing</h2>
+			<p class="text-lead">
+				FP-Devicer stays open source. Premium plugins extend enterprise functionality through Business Source License 1.1
+				tiers and a shared Polar checkout flow.
+			</p>
+		</div>
+
+		<div class="pricing-banner">
+			<p class="text-base" style="margin-bottom: 1rem;">
+				The core library is open source. Premium plugins unlock production enrichment, enforcement, and peer networking,
+				and all premium plugins share the same Polar license key.
+			</p>
+			<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+				rel="noopener noreferrer" class="btn btn-accent btn-lg">
+				Buy Plugin License on Polar
+			</a>
+		</div>
+
+		<div class="grid grid-2 gap-lg pricing-grid">
+			<div class="card card-centered pricing-card plugin-card ip">
+				<div class="card-header">
+					<div class="icon-circle icon-md icon-primary">🌐</div>
+					<h3 class="card-title">ip-devicer</h3>
+					<p class="card-text">IP geoenrichment, ASN context, proxy detection, AI-agent tagging, and travel-risk alerts.</p>
+				</div>
+				<div class="card-body">
+					<div class="tier-grid">
+						<div class="tier-row"><strong>Free</strong><span>$0</span><span>10,000 devices, basic features only</span></div>
+						<div class="tier-row"><strong>Pro</strong><span>$49 / mo</span><span>Unlimited devices, single-server production</span></div>
+						<div class="tier-row"><strong>Enterprise</strong><span>$299 / mo</span><span>Unlimited devices, multi-server production</span></div>
+					</div>
+						<p class="micro-copy">Production use requires a paid license. The same Polar license key works across all premium plugins.</p>
+				</div>
+				<div class="card-footer">
+					<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+						rel="noopener noreferrer" class="btn btn-primary w-full">
+						Get License
+					</a>
+				</div>
+			</div>
+
+			<div class="card card-centered pricing-card plugin-card tls">
+				<div class="card-header">
+					<div class="icon-circle icon-md icon-secondary">🔒</div>
+					<h3 class="card-title">tls-devicer</h3>
+					<p class="card-text">JA4 and JA3 ingestion, cipher and extension similarity, HTTP/2 settings, and header consistency.</p>
+				</div>
+				<div class="card-body">
+					<div class="tier-grid">
+						<div class="tier-row"><strong>Free</strong><span>$0</span><span>10,000 devices, basic features only</span></div>
+						<div class="tier-row"><strong>Pro</strong><span>$49 / mo</span><span>Unlimited devices, single-server production</span></div>
+						<div class="tier-row"><strong>Enterprise</strong><span>$299 / mo</span><span>Unlimited devices, multi-server production</span></div>
+					</div>
+						<p class="micro-copy">Production use requires a paid license. The same Polar license key works across all premium plugins.</p>
+				</div>
+				<div class="card-footer">
+					<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+						rel="noopener noreferrer" class="btn btn-primary w-full">
+						Get License
+					</a>
+				</div>
+			</div>
+
+			<div class="card card-centered pricing-card plugin-card bbas">
+				<div class="card-header">
+					<div class="icon-circle icon-md icon-warning">🤖</div>
+					<h3 class="card-title">bbas-devicer</h3>
+					<p class="card-text">Bot scoring and rule-driven allow, challenge, or block decisions for anti-scrape enforcement.</p>
+				</div>
+				<div class="card-body">
+					<div class="tier-grid">
+						<div class="tier-row"><strong>Free</strong><span>$0</span><span>10,000 devices, UA, headers, and velocity factors</span></div>
+						<div class="tier-row"><strong>Pro</strong><span>$49 / mo</span><span>Unlimited devices, all 13 scoring factors</span></div>
+						<div class="tier-row"><strong>Enterprise</strong><span>$299 / mo</span><span>Unlimited devices, all 13 factors at enterprise scale</span></div>
+					</div>
+					<p class="micro-copy">Without a key, the plugin runs on the free tier automatically and logs a startup warning. A single Polar key unlocks all premium plugins.</p>
+				</div>
+				<div class="card-footer">
+					<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+						rel="noopener noreferrer" class="btn btn-primary w-full">
+						Get License
+					</a>
+				</div>
+			</div>
+
+			<div class="card card-centered pricing-card plugin-card peer">
+				<div class="card-header">
+					<div class="icon-circle icon-md icon-primary">🕸️</div>
+					<h3 class="card-title">peer-devicer</h3>
+					<p class="card-text">Peer graph linking, taint and trust propagation, and confidence adjustments from related devices.</p>
+				</div>
+				<div class="card-body">
+					<div class="tier-grid">
+						<div class="tier-row"><strong>Free</strong><span>$0</span><span>10,000 devices, user and IP subnet edges, 10 edges per device</span></div>
+						<div class="tier-row"><strong>Pro</strong><span>$49 / mo</span><span>Unlimited devices, all 5 edge types, 50 edges per device</span></div>
+						<div class="tier-row"><strong>Enterprise</strong><span>$299 / mo</span><span>Unlimited devices, all 5 edge types, unlimited edges</span></div>
+					</div>
+					<p class="micro-copy">Without a key, the plugin runs on the free tier automatically and logs a startup warning. A single Polar key unlocks all premium plugins.</p>
+				</div>
+				<div class="card-footer">
+					<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+						rel="noopener noreferrer" class="btn btn-primary w-full">
+						Get License
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<div class="section-note">
+			<p class="text-base">
+				All premium plugins share the same Polar license key. The full premium lineup is designed to compose:
+				network context first, peer propagation next, and bot enforcement last.
+			</p>
+			<div class="cta-stack">
+				<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+					rel="noopener noreferrer" class="btn btn-accent btn-lg">
+					Buy License Now
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section id="cta" class="section">
+		<div class="section-header">
+			<h2 class="section-title">Get Started with the Devicer Intelligence Suite</h2>
+			<p class="text-lead">
+				Use the core today, review the architecture, and add premium plugins when you need production-grade enrichment
+				and enforcement.
+			</p>
+		</div>
+
+		<div class="container" style="max-width: 1000px; margin: 0 auto;">
+			<div class="grid grid-2 gap-xl" style="justify-items: center;">
+				<div class="card card-primary card-centered" style="max-width: 420px; width: 100%;">
+					<div class="card-header">
+						<div class="icon-circle icon-lg icon-primary">🐙</div>
+						<h3 class="card-title">Open-Source Core</h3>
+					</div>
+					<div class="card-body">
+						<p class="card-text">
+							Review the repository, issues, and implementation details for the FP-Devicer core library.
+						</p>
+						<div class="card-footer">
+							<a href="https://github.com/gatewaycorporate/fp-devicer" target="_blank" rel="noopener noreferrer"
+								class="btn btn-outline w-full btn-lg">
+								Open GitHub
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card card-primary card-centered" style="max-width: 420px; width: 100%;">
+					<div class="card-header">
+						<div class="icon-circle icon-lg icon-primary">📄</div>
+						<h3 class="card-title">Technical Whitepaper</h3>
+					</div>
+					<div class="card-body">
+						<p class="card-text">
+							Read the architectural breakdown of the scoring engine, storage model, and plugin lifecycle.
+						</p>
+						<div class="card-footer">
+							<a href="papers/FP-Devicer.pdf" class="btn btn-outline w-full btn-lg">
+								Download Whitepaper
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card card-primary card-centered" style="max-width: 420px; width: 100%;">
+					<div class="card-header">
+						<div class="icon-circle icon-lg icon-primary">📚</div>
+						<h3 class="card-title">API Documentation</h3>
+					</div>
+					<div class="card-body">
+						<p class="card-text">
+							Explore the generated TypeDoc reference for the FP-Devicer core and companion plugin APIs.
+						</p>
+						<div class="card-footer">
+							<a href="https://gatewaycorporate.github.io/fp-devicer/" target="_blank" rel="noopener noreferrer"
+								class="btn btn-outline w-full btn-lg">
+								Open TypeDoc
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card card-accent card-centered" style="max-width: 420px; width: 100%;">
+					<div class="card-header">
+						<div class="icon-circle icon-lg icon-secondary">📧</div>
+						<h3 class="card-title">Enterprise Contact</h3>
+					</div>
+					<div class="card-body">
+						<p class="card-text">
+							Reach Gateway Corporate for deployment planning, plugin licensing, and enterprise integration support.
+						</p>
+						<div class="card-footer">
+							<a href="mailto:office@gatewaycorporate.org?subject=Devicer%20Enterprise%20Inquiry"
+								class="btn btn-primary w-full btn-lg">
+								Contact Sales
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="cta-block">
+				<h3 class="heading-3 mb-md">Need the premium plugins?</h3>
+				<p class="text-base" style="margin-bottom: 1.5rem;">
+					One checkout starts access to the premium Devicer middleware lineup. Use it for IP intelligence, TLS
+					enrichment, bot blocking, and peer reputation workflows.
+				</p>
+				<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+					rel="noopener noreferrer" class="btn btn-accent btn-lg">
+					Buy Plugin License
+				</a>
+				<p class="micro-copy" style="margin-top: 1rem;">
+					One Polar checkout and one shared key for the full premium plugin lineup.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<footer class="footer">
+		<div class="container">
+			<div class="grid grid-4 gap-lg mb-xl" style="text-align: left; padding-bottom: var(--spacing-md);">
+				<div>
+					<h4 class="heading-4 mb-md">Gateway Corp</h4>
+					<p class="text-small">
+						Premiere technology services for the St. Louis area. Guiding you towards unprecedented success.
+					</p>
+				</div>
+				<div>
+					<h4 class="heading-4 mb-md">Services</h4>
+					<ul style="list-style: none; padding: 0;">
+						<li class="mb-xs"><a href="index.html#services" class="text-small footer-link">Web Development</a></li>
+						<li class="mb-xs"><a href="index.html#services" class="text-small footer-link">AI Integration</a></li>
+						<li class="mb-xs"><a href="index.html#services" class="text-small footer-link">Custom Software</a></li>
+						<li class="mb-xs"><a href="index.html#services" class="text-small footer-link">Maintenance</a></li>
+					</ul>
+				</div>
+				<div>
+					<h4 class="heading-4 mb-md">Company</h4>
+					<ul style="list-style: none; padding: 0;">
+						<li class="mb-xs"><a href="index.html#about" class="text-small footer-link">About</a></li>
+						<li class="mb-xs"><a href="index.html#team" class="text-small footer-link">Team</a></li>
+						<li class="mb-xs"><a href="index.html#projects" class="text-small footer-link">Projects</a></li>
+						<li class="mb-xs"><a href="index.html#contact" class="text-small footer-link">Contact</a></li>
+					</ul>
+				</div>
+			</div>
+			<div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--spacing-md); text-align: center;">
+				<p class="text-base">&copy; 2025 Gateway Corporate Solutions. All rights reserved.</p>
+			</div>
+		</div>
+	</footer>
+
+	<script>
+		document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+			anchor.addEventListener("click", function (e) {
+				e.preventDefault();
+				const target = document.querySelector(this.getAttribute("href"));
+				if (target) {
+					const navbarHeight = document.querySelector(".navbar").offsetHeight;
+					const targetPosition = target.offsetTop - navbarHeight - 20;
+
+					window.scrollTo({
+						top: targetPosition,
+						behavior: "smooth",
+					});
+				}
+			});
+		});
+
+		window.addEventListener("scroll", () => {
+			const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+			const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+			const scrolled = (winScroll / height) * 100;
+			document.querySelector(".scroll-progress").style.width = scrolled + "%";
+		});
+	</script>
+</body>
+
+</html>
