@@ -144,7 +144,133 @@ class NavbarController {
   }
 }
 
+// Plexus Network Graph Animation
+class NetworkGraph {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.nodes = [];
+    this.nodeCount = 50;
+    this.maxDist = 250;
+    this.rafId = null;
+    this.running = false;
+    this.reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    this.resize();
+    this.initNodes();
+
+    if (this.reducedMotion) {
+      this.drawFrame();
+    } else {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) this.start();
+          else this.stop();
+        });
+      });
+      observer.observe(canvas);
+    }
+
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const wasRunning = this.running;
+        this.stop();
+        this.resize();
+        this.initNodes();
+        if (this.reducedMotion) {
+          this.drawFrame();
+        } else if (wasRunning) {
+          this.start();
+        }
+      }, 150);
+    });
+  }
+
+  resize() {
+    const hero = this.canvas.parentElement;
+    this.canvas.width = hero.offsetWidth;
+    this.canvas.height = hero.offsetHeight;
+  }
+
+  initNodes() {
+    this.nodes = Array.from({ length: this.nodeCount }, () => ({
+      x: Math.random() * this.canvas.width,
+      y: Math.random() * this.canvas.height,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6,
+    }));
+  }
+
+  drawFrame() {
+    const { ctx, canvas, nodes, maxDist } = this;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < maxDist) {
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / maxDist) * 0.35})`;
+          ctx.lineWidth = 0.7;
+          ctx.stroke();
+        }
+      }
+    }
+
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    for (const node of nodes) {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  update() {
+    const { canvas, nodes } = this;
+    for (const node of nodes) {
+      node.x += node.vx;
+      node.y += node.vy;
+      if (node.x < 0) node.x += canvas.width;
+      else if (node.x > canvas.width) node.x -= canvas.width;
+      if (node.y < 0) node.y += canvas.height;
+      else if (node.y > canvas.height) node.y -= canvas.height;
+    }
+  }
+
+  start() {
+    if (this.running) return;
+    this.running = true;
+    this.tick();
+  }
+
+  stop() {
+    this.running = false;
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+  }
+
+  tick() {
+    if (!this.running) return;
+    this.update();
+    this.drawFrame();
+    this.rafId = requestAnimationFrame(() => this.tick());
+  }
+}
+
 // Initialize navbar when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   new NavbarController();
+  document.querySelectorAll("canvas#network-graph").forEach((canvas) => {
+    new NetworkGraph(canvas);
+  });
 });
