@@ -173,14 +173,28 @@ class NetworkGraph {
       observer.observe(canvas);
     }
 
+    this.lastWidth = this.canvas.width;
+
     let resizeTimer;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
+        const newWidth = this.canvas.parentElement.offsetWidth;
+        // Ignore height-only changes (mobile browser chrome show/hide on scroll)
+        if (newWidth === this.lastWidth) return;
         const wasRunning = this.running;
         this.stop();
-        this.resize();
-        this.initNodes();
+        const scaleX = newWidth / (this.canvas.width || 1);
+        const newHeight = this.canvas.parentElement.offsetHeight;
+        const scaleY = newHeight / (this.canvas.height || 1);
+        this.canvas.width = newWidth;
+        this.canvas.height = newHeight;
+        this.lastWidth = newWidth;
+        // Scale existing node positions instead of reinitialising
+        for (const node of this.nodes) {
+          node.x *= scaleX;
+          node.y *= scaleY;
+        }
         if (this.reducedMotion) {
           this.drawFrame();
         } else if (wasRunning) {
