@@ -3,6 +3,7 @@ import { handleUserRequest } from "./contact.ts";
 
 const router = new Router();
 const app = new Application();
+const port = parseInt(Deno.env.get("PORT") || "8000");
 
 router.get("/", (context) => {
     context.response.body = Deno.readTextFileSync("./static/views/index.html");
@@ -58,5 +59,5 @@ app.use(async (context, next) => {
     try { await context.send({ root }); } catch { await next(); }
 });
 
-app.listen({ port: 8000 });
-console.log("Server is running on http://localhost:8000");
+app.listen({ port });
+console.log(`Server is running on http://localhost:${port}`);
