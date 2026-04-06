@@ -55,6 +55,9 @@
   --radius-xl: 20px;
   --radius-full: 50px;
 
+  /* Layout */
+  --navbar-height: 6rem;
+
   /* Typography */
   --font-family:
     "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -833,7 +836,7 @@ body {
   color: var(--white);
   position: relative;
   overflow: hidden;
-  padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-lg)
+  padding: calc(var(--spacing-2xl) + var(--navbar-height)) var(--spacing-lg) var(--spacing-lg)
     var(--spacing-lg);
 }
 
@@ -883,10 +886,10 @@ body {
 }
 
 /* Hero stats grid for consistent alignment */
-.hero-stats {
+.hero .hero-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-lg);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: clamp(1rem, 3vw, var(--spacing-lg));
   margin: var(--spacing-xl) auto;
   max-width: 800px;
   width: 100%;
@@ -895,7 +898,8 @@ body {
 /* Stat items within hero */
 .hero .stat-item {
   text-align: center;
-  padding: var(--spacing-md);
+  min-width: 0;
+  padding: clamp(1rem, 2vw, var(--spacing-md));
   background: rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -904,7 +908,7 @@ body {
 }
 
 .hero .stat-number {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 5vw, 2.5rem);
   font-weight: 800;
   background: linear-gradient(
     135deg,
@@ -915,7 +919,20 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: block;
+  line-height: 1.1;
   margin-bottom: var(--spacing-xs);
+  white-space: nowrap;
+}
+
+.hero .stat-label {
+  display: block;
+  max-width: 14ch;
+  margin: 0 auto;
+  line-height: 1.5;
+  text-wrap: balance;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
 }
 
 .hero-buttons {
@@ -1315,6 +1332,10 @@ body {
 
   .nav-menu {
     display: none;
+  }
+
+  .hero .hero-stats {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
   }
 
   .section {
