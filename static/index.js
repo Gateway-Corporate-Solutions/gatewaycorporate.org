@@ -21,6 +21,8 @@ class NavbarController {
     );
     this.lastScrollY = window.scrollY;
     this.isMenuOpen = false;
+    this._openTimeout = null;
+    this._closeTimeout = null;
 
     this.init();
   }
@@ -76,6 +78,9 @@ class NavbarController {
   }
 
   openMenu() {
+    clearTimeout(this._closeTimeout);
+    this._closeTimeout = null;
+
     this.isMenuOpen = true;
     this.menuBtn.classList.add("open");
     this.dropdownMenu.style.display = "block";
@@ -87,7 +92,8 @@ class NavbarController {
     document.body.style.overflow = "hidden";
 
     // Add entrance animation to menu items
-    setTimeout(() => {
+    this._openTimeout = setTimeout(() => {
+      this._openTimeout = null;
       this.dropdownMenu.querySelectorAll("li").forEach(
         (item, index) => {
           item.style.animationDelay = `${index * 0.1}s`;
@@ -98,12 +104,16 @@ class NavbarController {
   }
 
   closeMenu() {
+    clearTimeout(this._openTimeout);
+    this._openTimeout = null;
+
     this.isMenuOpen = false;
     this.menuBtn.classList.remove("open");
     this.dropdownMenu.classList.remove("show");
     document.body.style.overflow = "";
 
-    setTimeout(() => {
+    this._closeTimeout = setTimeout(() => {
+      this._closeTimeout = null;
       this.dropdownMenu.style.display = "none";
       this.dropdownMenu.querySelectorAll("li").forEach((item) => {
         item.classList.remove("animate-in");
