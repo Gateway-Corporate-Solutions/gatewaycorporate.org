@@ -81,6 +81,20 @@
         gap: clamp(1.5rem, 4vw, 2.5rem);
       }
 
+      /* Third project card — centered on its own row */
+      .projects-centered {
+        grid-column: 1 / -1;
+        max-width: calc(50% - clamp(0.75rem, 2vw, 1.25rem));
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      @media (max-width: 768px) {
+        .projects-centered {
+          max-width: 100%;
+        }
+      }
+
       /* Hero content improvements */
       .hero-content {
         position: relative;
@@ -225,7 +239,7 @@
           <h2 class="section-title">Some of Our Projects</h2>
         </div>
 
-        <div class="grid grid-2 gap-xl">
+        <div class="grid grid-2 gap-xl" style="justify-content: center;">
           <div class="card card-primary projects-highlight">
             <div class="card-header">
               <div class="icon-circle icon-lg icon-primary">🔍</div>
@@ -260,6 +274,24 @@
                 <a href="papers/VOIP-TBS.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
                 <a href="hyperlocal.html" class="btn btn-primary btn-sm"
                 >View Project</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-primary projects-centered">
+            <div class="card-header">
+              <div class="icon-circle icon-lg icon-primary">♟️</div>
+              <h3 class="card-title">NashTwin CRM</h3>
+            </div>
+            <div class="card-body">
+              <p class="card-text">
+                Create a living digital twin of your company and run strategic simulations
+                powered by game theory algorithms. Find the equilibrium that makes your
+                operations stable, efficient, and optimal.
+              </p>
+              <div class="flex flex-wrap gap-sm mt-md btn-group">
+                <a href="https://nash.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer" class="btn btn-accent btn-sm">Try NashTwin</a>
+                <a href="nashtwin.html" class="btn btn-primary btn-sm">View Project</a>
               </div>
             </div>
           </div>
