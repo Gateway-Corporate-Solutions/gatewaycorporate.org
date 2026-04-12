@@ -9,7 +9,7 @@ tags: [nashtwin, game-theory, decision-systems]
 
 Most operating problems are not caused by missing effort. They are caused by **misaligned incentives and hidden constraints**.
 
-Business decisions are also *costly*, whether profitable or not, and a business owner would ideally like to simulate a decision multiple (or sometimes many, depending on how complex the decision space is) times before actually taking action.
+Business decisions are also costly, whether profitable or not, and a business owner would ideally like to simulate a decision multiple (or sometimes many, depending on how complex the decision space is) times before actually taking action.
 
 That is why we are interested in digital twins that model decisions instead of just dashboards that report outcomes. If you can represent the players, their choices, and the payoff structure, you can start testing how a business behaves before the next change goes live.
 
