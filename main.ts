@@ -13,7 +13,9 @@ const router = new Router();
 const app = new Application();
 const port = parseInt(Deno.env.get("PORT") || "8000");
 
-router.get("/", async (context) => {
+async function renderHomePage(
+    context: { response: { body: unknown; headers: Headers } },
+) {
     const homepageTemplate = await Deno.readTextFile("./static/views/index.html");
     const blogPosts = await getBlogPosts();
 
@@ -22,6 +24,13 @@ router.get("/", async (context) => {
         renderHomepageBlogSection(blogPosts),
     );
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+}
+
+router.get("/", async (context) => {
+    await renderHomePage(context);
+});
+router.get("/index.html", async (context) => {
+    await renderHomePage(context);
 });
 router.get("/blog", async (context) => {
     const blogPosts = await getBlogPosts();
@@ -56,7 +65,7 @@ router.get("/:view.html", (context) => {
     if (view) {
         try {
             context.response.body = Deno.readTextFileSync(`./static/views/${view}.html`);
-            context.response.headers.set("Content-Type", "text/html");
+            context.response.headers.set("Content-Type", "text/html; charset=utf-8");
         } catch (error) {
             console.error(`Error reading view file: ${error}`);
             context.response.status = 404;
