@@ -1,12 +1,55 @@
-import { Application, Router} from "oak";
+import { Application, Router } from "oak";
+import {
+    getBlogPostBySlug,
+    getBlogPosts,
+    renderBlogIndexPage,
+    renderBlogNotFoundPage,
+    renderBlogPostPage,
+    renderHomepageBlogSection,
+} from "./blog.ts";
 import { handleUserRequest } from "./contact.ts";
 
 const router = new Router();
 const app = new Application();
 const port = parseInt(Deno.env.get("PORT") || "8000");
 
-router.get("/", (context) => {
-    context.response.body = Deno.readTextFileSync("./static/views/index.html");
+router.get("/", async (context) => {
+    const homepageTemplate = await Deno.readTextFile("./static/views/index.html");
+    const blogPosts = await getBlogPosts();
+
+    context.response.body = homepageTemplate.replace(
+        "{{BLOG_SECTION}}",
+        renderHomepageBlogSection(blogPosts),
+    );
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.get("/blog", async (context) => {
+    const blogPosts = await getBlogPosts();
+    context.response.body = renderBlogIndexPage(blogPosts);
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.get("/blog/:slug", async (context) => {
+    const slug = context.params.slug;
+
+    if (!slug) {
+        context.response.status = 404;
+        context.response.body = renderBlogNotFoundPage("that slug");
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    const blogPosts = await getBlogPosts();
+    const post = await getBlogPostBySlug(slug);
+
+    if (!post) {
+        context.response.status = 404;
+        context.response.body = renderBlogNotFoundPage(slug);
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    context.response.body = renderBlogPostPage(post, blogPosts);
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 });
 router.get("/:view.html", (context) => {
     const view = context.params.view;
