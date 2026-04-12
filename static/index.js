@@ -291,10 +291,60 @@ class NetworkGraph {
   }
 }
 
+class ContactFormController {
+  constructor(form) {
+    this.form = form;
+    this.isSubmitting = false;
+    this.submitButton = this.form.querySelector('button[type="submit"]');
+
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    this.form.addEventListener("submit", (event) => this.handleSubmit(event));
+  }
+
+  async handleSubmit(event) {
+    if (this.isSubmitting) {
+      event.preventDefault();
+      return;
+    }
+
+    event.preventDefault();
+    this.isSubmitting = true;
+
+    if (this.submitButton) {
+      this.submitButton.disabled = true;
+    }
+
+    const formData = new FormData(this.form);
+    const name = formData.get("name")?.toString().trim() || "";
+    const email = formData.get("email")?.toString().trim() || "";
+
+    try {
+      if (window.Devicer?.submitContact && name && email) {
+        await window.Devicer.submitContact({
+          name,
+          emails: [{ address: email, isPrimary: true }],
+        });
+      }
+    } catch (error) {
+      console.error("Devicer contact submission failed:", error);
+    } finally {
+      this.form.submit();
+    }
+  }
+}
+
 // Initialize navbar when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   new NavbarController();
   document.querySelectorAll("canvas#network-graph").forEach((canvas) => {
     new NetworkGraph(canvas);
   });
+
+  const contactForm = document.getElementById("contact-form");
+  if (contactForm instanceof HTMLFormElement) {
+    new ContactFormController(contactForm);
+  }
 });
