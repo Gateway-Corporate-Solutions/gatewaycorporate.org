@@ -296,6 +296,106 @@
 			border: 1px solid rgba(167, 139, 250, 0.2);
 		}
 
+		.cta-title-stack {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			gap: 1rem;
+		}
+
+		.cta-title-stack .section-title {
+			margin-bottom: 0;
+		}
+
+		.rotating-promo {
+			position: relative;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 15rem;
+			max-width: 100%;
+			height: 3.5rem;
+			padding: 0 1.5rem;
+			border-radius: 999px;
+			overflow: hidden;
+			background: linear-gradient(135deg, rgba(96, 165, 250, 0.18) 0%, rgba(167, 139, 250, 0.2) 50%, rgba(52, 211, 153, 0.16) 100%);
+			border: 1px solid rgba(255, 255, 255, 0.14);
+			box-shadow: 0 18px 35px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+		}
+
+		.rotating-promo::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.14) 50%, rgba(255, 255, 255, 0) 100%);
+			transform: translateX(-100%);
+			animation: promoSheen 4.5s ease-in-out infinite;
+		}
+
+		.rotating-promo-track {
+			position: relative;
+			width: 100%;
+			height: 100%;
+		}
+
+		.rotating-promo-item {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+			font-weight: 800;
+			letter-spacing: 0.14em;
+			text-transform: uppercase;
+			color: rgba(255, 255, 255, 0.96);
+			text-shadow: 0 0 20px rgba(96, 165, 250, 0.22);
+			opacity: 0;
+			transform: translateY(65%);
+			animation: promoRotate 9s ease-in-out infinite;
+		}
+
+		.rotating-promo-item:nth-child(2) {
+			animation-delay: 3s;
+		}
+
+		.rotating-promo-item:nth-child(3) {
+			animation-delay: 6s;
+		}
+
+		@keyframes promoRotate {
+			0%,
+			8% {
+				opacity: 0;
+				transform: translateY(65%);
+			}
+
+			14%,
+			28% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			34%,
+			100% {
+				opacity: 0;
+				transform: translateY(-65%);
+			}
+		}
+
+		@keyframes promoSheen {
+			0%,
+			55% {
+				transform: translateX(-100%);
+			}
+
+			75%,
+			100% {
+				transform: translateX(100%);
+			}
+		}
+
 		.micro-copy {
 			font-size: 0.9rem;
 			color: var(--gray-500);
@@ -304,6 +404,37 @@
 		@media (max-width: 768px) {
 			.hero-stats {
 				grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			}
+
+			.cta-title-stack {
+				flex-direction: column;
+			}
+
+			.rotating-promo {
+				width: 100%;
+				min-width: 0;
+				height: 3.25rem;
+				padding: 0 1rem;
+			}
+
+			.rotating-promo-item {
+				letter-spacing: 0.1em;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.rotating-promo::after,
+			.rotating-promo-item {
+				animation: none;
+			}
+
+			.rotating-promo-item {
+				opacity: 0;
+				transform: none;
+			}
+
+			.rotating-promo-item:first-child {
+				opacity: 1;
 			}
 		}
 	</style>
@@ -735,7 +866,16 @@
 
 	<section id="cta" class="section">
 		<div class="section-header">
-			<h2 class="section-title">Your Next Best Move Is Already Computed</h2>
+			<div class="cta-title-stack">
+				<h2 class="section-title">Your Next Best Move Is</h2>
+				<div class="rotating-promo" aria-label="Already Calculated, Winning, With Us">
+					<div class="rotating-promo-track" aria-hidden="true">
+						<span class="rotating-promo-item">Already Calculated</span>
+						<span class="rotating-promo-item">Winning</span>
+						<span class="rotating-promo-item">With Us</span>
+					</div>
+				</div>
+			</div>
 			<p class="text-lead">
 				NashTwin doesn&apos;t just show you what happened. It shows you what equilibrium looks like — and how to
 				get there. Stop guessing. Start equilibrium.
