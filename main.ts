@@ -8,6 +8,7 @@ import {
     renderHomepageBlogSection,
 } from "./blog.ts";
 import { handleUserRequest } from "./contact.ts";
+import { injectFooterIntoHtml, resolveFooterVariant } from "./footer.ts";
 
 const router = new Router();
 const app = new Application();
@@ -19,9 +20,12 @@ async function renderHomePage(
     const homepageTemplate = await Deno.readTextFile("./static/views/index.html");
     const blogPosts = await getBlogPosts();
 
-    context.response.body = homepageTemplate.replace(
-        "{{BLOG_SECTION}}",
-        renderHomepageBlogSection(blogPosts),
+    context.response.body = injectFooterIntoHtml(
+        homepageTemplate.replace(
+            "{{BLOG_SECTION}}",
+            renderHomepageBlogSection(blogPosts),
+        ),
+        resolveFooterVariant("index"),
     );
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 }
@@ -64,7 +68,11 @@ router.get("/:view.html", (context) => {
     const view = context.params.view;
     if (view) {
         try {
-            context.response.body = Deno.readTextFileSync(`./static/views/${view}.html`);
+            const viewHtml = Deno.readTextFileSync(`./static/views/${view}.html`);
+            context.response.body = injectFooterIntoHtml(
+                viewHtml,
+                resolveFooterVariant(view),
+            );
             context.response.headers.set("Content-Type", "text/html; charset=utf-8");
         } catch (error) {
             console.error(`Error reading view file: ${error}`);

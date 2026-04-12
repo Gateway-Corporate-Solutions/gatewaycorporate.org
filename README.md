@@ -12,3 +12,10 @@ The site now includes a markdown-powered blog system.
 - Use YAML-style front matter with `title`, `slug`, `date`, `author`, `excerpt`, and `tags`
 - Visit `/blog` for the archive and `/blog/<slug>` for individual posts
 - The homepage automatically renders the latest posts into the blog section
+
+## Shared footer
+
+The site footer is rendered from `footer.ts` for both blog pages and static HTML views.
+
+- Update footer content and per-page footer link groups in `footer.ts`
+- Do not reintroduce literal `<footer class="footer">` blocks in `static/views/*.html`

@@ -1,5 +1,6 @@
 // deno-lint-ignore no-import-prefix
 import { marked } from "npm:marked@15.0.12";
+import { renderSiteFooter } from "./footer.ts";
 
 const BLOG_DIR = new URL("./content/blog/", import.meta.url);
 const SITE_URL = "https://gatewaycorporate.org";
@@ -297,36 +298,7 @@ function renderPageShell(options: {
     <main>
       ${options.content}
     </main>
-    <footer class="footer">
-      <div class="container">
-        <div class="grid grid-4 gap-lg mb-xl" style="text-align: left; padding-bottom: var(--spacing-md);">
-          <div>
-            <h4 class="heading-4 mb-md">Gateway Corporate Solutions</h4>
-            <p class="text-small">
-              Practical technology, local execution, and a clear path from strategy to launch.
-            </p>
-          </div>
-          <div>
-            <h4 class="heading-4 mb-md">Journal</h4>
-            <ul style="list-style: none; padding: 0">
-              <li class="mb-xs"><a href="/blog" class="text-small footer-link">All articles</a></li>
-              <li class="mb-xs"><a href="/#projects" class="text-small footer-link">Project work</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="heading-4 mb-md">Company</h4>
-            <ul style="list-style: none; padding: 0">
-              <li class="mb-xs"><a href="/" class="text-small footer-link">Home</a></li>
-              <li class="mb-xs"><a href="/#team" class="text-small footer-link">Team</a></li>
-              <li class="mb-xs"><a href="/#contact" class="text-small footer-link">Contact</a></li>
-            </ul>
-          </div>
-        </div>
-        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--spacing-md); text-align: center">
-          <p class="text-base">&copy; 2026 Gateway Corporate Solutions. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
+${renderSiteFooter()}
   </body>
 </html>`;
 }
