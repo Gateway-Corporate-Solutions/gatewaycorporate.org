@@ -336,6 +336,84 @@ class ContactFormController {
   }
 }
 
+class EqualHeightCardRows {
+  constructor() {
+    this.rafId = null;
+    this.resizeObserver = new ResizeObserver(() => this.schedule());
+
+    this.observeContainers();
+    window.addEventListener("resize", () => this.schedule(), { passive: true });
+    window.addEventListener("load", () => this.schedule(), { passive: true });
+
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => this.schedule());
+    }
+
+    this.schedule();
+  }
+
+  getContainers() {
+    return Array.from(document.querySelectorAll(".grid, .problem-grid, .pricing-grid"))
+      .filter((container) => this.getCards(container).length > 1);
+  }
+
+  getCards(container) {
+    return Array.from(container.children).filter((child) =>
+      child instanceof HTMLElement && child.matches(".card, article.card")
+    );
+  }
+
+  observeContainers() {
+    this.getContainers().forEach((container) => this.resizeObserver.observe(container));
+  }
+
+  schedule() {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+    }
+
+    this.rafId = requestAnimationFrame(() => {
+      this.rafId = null;
+      this.syncAll();
+    });
+  }
+
+  syncAll() {
+    this.getContainers().forEach((container) => this.syncContainer(container));
+  }
+
+  syncContainer(container) {
+    const cards = this.getCards(container);
+    if (cards.length < 2) {
+      return;
+    }
+
+    cards.forEach((card) => {
+      card.style.minHeight = "";
+    });
+
+    const rows = new Map();
+
+    cards.forEach((card) => {
+      const top = Math.round(card.getBoundingClientRect().top);
+      const rowTop = Array.from(rows.keys()).find((value) => Math.abs(value - top) <= 2) ?? top;
+
+      if (!rows.has(rowTop)) {
+        rows.set(rowTop, []);
+      }
+
+      rows.get(rowTop).push(card);
+    });
+
+    rows.forEach((rowCards) => {
+      const maxHeight = Math.max(...rowCards.map((card) => card.offsetHeight));
+      rowCards.forEach((card) => {
+        card.style.minHeight = `${maxHeight}px`;
+      });
+    });
+  }
+}
+
 // Initialize navbar when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   new NavbarController();
@@ -347,4 +425,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (contactForm instanceof HTMLFormElement) {
     new ContactFormController(contactForm);
   }
+
+  new EqualHeightCardRows();
 });

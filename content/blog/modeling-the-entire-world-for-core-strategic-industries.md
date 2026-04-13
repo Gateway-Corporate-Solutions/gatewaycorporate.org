@@ -40,9 +40,7 @@ Every model plugin is described as a **first-party optimization plugin** built o
 - the shared `game-theory-strategy` capability
 - a common `optimize/runtime/reasoning` pipeline
 
-That is the right architecture.
-
-It means NashTwin does not need to reinvent the full platform every time it enters a new industry. The core engine stays consistent, while the model plugin changes the strategic entities, decision surfaces, constraints, and payoff structures for the domain being studied.
+This architecture means NashTwin does not need to reinvent the full platform every time it enters a new industry. The core engine stays consistent, while the model plugin changes the strategic entities, decision surfaces, constraints, and payoff structures for the domain being studied.
 
 In other words, the system can stay unified without becoming generic.
 

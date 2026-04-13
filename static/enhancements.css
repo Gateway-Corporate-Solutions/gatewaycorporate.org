@@ -256,6 +256,72 @@
   margin-bottom: var(--spacing-xl);
 }
 
+.grid:has(> .card),
+.grid:has(> article.card),
+.problem-grid:has(> .card),
+.pricing-grid:has(> .card) {
+  --card-grid-gap: var(--spacing-lg);
+  align-items: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--card-grid-gap);
+  justify-content: center;
+}
+
+.grid.gap-sm:has(> .card),
+.grid.gap-sm:has(> article.card) {
+  --card-grid-gap: var(--spacing-sm);
+}
+
+.grid.gap-md:has(> .card),
+.grid.gap-md:has(> article.card) {
+  --card-grid-gap: var(--spacing-md);
+}
+
+.grid.gap-xl:has(> .card),
+.grid.gap-xl:has(> article.card) {
+  --card-grid-gap: var(--spacing-xl);
+}
+
+.grid:has(> .card) > .card,
+.grid:has(> article.card) > article.card,
+.problem-grid:has(> .card) > .card,
+.pricing-grid:has(> .card) > .card {
+  align-self: stretch;
+  flex: 1 1 20rem;
+  min-width: min(100%, 18rem);
+}
+
+.grid-2:has(> .card) > .card,
+.grid-2:has(> article.card) > article.card,
+.pricing-grid:has(> .card) > .card {
+  flex-basis: min(100%, calc((100% - var(--card-grid-gap)) / 2));
+  max-width: calc((100% - var(--card-grid-gap)) / 2);
+}
+
+.grid-3:has(> .card) > .card,
+.grid-3:has(> article.card) > article.card {
+  flex-basis: min(100%, calc((100% - (2 * var(--card-grid-gap))) / 3));
+  max-width: calc((100% - (2 * var(--card-grid-gap))) / 3);
+}
+
+.grid-4:has(> .card) > .card,
+.grid-4:has(> article.card) > article.card {
+  flex-basis: min(100%, calc((100% - (3 * var(--card-grid-gap))) / 4));
+  max-width: calc((100% - (3 * var(--card-grid-gap))) / 4);
+}
+
+.grid-auto-fit:has(> .card) > .card,
+.grid-auto-fit:has(> article.card) > article.card,
+.grid-auto-fill:has(> .card) > .card,
+.grid-auto-fill:has(> article.card) > article.card,
+.blog-grid:has(> .card) > .card,
+.blog-grid:has(> article.card) > article.card,
+.problem-grid:has(> .card) > .card {
+  flex-basis: min(100%, 22rem);
+  max-width: min(100%, 24rem);
+}
+
 .blog-grid {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
@@ -425,6 +491,17 @@
 }
 
 @media (max-width: 768px) {
+  .grid-2:has(> .card) > .card,
+  .grid-2:has(> article.card) > article.card,
+  .grid-3:has(> .card) > .card,
+  .grid-3:has(> article.card) > article.card,
+  .grid-4:has(> .card) > .card,
+  .grid-4:has(> article.card) > article.card,
+  .pricing-grid:has(> .card) > .card {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+
   .article-nav {
     flex-direction: column;
   }
