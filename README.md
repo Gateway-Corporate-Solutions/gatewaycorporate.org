@@ -10,6 +10,7 @@ The site now includes a markdown-powered blog system.
 
 - Add posts in `content/blog/*.md`
 - Use YAML-style front matter with `title`, `slug`, `date`, `author`, `excerpt`, and `tags`
+- If a title begins with a quote, wrap the entire YAML value in the other quote style, for example `title: '"Quoted title" and the rest'`
 - Visit `/blog` for the archive and `/blog/<slug>` for individual posts
 - The homepage automatically renders the latest posts into the blog section
 

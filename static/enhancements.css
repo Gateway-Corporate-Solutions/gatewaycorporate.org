@@ -484,6 +484,12 @@
 }
 
 .prose em {
+  color: inherit;
+  font-style: italic;
+}
+
+.prose > p:first-child > em:only-child,
+.prose blockquote > p > em:only-child {
   color: #b7c6d7;
   display: block;
   font-size: 0.95rem;
