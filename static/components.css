@@ -57,6 +57,10 @@
 
   /* Layout */
   --navbar-height: 6rem;
+  --navbar-padding-y: 1rem;
+  --nav-logo-size: 60px;
+  --hamburger-height: 18px;
+  --menu-icon-padding: 0.75rem;
 
   /* Typography */
   --font-family:
@@ -650,8 +654,8 @@ body {
 }
 
 .nav-logo {
-  height: 60px;
-  width: 60px;
+  height: var(--nav-logo-size);
+  width: var(--nav-logo-size);
   vertical-align: middle;
   margin-right: var(--spacing-md);
 }
@@ -698,7 +702,7 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 1rem 2rem;
+  padding: var(--navbar-padding-y) 2rem;
   background: rgba(15, 15, 15, 0.85);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
@@ -737,13 +741,19 @@ body {
 /* Enhanced Hamburger Menu */
 .menu-icon {
   position: fixed;
-  top: 1rem;
+  top: calc(
+    var(--navbar-padding-y) +
+      (
+        var(--nav-logo-size) -
+          (var(--hamburger-height) + (var(--menu-icon-padding) * 2))
+      ) / 2
+  );
   right: 1rem;
   z-index: 1001;
   background: rgba(15, 15, 15, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 0.75rem;
+  padding: var(--menu-icon-padding);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   cursor: pointer;
@@ -759,7 +769,7 @@ body {
 /* Morphing hamburger animation */
 .hamburger {
   width: 24px;
-  height: 18px;
+  height: var(--hamburger-height);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1319,6 +1329,10 @@ body {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --navbar-padding-y: 0.75rem;
+  }
+
   .grid-2,
   .grid-3,
   .grid-4 {
@@ -1344,6 +1358,10 @@ body {
 }
 
 @media (max-width: 480px) {
+  :root {
+    --menu-icon-padding: 0.5rem;
+  }
+
   .btn {
     width: 100%;
     max-width: 280px;

@@ -811,9 +811,7 @@
 
 @media (max-width: 480px) {
   .menu-icon {
-    top: 0.75rem;
     right: 0.75rem;
-    padding: 0.5rem;
   }
 
   .nav-list .nav-link {
