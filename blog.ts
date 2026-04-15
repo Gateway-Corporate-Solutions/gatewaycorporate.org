@@ -382,7 +382,6 @@ export function renderBlogIndexPage(posts: BlogPost[]): string {
       <section class="section section-tight">
         <div class="section-header">
           <h2 class="section-title">Recent articles</h2>
-          <p class="text-lead">A first-class publishing layer for the site, driven directly from markdown source files.</p>
         </div>
         ${postMarkup}
       </section>
