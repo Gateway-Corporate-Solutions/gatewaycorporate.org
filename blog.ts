@@ -382,6 +382,7 @@ export function renderBlogIndexPage(posts: BlogPost[]): string {
       <section class="section section-tight">
         <div class="section-header">
           <h2 class="section-title">Recent articles</h2>
+          <p class="text-lead">Read the latest insights and updates from our team.</p>
         </div>
         ${postMarkup}
       </section>
