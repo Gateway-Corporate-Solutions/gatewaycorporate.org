@@ -3,8 +3,8 @@ title: '"Untraceability" vs "Untrackability," and Why The Distinction Matters'
 slug: untraceability-vs-untrackability-and-why-the-distinction-matters
 date: 2026-04-15
 author: Sam Roux
-excerpt:
-tags:
+excerpt: Untraceability, untrackability, privacy, and security are related ideas, but treating them as identical leads to poor tool choices and avoidable operational risk.
+tags: [privacy, security, fingerprinting, anonymity, intelligence]
 ---
 
 *“This resemblance is the cause of the confusion and mistake, and makes us substitute the notion of identity, instead of that of related objects.”*
