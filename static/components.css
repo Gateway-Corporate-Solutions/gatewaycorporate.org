@@ -14,6 +14,7 @@
   --light: #f0f0f0;
   --white: #ffffff;
   --dark: #0f0f0f;
+  --input-bg: #141b22;
 
   /* Gray Scale */
   --gray-100: #2d2d2d;
@@ -563,7 +564,7 @@ body {
   border-radius: var(--radius-md);
   font-family: inherit;
   transition: var(--transition);
-  background-color: rgba(15, 23, 42, 0.8);
+  background-color: var(--input-bg);
   color: var(--gray-800);
   border: 2px solid rgba(255, 255, 255, 0.1);
   font-size: var(--font-size-base);
@@ -576,7 +577,7 @@ body {
   outline: none;
   border-color: var(--secondary);
   box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
-  background-color: rgba(15, 23, 42, 0.9);
+  background-color: var(--input-bg);
 }
 
 .form-textarea {
