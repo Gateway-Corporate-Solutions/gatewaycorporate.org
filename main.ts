@@ -7,6 +7,15 @@ import {
     renderBlogPostPage,
     renderHomepageBlogSection,
 } from "./blog.ts";
+import {
+    getJobPostingBySlug,
+    getJobPostings,
+    renderCareersIndexPage,
+    renderCareersNotFoundPage,
+    renderCareersSuccessPage,
+    renderJobPostingPage,
+} from "./careers.ts";
+import { submitJobApplication } from "./applications.ts";
 import { handleUserRequest } from "./contact.ts";
 import { injectFooterIntoHtml, resolveFooterVariant } from "./footer.ts";
 
@@ -63,6 +72,94 @@ router.get("/blog/:slug", async (context) => {
 
     context.response.body = renderBlogPostPage(post, blogPosts);
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.get("/careers", async (context) => {
+    const jobs = await getJobPostings();
+    context.response.body = renderCareersIndexPage(jobs);
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.get("/careers/success", async (context) => {
+    const slug = context.request.url.searchParams.get("job") || "";
+    const job = slug ? await getJobPostingBySlug(slug) : undefined;
+    context.response.body = renderCareersSuccessPage(job);
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.get("/careers/:slug", async (context) => {
+    const slug = context.params.slug;
+
+    if (!slug) {
+        context.response.status = 404;
+        context.response.body = renderCareersNotFoundPage("that role");
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    const jobs = await getJobPostings();
+    const job = jobs.find((candidate) => candidate.slug === slug);
+
+    if (!job) {
+        context.response.status = 404;
+        context.response.body = renderCareersNotFoundPage(slug);
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    context.response.body = renderJobPostingPage(job, jobs);
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.post("/careers/:slug/apply", async (context) => {
+    const slug = context.params.slug;
+
+    if (!slug) {
+        context.response.status = 404;
+        context.response.body = renderCareersNotFoundPage("that role");
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    const jobs = await getJobPostings();
+    const job = jobs.find((candidate) => candidate.slug === slug);
+
+    if (!job) {
+        context.response.status = 404;
+        context.response.body = renderCareersNotFoundPage(slug);
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    try {
+        const rawForm = await context.request.body.form();
+        const form = rawForm instanceof FormData
+            ? rawForm
+            : new FormData();
+
+        if (!(rawForm instanceof FormData)) {
+            for (const [key, value] of rawForm.entries()) {
+                form.append(key, value);
+            }
+        }
+
+        const result = await submitJobApplication(job, form);
+
+        if (result.ok) {
+            context.response.redirect(`/careers/success?job=${encodeURIComponent(job.slug)}`);
+            return;
+        }
+
+        context.response.status = result.status;
+        context.response.body = renderJobPostingPage(job, jobs, {
+            errorMessage: result.message,
+            values: result.values,
+        });
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+    } catch (error) {
+        console.error("Error processing application:", error);
+        context.response.status = 500;
+        context.response.body = renderJobPostingPage(job, jobs, {
+            errorMessage: "We could not process your application. Please try again shortly or email office@gatewaycorporate.org directly.",
+        });
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+    }
 });
 router.get("/:view.html", (context) => {
     const view = context.params.view;

@@ -14,6 +14,18 @@ The site now includes a markdown-powered blog system.
 - Visit `/blog` for the archive and `/blog/<slug>` for individual posts
 - The homepage automatically renders the latest posts into the blog section
 
+## Careers
+
+The site also supports a markdown-powered careers section with direct email applications.
+
+- Add open roles in `content/jobs/*.md`
+- Use YAML-style front matter with `title`, `slug`, `date`, `excerpt`, `department`, `location`, `employmentType`, and `status`
+- Visit `/careers` for the index and `/careers/<slug>` for the individual role page
+- Applicants submit a shared questionnaire and a PDF resume from the role page
+- Successful applications are emailed to `office@gatewaycorporate.org` through the configured mail provider
+- Required environment variables for application delivery: `RESEND_API_KEY`, `CAREERS_EMAIL_FROM`, and `RECAPTCHA_SECRET_KEY`
+- Optional environment variable: `CAREERS_EMAIL_TO` to override the default inbox
+
 ## Shared footer
 
 The site footer is rendered from `footer.ts` for both blog pages and static HTML views.

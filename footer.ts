@@ -26,6 +26,7 @@ const companyColumn: FooterColumn = {
   heading: "Company",
   links: [
     { label: "About", href: "/#about" },
+    { label: "Careers", href: "/careers" },
     { label: "Journal", href: "/blog" },
     { label: "Team", href: "/#team" },
     { label: "Projects", href: "/#projects" },

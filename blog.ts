@@ -269,6 +269,7 @@ function renderPageShell(options: {
       <div class="scroll-progress"></div>
 
       <section class="hero hero-compact">
+        <canvas id="network-graph" aria-hidden="true"></canvas>
         <div class="hero-content">
           <p class="eyebrow">Gateway Journal</p>
           <h1 class="hero-title">${escapeHtml(options.heroTitle)}</h1>
@@ -288,6 +289,7 @@ function renderPageShell(options: {
         <div class="menu-container">
           <ul class="nav-list">
             <li><a href="/" class="nav-link">Home</a></li>
+            <li><a href="/careers" class="nav-link">Careers</a></li>
             <li><a href="/blog" class="nav-link">Blog</a></li>
             <li><a href="/#projects" class="nav-link">Projects</a></li>
             <li><a href="/#contact" class="nav-link">Contact</a></li>
