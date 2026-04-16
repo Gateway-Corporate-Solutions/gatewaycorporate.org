@@ -3,13 +3,13 @@ title: Building & Beating Advanced Digital Fingerprinting Systems
 slug: building-and-beating-advanced-digital-fingerprinting-systems
 date: 2026-04-14
 author: Sam Roux
-excerpt: Gateway’s dual-track device intelligence strategy pairs enterprise-grade fingerprinting with practical anti-fingerprinting defenses, and MetaDock’s latest privacy features show how effective that balance can be.
+excerpt: Gateway Corporate’s dual-track device intelligence strategy pairs enterprise-grade fingerprinting with practical anti-fingerprinting defenses, and MetaDock’s latest privacy features show how effective that balance can be.
 tags: [privacy, fingerprinting, browsers, cybersecurity, devicer]
 ---
 
 There’s an ancient Chinese parable about a merchant who sold both an impenetrable shield and a spear that could pierce anything. When a customer asked what would happen if the two collided, the paradox became clear: they could not both exist.
 
-At Gateway Corporate Solutions, we’ve intentionally embraced a similar tension. While developing the **Devicer Intelligence Suite**, our central mission has been to build world-class digital fingerprinting systems for enterprise use (technology that is, by design, a form of advanced surveillance) while simultaneously arming individual users with powerful anti-fingerprinting tools to reclaim their privacy.
+At Gateway Corporate, we’ve intentionally embraced a similar tension. While developing the **Devicer Intelligence Suite**, our central mission has been to build world-class digital fingerprinting systems for enterprise use (technology that is, by design, a form of advanced surveillance) while simultaneously arming individual users with powerful anti-fingerprinting tools to reclaim their privacy.
 
 We don’t see this as contradictory. It’s a deliberate two-pronged strategy: enterprises gain highly accurate, compliant KYC and fraud-prevention capabilities, while everyday users receive the means to defend themselves against invasive tracking.
 

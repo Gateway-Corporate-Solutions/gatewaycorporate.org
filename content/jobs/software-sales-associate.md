@@ -15,7 +15,7 @@ tags: [sales, software, b2b, remote, commission]
 
 Gateway Corporate is hiring multiple **Software Sales Associates** to help us grow revenue around our core software products and client solutions.
 
-This role is for those who can build trust quickly, understand business problems, and connect prospective customers with the right Gateway offering. You should be comfortable with outbound outreach, discovery conversations, follow-up, and closing smaller deals while helping build a repeatable sales motion over time.
+This role is for those who can build trust quickly, understand business problems, and connect prospective customers with the right Gateway Corporate offering. You should be comfortable with outbound outreach, discovery conversations, follow-up, and closing smaller deals while helping build a repeatable sales motion over time.
 
 ## What you would do
 
@@ -48,7 +48,7 @@ This position includes a commission structure where you receive **20% of the rec
 
 ## How we work
 
-Gateway values direct communication, fast execution, and practical results. We are not looking for someone to recite a sales playbook without understanding the customer. We are looking for someone who can learn quickly, operate independently, and help turn real conversations into real revenue.
+Gateway Corporate values direct communication, fast execution, and practical results. We are not looking for someone to recite a sales playbook without understanding the customer. We are looking for someone who can learn quickly, operate independently, and help turn real conversations into real revenue.
 
 ## Applying
 

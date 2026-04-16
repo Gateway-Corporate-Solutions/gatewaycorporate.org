@@ -1,5 +1,5 @@
 ---
-title: Why Gateway Built a Journal
+title: Why Gateway Corporate Built a Journal
 slug: why-gateway-built-a-journal
 date: 2026-04-12
 author: Sam Roux

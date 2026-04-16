@@ -233,11 +233,11 @@ function renderPageShell(options: {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(options.title)}</title>
     <meta name="description" content="${escapeHtml(options.description)}">
-    <meta name="author" content="Gateway Corporate Solutions">
+    <meta name="author" content="Gateway Corporate">
     <link rel="canonical" href="${escapeHtml(options.canonicalUrl)}">
     <meta property="og:locale" content="en_US">
     <meta property="og:type" content="${ogType}">
-    <meta property="og:site_name" content="Gateway Corporate Solutions">
+    <meta property="og:site_name" content="Gateway Corporate">
     <meta property="og:title" content="${escapeHtml(options.title)}">
     <meta property="og:description" content="${escapeHtml(options.description)}">
     <meta property="og:url" content="${escapeHtml(options.canonicalUrl)}">
@@ -260,7 +260,7 @@ function renderPageShell(options: {
       <nav class="navbar">
         <div class="nav-content">
           <a href="/" class="nav-brand">
-            <img src="/logo.png" alt="Gateway Corporate Solutions Logo" class="nav-logo">
+            <img src="/logo.png" alt="Gateway Corporate Logo" class="nav-logo">
             Gateway Corporate
           </a>
           <div class="nav-indicator"></div>
@@ -271,7 +271,7 @@ function renderPageShell(options: {
       <section class="hero hero-compact">
         <canvas id="network-graph" aria-hidden="true"></canvas>
         <div class="hero-content">
-          <p class="eyebrow">Gateway Journal</p>
+          <p class="eyebrow">Gateway Corporate Journal</p>
           <h1 class="hero-title">${escapeHtml(options.heroTitle)}</h1>
           <h3 class="hero-subtitle">${escapeHtml(options.heroSubtitle)}</h3>
         </div>
@@ -352,7 +352,7 @@ export function renderHomepageBlogSection(posts: BlogPost[]): string {
   return `
     <section id="blog" class="section">
       <div class="section-header">
-        <p class="eyebrow">Gateway Journal</p>
+        <p class="eyebrow">Gateway Corporate Journal</p>
         <h2 class="section-title">What we are seeing, shipping, and learning</h2>
         <p class="text-lead blog-home-intro">
           Notes from client work, AI operations, and product strategy written directly from the team building it.
@@ -374,9 +374,9 @@ export function renderBlogIndexPage(posts: BlogPost[]): string {
     : `<div class="card card-primary blog-empty"><p class="card-text">No articles are published yet. Add markdown files to content/blog to populate the journal.</p></div>`;
 
   return renderPageShell({
-    title: "Gateway Journal | Gateway Corporate Solutions",
-    description: "Strategy, software, and AI field notes from Gateway Corporate Solutions.",
-    heroTitle: "Gateway Journal",
+    title: "Gateway Corporate Journal | Gateway Corporate",
+    description: "Strategy, software, and AI field notes from Gateway Corporate.",
+    heroTitle: "Gateway Corporate Journal",
     heroSubtitle: "Markdown-powered publishing for practical software, AI, and growth work.",
     canonicalUrl: absoluteUrl("/blog"),
     imageUrl: DEFAULT_SOCIAL_IMAGE,
@@ -404,7 +404,7 @@ export function renderBlogPostPage(post: BlogPost, allPosts: BlogPost[]): string
     : "";
 
   return renderPageShell({
-    title: `${post.title} | Gateway Journal`,
+    title: `${post.title} | Gateway Corporate Journal`,
     description: post.excerpt,
     heroTitle: post.title,
     heroSubtitle: `${formatDate(post.date)} • ${post.readingTime} min read • ${post.author}`,
@@ -423,7 +423,7 @@ export function renderBlogPostPage(post: BlogPost, allPosts: BlogPost[]): string
           <div class="prose">${post.html}</div>
           <div class="article-nav">
             <a href="/blog" class="btn btn-secondary btn-sm">Back to blog</a>
-            <a href="/#contact" class="btn btn-primary btn-sm">Talk to Gateway</a>
+            <a href="/#contact" class="btn btn-primary btn-sm">Talk to Gateway Corporate</a>
           </div>
         </article>
       </section>
@@ -434,7 +434,7 @@ export function renderBlogPostPage(post: BlogPost, allPosts: BlogPost[]): string
 
 export function renderBlogNotFoundPage(slug: string): string {
   return renderPageShell({
-    title: "Article not found | Gateway Journal",
+    title: "Article not found | Gateway Corporate Journal",
     description: "The requested article could not be found.",
     heroTitle: "Article not found",
     heroSubtitle: `No published post matched ${slug}.`,

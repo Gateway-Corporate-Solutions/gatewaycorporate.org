@@ -109,7 +109,7 @@ export function renderSiteFooter(variant: FooterVariant = "default"): string {
       <div class="container">
         <div class="grid grid-4 gap-lg mb-xl" style="text-align: left; padding-bottom: var(--spacing-md);">
           <div>
-            <h4 class="heading-4 mb-md">Gateway Corporate Solutions</h4>
+            <h4 class="heading-4 mb-md">Gateway Corporate</h4>
             <p class="text-small">${escapeHtml(brandCopy)}</p>
           </div>
           ${renderLinkList(serviceColumn)}
@@ -117,7 +117,7 @@ export function renderSiteFooter(variant: FooterVariant = "default"): string {
           ${renderLinkList(companyColumn)}
         </div>
         <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--spacing-md); text-align: center">
-          <p class="text-base">&copy; ${new Date().getFullYear()} Gateway Corporate Solutions. All rights reserved.</p>
+          <p class="text-base">&copy; ${new Date().getFullYear()} Gateway Corporate. All rights reserved.</p>
         </div>
       </div>
     </footer>`;

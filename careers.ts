@@ -373,11 +373,11 @@ function renderPageShell(options: {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(options.title)}</title>
     <meta name="description" content="${escapeHtml(options.description)}">
-    <meta name="author" content="Gateway Corporate Solutions">
+      <meta name="author" content="Gateway Corporate">
     <link rel="canonical" href="${escapeHtml(options.canonicalUrl)}">
     <meta property="og:locale" content="en_US">
     <meta property="og:type" content="${options.ogType || "website"}">
-    <meta property="og:site_name" content="Gateway Corporate Solutions">
+      <meta property="og:site_name" content="Gateway Corporate">
     <meta property="og:title" content="${escapeHtml(options.title)}">
     <meta property="og:description" content="${escapeHtml(options.description)}">
     <meta property="og:url" content="${escapeHtml(options.canonicalUrl)}">
@@ -400,7 +400,7 @@ function renderPageShell(options: {
       <nav class="navbar">
         <div class="nav-content">
           <a href="/" class="nav-brand">
-            <img src="/logo.png" alt="Gateway Corporate Solutions Logo" class="nav-logo">
+            <img src="/logo.png" alt="Gateway Corporate Logo" class="nav-logo">
             Gateway Corporate
           </a>
           <div class="nav-indicator"></div>
@@ -513,10 +513,10 @@ export function renderCareersIndexPage(jobs: JobPosting[]): string {
     : `<div class="card card-primary blog-empty"><p class="card-text">No open roles are published right now. Check back soon or email <a href="mailto:office@gatewaycorporate.org" class="careers-inline-link">office@gatewaycorporate.org</a>.</p></div>`;
 
   return renderPageShell({
-    title: "Careers | Gateway Corporate Solutions",
-    description: "Open roles at Gateway Corporate Solutions.",
+    title: "Careers | Gateway Corporate",
+    description: "Open roles at Gateway Corporate.",
     heroEyebrow: "Careers",
-    heroTitle: "Build with Gateway",
+    heroTitle: "Build with Gateway Corporate",
     heroSubtitle: "Browse current openings and apply directly with a short questionnaire and resume.",
     canonicalUrl: absoluteUrl("/careers"),
     imageUrl: DEFAULT_SOCIAL_IMAGE,
@@ -552,7 +552,7 @@ export function renderJobPostingPage(
     : "";
 
   return renderPageShell({
-    title: `${job.title} | Gateway Careers`,
+    title: `${job.title} | Gateway Corporate Careers`,
     description: job.excerpt,
     heroEyebrow: "Careers",
     heroTitle: job.title,
@@ -575,7 +575,7 @@ export function renderJobPostingPage(
             <div class="prose">${job.html}</div>
             <div class="article-nav">
               <a href="/careers" class="btn btn-secondary btn-sm">Back to careers</a>
-              <a href="/#contact" class="btn btn-primary btn-sm">Contact Gateway</a>
+              <a href="/#contact" class="btn btn-primary btn-sm">Contact Gateway Corporate</a>
             </div>
           </article>
           <div class="careers-sidebar">
@@ -590,7 +590,7 @@ export function renderJobPostingPage(
 
 export function renderCareersNotFoundPage(slug: string): string {
   return renderPageShell({
-    title: "Role not found | Gateway Careers",
+    title: "Role not found | Gateway Corporate Careers",
     description: "The requested role could not be found.",
     heroEyebrow: "Careers",
     heroTitle: "Role not found",
@@ -615,11 +615,11 @@ export function renderCareersSuccessPage(job?: JobPosting): string {
     ? `<a href="/careers/${encodeURIComponent(job.slug)}" class="btn btn-secondary btn-sm">Back to role</a>`
     : "";
   const followUpCopy = job
-    ? `Your application for ${job.title} has been routed to Gateway.`
-    : "Your application has been routed to Gateway.";
+    ? `Your application for ${job.title} has been routed to Gateway Corporate.`
+    : "Your application has been routed to Gateway Corporate.";
 
   return renderPageShell({
-    title: "Application received | Gateway Careers",
+    title: "Application received | Gateway Corporate Careers",
     description: followUpCopy,
     heroEyebrow: "Careers",
     heroTitle: "Application received",
