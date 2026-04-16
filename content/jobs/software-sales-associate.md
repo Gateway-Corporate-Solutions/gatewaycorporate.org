@@ -19,13 +19,13 @@ This role is for those who can build trust quickly, understand business problems
 
 ## What you would do
 
-- Identify and qualify businesses that are a strong fit for Gateway products and services.
+- Identify and qualify businesses that are a strong fit for Gateway Corporate products and services.
 - Run discovery conversations to understand pain points, buying urgency, and decision-making constraints.
-- Present Gateway offerings clearly and map product capabilities to real business outcomes.
+- Present Gateway Corporate offerings clearly and map product capabilities to real business outcomes.
 - Follow up consistently with leads, proposals, and active opportunities.
 - Maintain a disciplined pipeline and keep notes on conversations, objections, and next steps.
 - Work directly with leadership to improve messaging, positioning, and offer structure.
-- Help refine how Gateway sells software in a practical, repeatable way.
+- Help refine how Gateway Corporate sells software in a practical, repeatable way.
 
 ## What we are looking for
 
@@ -52,4 +52,4 @@ Gateway values direct communication, fast execution, and practical results. We a
 
 ## Applying
 
-Use the application form on this page to send a short introduction, tell us about your sales background, and attach your resume. If there is a fit, Gateway will follow up directly.
+Use the application form on this page to send a short introduction, tell us about your sales background, and attach your resume. If there is a fit, Gateway Corporate will follow up directly.
