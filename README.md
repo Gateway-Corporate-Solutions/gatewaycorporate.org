@@ -26,6 +26,14 @@ The site also supports a markdown-powered careers section with direct email appl
 - Required environment variables for application delivery: `RESEND_API_KEY`, `CAREERS_EMAIL_FROM`, and `RECAPTCHA_SECRET_KEY`
 - Optional environment variable: `CAREERS_EMAIL_TO` to override the default inbox
 
+## Contact form
+
+The homepage contact form delivers messages through Resend to `office@gatewaycorporate.org`.
+
+- Required environment variables: `RESEND_API_KEY`, `RECAPTCHA_SECRET_KEY`, and either `CONTACT_EMAIL_FROM` or `CAREERS_EMAIL_FROM`
+- Optional environment variable: `CONTACT_EMAIL_TO` to override the default inbox
+- If Twilio env vars remain configured, the contact flow will also send the existing SMS notification
+
 ## Shared footer
 
 The site footer is rendered from `footer.ts` for both blog pages and static HTML views.

@@ -562,6 +562,7 @@ body {
   width: 100%;
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
+  appearance: none;
   font-family: inherit;
   transition: var(--transition);
   background-color: var(--input-bg);
@@ -578,6 +579,18 @@ body {
   border-color: var(--secondary);
   box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
   background-color: var(--input-bg);
+}
+
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus,
+.form-textarea:-webkit-autofill,
+.form-textarea:-webkit-autofill:hover,
+.form-textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--gray-800);
+  box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 .form-textarea {

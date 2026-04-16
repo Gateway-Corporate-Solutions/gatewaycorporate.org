@@ -211,8 +211,10 @@ router.post('/contact', async (context) => {
     context.response.redirect('/');
   } catch (error) {
     console.error('Error processing request:', error);
-    context.response.status = 500;
-    context.response.body = 'Internal Server Error';
+        context.response.status = 502;
+        context.response.body = error instanceof Error
+            ? error.message
+            : 'We could not send your message right now. Please try again shortly or email office@gatewaycorporate.org directly.';
   }
 });
 
