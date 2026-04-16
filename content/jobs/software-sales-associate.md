@@ -3,7 +3,7 @@ title: Software Sales Associate
 slug: software-sales-associate
 date: 2026-04-15
 excerpt: Help Gateway Corporate sell our flagship products, and receive 20% of all recurring revenue brought in
-department: Engineering
+department: Sales
 location: United States
 employmentType: Full-time
 status: open

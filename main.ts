@@ -128,14 +128,21 @@ router.post("/careers/:slug/apply", async (context) => {
     }
 
     try {
-        const rawForm = await context.request.body.form();
-        const form = rawForm instanceof FormData
-            ? rawForm
-            : new FormData();
+        let form: FormData;
+        const contentType = context.request.headers.get("content-type") || "";
 
-        if (!(rawForm instanceof FormData)) {
-            for (const [key, value] of rawForm.entries()) {
-                form.append(key, value);
+        if (contentType.includes("multipart/form-data")) {
+            form = await context.request.body.formData();
+        } else {
+            const rawForm = await context.request.body.form();
+            form = rawForm instanceof FormData
+                ? rawForm
+                : new FormData();
+
+            if (!(rawForm instanceof FormData)) {
+                for (const [key, value] of rawForm.entries()) {
+                    form.append(key, value);
+                }
             }
         }
 

@@ -302,7 +302,7 @@ function renderApplicationForm(job: JobPosting, state?: JobApplicationState): st
       <div class="card-header">
         <p class="article-kicker">Apply</p>
         <h2 class="card-title">Send your application</h2>
-        <p class="card-text">Submit a short introduction and a PDF resume. Applications are emailed directly to Gateway.</p>
+        <p class="card-text">Submit a short introduction and a PDF resume. Applications are sent directly to Gateway Corporate.</p>
       </div>
       <div class="card-body">
         ${closedMessage}
