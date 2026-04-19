@@ -1015,3 +1015,101 @@
     font-size: 1.25rem;
   }
 }
+
+/* ===== COMPARISON TABLE ===== */
+.comparison-table-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  overflow-x: auto;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.comparison-table thead th {
+  padding: 1.1rem 1.5rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comparison-table thead th:not(:first-child) {
+  text-align: center;
+}
+
+.comparison-table thead th.col-feature {
+  color: #93c5fd;
+}
+
+.comparison-table thead th.col-hl {
+  color: #c4b5fd;
+}
+
+.comparison-table thead th.col-other {
+  color: #fca5a5;
+}
+
+.comparison-table thead th.col-other2 {
+  color: #fcd34d;
+}
+
+.comparison-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.15s ease;
+}
+
+.comparison-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.comparison-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.comparison-table td {
+  padding: 0.9rem 1.5rem;
+  color: var(--gray-800);
+  vertical-align: middle;
+}
+
+.comparison-table td:not(:first-child) {
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.comparison-table td.check-hl {
+  color: #6ee7b7;
+}
+
+.comparison-table td.check-neutral {
+  color: #6ee7b7;
+}
+
+.comparison-table td.check-other {
+  color: #f87171;
+}
+
+.comparison-note {
+  max-width: 960px;
+  margin: 1.5rem auto 0;
+  text-align: center;
+  color: var(--gray-500);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .comparison-table td,
+  .comparison-table thead th {
+    padding: 0.75rem 1rem;
+  }
+}

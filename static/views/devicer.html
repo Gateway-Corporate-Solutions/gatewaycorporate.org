@@ -240,6 +240,69 @@
 			margin: 0 auto;
 		}
 
+		.bundle-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.35rem 0.8rem;
+			border-radius: 999px;
+			font-size: 0.8rem;
+			font-weight: 700;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			margin-bottom: 1rem;
+			background: rgba(167, 139, 250, 0.16);
+			color: #c4b5fd;
+		}
+
+		.price-amount {
+			font-size: 2.8rem;
+			font-weight: 800;
+			background: linear-gradient(135deg, var(--secondary-light) 0%, var(--accent) 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			display: block;
+			margin: 0.75rem 0 0.25rem;
+		}
+
+		.price-period {
+			font-size: 0.95rem;
+			color: var(--gray-500);
+		}
+
+		.feature-list {
+			list-style: none;
+			padding: 0;
+			margin: 1.5rem 0;
+		}
+
+		.feature-list li {
+			padding: 0.5rem 0;
+			padding-left: 1.5rem;
+			position: relative;
+			font-size: 0.95rem;
+			color: var(--gray-800);
+			border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		}
+
+		.feature-list li:last-child {
+			border-bottom: none;
+		}
+
+		.feature-list li::before {
+			content: "•";
+			position: absolute;
+			left: 0;
+			color: var(--secondary-light);
+			font-weight: 700;
+		}
+
+		.pricing-card.featured {
+			border-color: rgba(167, 139, 250, 0.5);
+			box-shadow: 0 0 40px rgba(167, 139, 250, 0.1);
+		}
+
 		.tier-grid {
 			display: grid;
 			gap: 0.75rem;
@@ -344,6 +407,8 @@
 				<li><a href="#problem" class="nav-link">Problem</a></li>
 				<li><a href="#suite" class="nav-link">Suite</a></li>
 				<li><a href="#features" class="nav-link">Features</a></li>
+				<li><a href="#comparison" class="nav-link">Comparison</a></li>
+				<li><a href="#bundle" class="nav-link">Bundle</a></li>
 				<li><a href="#pricing" class="nav-link">Pricing</a></li>
 				<li><a href="#cta" class="nav-link">Get Started</a></li>
 			</ul>
@@ -657,6 +722,143 @@
 					<p class="card-text">
 						Inject your own logger and metrics backends while keeping the suite modular and deployment-friendly.
 					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="comparison" class="section">
+		<div class="section-header">
+			<h2 class="section-title">How Devicer fits</h2>
+			<p class="text-lead">
+				Devicer is built around an open, explainable server-side intelligence core. Here is how that compares
+				to a closed fingerprinting platform.
+			</p>
+		</div>
+
+		<div class="comparison-table-wrap">
+			<table class="comparison-table">
+				<thead>
+					<tr>
+						<th class="col-feature">Capability</th>
+						<th class="col-hl">Devicer</th>
+						<th class="col-other">FingerprintJS</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Open-source server-side core engine</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Modular premium plugins (IP, TLS, Bot, Peer)</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Peer graph cluster trust &amp; taint propagation</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Calibrated 0–100 explainable confidence score</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Temporal decay &amp; fingerprint drift analysis</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>JA4/JA3 passive TLS consistency intelligence</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Rules-based bot blocking &amp; anti-scrape middleware</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Flexible storage adapters (Redis, Postgres, SQLite)</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Framework-agnostic server middleware integration</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Flat-rate pricing (Pro from $49/mo)</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Server-side persistent device history &amp; enrichment</td>
+						<td class="check-hl">✓</td>
+						<td class="check-neutral">✓</td>
+					</tr>
+					<tr>
+						<td>IP intelligence, proxy / VPN / Tor &amp; impossible travel</td>
+						<td class="check-hl">✓</td>
+						<td class="check-neutral">✓</td>
+					</tr>
+					<tr>
+						<td>Real-time bot &amp; abuse detection</td>
+						<td class="check-hl">✓</td>
+						<td class="check-neutral">✓</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<p class="comparison-note">
+			FingerprintJS feature set reflects general availability as of April 2026.
+		</p>
+	</section>
+
+	<section id="bundle" class="section">
+		<div class="section-header">
+			<h2 class="section-title">Bundle With NashTwin Pro</h2>
+			<p class="text-lead">
+				Devicer is strongest when fraud signals feed directly into your operational model. Bundle it with
+				NashTwin Pro for device intelligence, CRM context, and decision workflows on one shared platform.
+			</p>
+		</div>
+
+		<div class="pricing-banner">
+			<p class="text-base" style="margin: 0;">
+				Recommended for teams that want Devicer deployed as part of a broader CRM and operational intelligence stack.
+			</p>
+		</div>
+
+		<div class="grid grid-1 gap-lg pricing-grid" style="max-width: 900px; margin-bottom: 5rem;">
+			<div class="card card-centered pricing-card featured">
+				<div class="card-header">
+					<span class="bundle-badge">Bundle With NashTwin Pro</span>
+					<h3 class="card-title">Devicer + NashTwin Pro</h3>
+					<span class="price-amount">$25/mo</span>
+					<span class="price-period">with NashTwin Pro deployment</span>
+				</div>
+				<div class="card-body">
+					<p class="card-text text-large">
+						Pair Devicer's device intelligence layer with NashTwin Pro so fraud signals, CRM records,
+						and decision workflows live inside one governed system.
+					</p>
+					<ul class="feature-list">
+						<li>Devicer Pro plugin suite and server middleware setup</li>
+						<li>NashTwin Pro CRM workspace and operator control surface</li>
+						<li>Device risk signals surfaced directly in contact and deal records</li>
+						<li>Shared deployment and onboarding for fraud-aware operations</li>
+						<li>Architecture review aligned to your storage and integration model</li>
+					</ul>
+				</div>
+				<div class="card-footer">
+					<div class="btn-group" style="justify-content: center;">
+						<a href="nashtwin.html" class="btn btn-primary btn-lg">See NashTwin Pro</a>
+					</div>
 				</div>
 			</div>
 		</div>
