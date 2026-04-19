@@ -361,9 +361,17 @@ function renderPageShell(options: {
   imageUrl: string;
   includeRecaptcha?: boolean;
   ogType?: "website" | "article";
+  jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
 }): string {
   const recaptchaScript = options.includeRecaptcha
     ? "\n    <script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>"
+    : "";
+  const jsonLdScript = options.jsonLd
+    ? `\n    <script type="application/ld+json">${JSON.stringify(options.jsonLd)}</script>`
+    : "";
+  const robotsMeta = options.noindex
+    ? `\n    <meta name="robots" content="noindex, nofollow">`
     : "";
 
   return `<!DOCTYPE html>
@@ -386,7 +394,7 @@ function renderPageShell(options: {
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHtml(options.title)}">
     <meta name="twitter:description" content="${escapeHtml(options.description)}">
-    <meta name="twitter:image" content="${escapeHtml(options.imageUrl)}">${recaptchaScript}
+    <meta name="twitter:image" content="${escapeHtml(options.imageUrl)}">${recaptchaScript}${jsonLdScript}${robotsMeta}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -560,6 +568,25 @@ export function renderJobPostingPage(
     canonicalUrl: absoluteUrl(`/careers/${job.slug}`),
     imageUrl: DEFAULT_SOCIAL_IMAGE,
     includeRecaptcha: isJobOpen(job),
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "JobPosting",
+      "title": job.title,
+      "description": job.excerpt,
+      "datePosted": job.date,
+      "hiringOrganization": {
+        "@type": "Organization",
+        "name": "Gateway Corporate",
+        "sameAs": SITE_URL,
+      },
+      "jobLocation": {
+        "@type": "Place",
+        "name": job.location,
+      },
+      "employmentType": job.employmentType.toUpperCase().replace(/[-\s]+/g, "_"),
+      "url": absoluteUrl(`/careers/${job.slug}`),
+      ...(job.remote ? { "jobLocationType": "TELECOMMUTE" } : {}),
+    },
     content: `
       <section class="section section-tight careers-shell">
         <div class="careers-detail-stack">
@@ -626,6 +653,7 @@ export function renderCareersSuccessPage(job?: JobPosting): string {
     heroSubtitle: "The team will review your submission and follow up directly if there is a fit.",
     canonicalUrl: absoluteUrl("/careers/success"),
     imageUrl: DEFAULT_SOCIAL_IMAGE,
+    noindex: true,
     content: `
       <section class="section section-tight">
         <div class="card card-primary blog-empty careers-success-card">

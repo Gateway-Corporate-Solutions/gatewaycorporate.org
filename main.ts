@@ -39,6 +39,75 @@ async function renderHomePage(
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 }
 
+router.get("/sitemap.xml", async (context) => {
+    const [blogPosts, jobs] = await Promise.all([getBlogPosts(), getJobPostings()]);
+    const today = new Date().toISOString().slice(0, 10);
+
+    const staticUrls = `  <url>
+    <loc>https://gatewaycorporate.org/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://gatewaycorporate.org/hyperlocal.html</loc>
+    <lastmod>2025-07-22</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://gatewaycorporate.org/devicer.html</loc>
+    <lastmod>2026-04-05</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://gatewaycorporate.org/nashtwin.html</loc>
+    <lastmod>2026-04-11</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://gatewaycorporate.org/blog</loc>
+    <lastmod>${today}</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gatewaycorporate.org/careers</loc>
+    <lastmod>${today}</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gatewaycorporate.org/papers/VOIP-TBS.pdf</loc>
+    <lastmod>2025-01-23</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://gatewaycorporate.org/papers/FP-Devicer.pdf</loc>
+    <lastmod>2026-04-05</lastmod>
+    <priority>0.6</priority>
+  </url>`;
+
+    const blogUrls = blogPosts.map((post) => `  <url>
+    <loc>https://gatewaycorporate.org/blog/${encodeURIComponent(post.slug)}</loc>
+    <lastmod>${post.date}</lastmod>
+    <priority>0.7</priority>
+  </url>`).join("\n");
+
+    const jobUrls = jobs
+        .filter((job) => job.status === "open")
+        .map((job) => `  <url>
+    <loc>https://gatewaycorporate.org/careers/${encodeURIComponent(job.slug)}</loc>
+    <lastmod>${job.date}</lastmod>
+    <priority>0.7</priority>
+  </url>`).join("\n");
+
+    const parts = [staticUrls, blogUrls, jobUrls].filter(Boolean).join("\n");
+
+    context.response.body = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${parts}
+</urlset>`;
+    context.response.headers.set("Content-Type", "application/xml; charset=utf-8");
+});
+
 router.get("/", async (context) => {
     await renderHomePage(context);
 });

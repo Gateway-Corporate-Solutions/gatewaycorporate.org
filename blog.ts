@@ -217,6 +217,8 @@ function renderPageShell(options: {
   ogType?: "website" | "article";
   publishedTime?: string;
   tags?: string[];
+  jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
 }): string {
   const ogType = options.ogType || "website";
   const publishedTime = options.publishedTime
@@ -224,6 +226,12 @@ function renderPageShell(options: {
     : "";
   const articleTags = options.tags?.length
     ? `\n    ${options.tags.map((tag) => `<meta property="article:tag" content="${escapeHtml(tag)}">`).join("\n    ")}`
+    : "";
+  const jsonLdScript = options.jsonLd
+    ? `\n    <script type="application/ld+json">${JSON.stringify(options.jsonLd)}</script>`
+    : "";
+  const robotsMeta = options.noindex
+    ? `\n    <meta name="robots" content="noindex, nofollow">`
     : "";
 
   return `<!DOCTYPE html>
@@ -246,7 +254,7 @@ function renderPageShell(options: {
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHtml(options.title)}">
     <meta name="twitter:description" content="${escapeHtml(options.description)}">
-    <meta name="twitter:image" content="${escapeHtml(options.imageUrl)}">${publishedTime}${articleTags}
+    <meta name="twitter:image" content="${escapeHtml(options.imageUrl)}">${publishedTime}${articleTags}${jsonLdScript}${robotsMeta}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -380,6 +388,18 @@ export function renderBlogIndexPage(posts: BlogPost[]): string {
     heroSubtitle: "Markdown-powered publishing for practical software, AI, and growth work.",
     canonicalUrl: absoluteUrl("/blog"),
     imageUrl: DEFAULT_SOCIAL_IMAGE,
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "name": "Gateway Corporate Journal",
+      "url": absoluteUrl("/blog"),
+      "description": "Strategy, software, and AI field notes from Gateway Corporate.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Gateway Corporate",
+        "url": SITE_URL,
+      },
+    },
     content: `
       <section class="section section-tight">
         <div class="section-header">
@@ -413,6 +433,30 @@ export function renderBlogPostPage(post: BlogPost, allPosts: BlogPost[]): string
     ogType: "article",
     publishedTime: new Date(post.date).toISOString(),
     tags: post.tags,
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": post.title,
+      "description": post.excerpt,
+      "datePublished": new Date(post.date).toISOString(),
+      "author": {
+        "@type": "Organization",
+        "name": post.author,
+        "url": SITE_URL,
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Gateway Corporate",
+        "url": SITE_URL,
+      },
+      "url": absoluteUrl(`/blog/${post.slug}`),
+      "image": post.imageUrl,
+      "keywords": post.tags.join(", "),
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": absoluteUrl(`/blog/${post.slug}`),
+      },
+    },
     content: `
       <section class="section section-tight article-shell">
         <article class="card card-primary article-card">
