@@ -10,7 +10,7 @@ interface FooterColumn {
 
 export type FooterVariant = "default" | "nashtwin" | "devicer" | "hyperlocal";
 
-const brandCopy = "Premiere technology services for the St. Louis area. Guiding you towards unprecedented success.";
+const brandCopy = "Premiere technology services for the St. Louis area and beyond. Guiding you towards unprecedented success.";
 
 const serviceColumn: FooterColumn = {
   heading: "Services",
