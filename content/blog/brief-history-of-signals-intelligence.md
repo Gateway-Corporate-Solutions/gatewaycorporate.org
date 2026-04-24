@@ -7,8 +7,9 @@ excerpt: Signals intelligence evolved from improvised radio interception into a 
 tags: [intelligence, sigint, cryptography, surveillance, history]
 ---
 
-*“Gentlemen do not read each other’s mail.”*
-- Henry L. Stimson *(U.S. Secretary of State, 1929, upon learning of the American Black Chamber and ordering its closure.)*
+> *“Gentlemen do not read each other’s mail.”*
+> 
+> \- Henry L. Stimson (U.S. Secretary of State, 1929, upon learning of the American Black Chamber and ordering its closure.)
 
 ---
 

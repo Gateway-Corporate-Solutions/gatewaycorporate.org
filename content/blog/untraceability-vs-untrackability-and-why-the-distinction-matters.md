@@ -7,9 +7,9 @@ excerpt: Untraceability, untrackability, privacy, and security are related ideas
 tags: [privacy, security, fingerprinting, anonymity, intelligence]
 ---
 
-*“This resemblance is the cause of the confusion and mistake, and makes us substitute the notion of identity, instead of that of related objects.”*
-
-\- David Hume (from *A Treatise of Human Nature*)
+> *“This resemblance is the cause of the confusion and mistake, and makes us substitute the notion of identity, instead of that of related objects.”*
+>
+> \- David Hume (from A Treatise of Human Nature)
 
 ---
 
