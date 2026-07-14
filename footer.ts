@@ -45,28 +45,28 @@ const variantColumns: Record<FooterVariant, FooterColumn> = {
   nashtwin: {
     heading: "NashTwin",
     links: [
-      { label: "Problem", href: "/nashtwin.html#problem" },
-      { label: "How It Works", href: "/nashtwin.html#twin" },
-      { label: "Features", href: "/nashtwin.html#features" },
-      { label: "Pricing", href: "/nashtwin.html#pricing" },
+      { label: "Problem", href: "/products/nashtwin#problem" },
+      { label: "How It Works", href: "/products/nashtwin#twin" },
+      { label: "Features", href: "/products/nashtwin#features" },
+      { label: "Pricing", href: "/products/nashtwin#pricing" },
     ],
   },
   devicer: {
     heading: "Devicer",
     links: [
-      { label: "Problem", href: "/devicer.html#problem" },
-      { label: "Suite", href: "/devicer.html#suite" },
-      { label: "Features", href: "/devicer.html#features" },
-      { label: "Pricing", href: "/devicer.html#pricing" },
+      { label: "Problem", href: "/products/devicer#problem" },
+      { label: "Suite", href: "/products/devicer#suite" },
+      { label: "Features", href: "/products/devicer#features" },
+      { label: "Pricing", href: "/products/devicer#pricing" },
     ],
   },
   hyperlocal: {
     heading: "HyperLocal",
     links: [
-      { label: "Problem", href: "/hyperlocal.html#problem" },
-      { label: "Solution", href: "/hyperlocal.html#solution" },
-      { label: "Features", href: "/hyperlocal.html#features" },
-      { label: "Pricing", href: "/hyperlocal.html#pricing" },
+      { label: "Problem", href: "/products/hyperlocal#problem" },
+      { label: "Solution", href: "/products/hyperlocal#solution" },
+      { label: "Features", href: "/products/hyperlocal#features" },
+      { label: "Pricing", href: "/products/hyperlocal#pricing" },
     ],
   },
 };
