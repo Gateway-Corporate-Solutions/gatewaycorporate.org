@@ -280,6 +280,7 @@
   position: relative;
   overflow: hidden;
   background: var(--primary);
+  isolation: isolate;
 }
 
 #network-graph {
@@ -290,6 +291,53 @@
   height: 100%;
   z-index: 0;
   pointer-events: none;
+}
+
+.hero > .hero-content,
+.hero > .section,
+.hero .section-header,
+.hero .hero-title,
+.hero .section-title,
+.hero .hero-subtitle,
+.hero .hero-text,
+.hero .text-lead,
+.hero .hero-buttons,
+.hero .jump-links {
+  position: relative;
+  z-index: 2;
+}
+
+.hero > .hero-content {
+  background: linear-gradient(
+    180deg,
+    rgba(2, 6, 23, 0.52) 0%,
+    rgba(2, 6, 23, 0.3) 60%,
+    rgba(2, 6, 23, 0.12) 100%
+  );
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.3);
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
+}
+
+.hero .section-header {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.hero .hero-title,
+.hero .section-title,
+.hero .hero-subtitle,
+.hero .hero-text,
+.hero .text-lead {
+  color: #f8fafc;
+  text-shadow: 0 2px 14px rgba(2, 6, 23, 0.92);
 }
 
 /* Enhanced hero background effects */

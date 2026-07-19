@@ -1,7 +1,8 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-if (urlParams.has('referral')) {
-  const referral = urlParams.get('referral');
+
+if (urlParams.has("referral")) {
+  const referral = urlParams.get("referral");
   if (referral) {
     const input = document.querySelector('input[name="referral"]');
     if (input) {
@@ -10,15 +11,12 @@ if (urlParams.has('referral')) {
   }
 }
 
-// Enhanced Navbar Functionality
 class NavbarController {
   constructor() {
     this.navbar = document.querySelector(".navbar");
     this.menuBtn = document.getElementById("menu-btn");
     this.dropdownMenu = document.getElementById("dropdown-menu");
-    this.scrollProgress = document.querySelector(
-      ".scroll-progress",
-    );
+    this.scrollProgress = document.querySelector(".scroll-progress");
     this.lastScrollY = window.scrollY;
     this.isMenuOpen = false;
     this._openTimeout = null;
@@ -34,39 +32,31 @@ class NavbarController {
 
   bindEvents() {
     if (this.menuBtn) {
-      // Menu toggle
-      this.menuBtn.addEventListener(
-        "click",
-        () => this.toggleMenu(),
-      );
+      this.menuBtn.addEventListener("click", () => this.toggleMenu());
     }
 
     if (this.dropdownMenu) {
-      // Close menu when clicking on links
       this.dropdownMenu.querySelectorAll("a").forEach((link) => {
         link.addEventListener("click", () => this.closeMenu());
       });
     }
 
-    // Close menu on escape key
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && this.isMenuOpen) {
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && this.isMenuOpen) {
         this.closeMenu();
       }
     });
 
-    // Scroll events
     window.addEventListener("scroll", () => {
       this.handleScroll();
       this.updateScrollProgress();
     }, { passive: true });
 
-    // Resize event
     window.addEventListener("resize", () => {
       if (window.innerWidth > 768 && this.isMenuOpen) {
         this.closeMenu();
       }
-    });
+    }, { passive: true });
   }
 
   toggleMenu() {
@@ -78,32 +68,30 @@ class NavbarController {
   }
 
   openMenu() {
+    if (!this.menuBtn || !this.dropdownMenu) return;
+
     clearTimeout(this._closeTimeout);
     this._closeTimeout = null;
 
     this.isMenuOpen = true;
     this.menuBtn.classList.add("open");
     this.dropdownMenu.style.display = "block";
-
-    // Trigger reflow for animation
     this.dropdownMenu.offsetHeight;
-
     this.dropdownMenu.classList.add("show");
     document.body.style.overflow = "hidden";
 
-    // Add entrance animation to menu items
     this._openTimeout = setTimeout(() => {
       this._openTimeout = null;
-      this.dropdownMenu.querySelectorAll("li").forEach(
-        (item, index) => {
-          item.style.animationDelay = `${index * 0.1}s`;
-          item.classList.add("animate-in");
-        },
-      );
+      this.dropdownMenu.querySelectorAll("li").forEach((item, index) => {
+        item.style.animationDelay = `${index * 0.1}s`;
+        item.classList.add("animate-in");
+      });
     }, 100);
   }
 
   closeMenu() {
+    if (!this.menuBtn || !this.dropdownMenu) return;
+
     clearTimeout(this._openTimeout);
     this._openTimeout = null;
 
@@ -123,19 +111,17 @@ class NavbarController {
   }
 
   handleScroll() {
+    if (!this.navbar) return;
+
     const currentScrollY = window.scrollY;
 
-    // Add scrolled class for styling
     if (currentScrollY > 100) {
       this.navbar.classList.add("scrolled");
     } else {
       this.navbar.classList.remove("scrolled");
     }
 
-    // Hide/show navbar on scroll
-    if (
-      currentScrollY > this.lastScrollY && currentScrollY > 100
-    ) {
+    if (currentScrollY > this.lastScrollY && currentScrollY > 100) {
       this.navbar.classList.add("hidden");
     } else {
       this.navbar.classList.remove("hidden");
@@ -145,127 +131,672 @@ class NavbarController {
   }
 
   updateScrollProgress() {
-    const winScroll = document.body.scrollTop ||
-      document.documentElement.scrollTop;
-    const height = document.documentElement.scrollHeight -
-      document.documentElement.clientHeight;
-    const scrolled = (winScroll / height) * 100;
-    this.scrollProgress.style.width = scrolled + "%";
+    if (!this.scrollProgress) return;
+
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+    this.scrollProgress.style.width = `${scrolled}%`;
   }
 }
 
-// Plexus Network Graph Animation
 class NetworkGraph {
   constructor(canvas) {
     this.canvas = canvas;
+    this.hero = canvas.parentElement;
     this.ctx = canvas.getContext("2d");
     this.nodes = [];
-    this.nodeCount = 50;
-    this.maxDist = 250;
+    this.meshModel = null;
+    this.meshTargets = [];
+    this.meshBlend = 0;
+    this.meshLoaded = false;
+    this.meshLoadAttempted = false;
+    this.meshLoading = false;
+    this.meshLoadRequestId = 0;
+    this.transitionActive = false;
     this.rafId = null;
     this.running = false;
-    this.reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    this.pointer = { x: 0, y: 0, active: false };
+    this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.lastWidth = 0;
+    this.lastHeight = 0;
+    this.resizeTimer = null;
+    this.time = 0;
+    this.minMeshViewportWidth = 721;
+    this.heroResizeObserver = null;
 
-    this.resize();
-    this.initNodes();
+    this.resize(true);
+    this.buildNodes();
+    this.bindEvents();
+    this.rebuildNodes();
 
     if (this.reducedMotion) {
       this.drawFrame();
     } else {
       const observer = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) this.start();
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) this.start();
           else this.stop();
         });
-      });
+      }, { threshold: 0.08 });
       observer.observe(canvas);
+      this.start();
+    }
+  }
+
+  bindEvents() {
+    window.addEventListener("pointermove", (event) => this.handlePointerMove(event), { passive: true });
+    window.addEventListener("pointerout", (event) => {
+      if (!event.relatedTarget) {
+        this.clearPointer();
+      }
+    }, { passive: true });
+    window.addEventListener("blur", () => this.clearPointer(), { passive: true });
+
+    window.addEventListener("resize", () => this.scheduleResizeUpdate(), { passive: true });
+
+    if (typeof ResizeObserver === "function" && this.hero) {
+      this.heroResizeObserver = new ResizeObserver(() => this.scheduleResizeUpdate());
+      this.heroResizeObserver.observe(this.hero);
+    }
+  }
+
+  scheduleResizeUpdate() {
+    clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => {
+      const wasRunning = this.running;
+      const changed = this.resize();
+      if (changed) {
+        this.rebuildNodes();
+      }
+      if (this.reducedMotion || wasRunning) {
+        this.drawFrame();
+      }
+      if (wasRunning && !this.reducedMotion) {
+        this.start();
+      }
+    }, 120);
+  }
+
+  resize(force = false) {
+    const hero = this.hero;
+    if (!hero) return false;
+
+    const width = Math.max(1, hero.offsetWidth);
+    const height = Math.max(1, hero.offsetHeight);
+
+    if (!force && width === this.lastWidth && height === this.lastHeight) {
+      return false;
     }
 
-    this.lastWidth = this.canvas.width;
+    this.lastWidth = width;
+    this.lastHeight = height;
 
-    let resizeTimer;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        const newWidth = this.canvas.parentElement.offsetWidth;
-        // Ignore height-only changes (mobile browser chrome show/hide on scroll)
-        if (newWidth === this.lastWidth) return;
-        const wasRunning = this.running;
-        this.stop();
-        const scaleX = newWidth / (this.canvas.width || 1);
-        const newHeight = this.canvas.parentElement.offsetHeight;
-        const scaleY = newHeight / (this.canvas.height || 1);
-        this.canvas.width = newWidth;
-        this.canvas.height = newHeight;
-        this.lastWidth = newWidth;
-        // Scale existing node positions instead of reinitialising
-        for (const node of this.nodes) {
-          node.x *= scaleX;
-          node.y *= scaleY;
-        }
-        if (this.reducedMotion) {
-          this.drawFrame();
-        } else if (wasRunning) {
-          this.start();
-        }
-      }, 150);
+    this.canvas.width = Math.round(width * this.dpr);
+    this.canvas.height = Math.round(height * this.dpr);
+    this.canvas.style.width = `${width}px`;
+    this.canvas.style.height = `${height}px`;
+
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    return true;
+  }
+
+  clearPointer() {
+    this.pointer.active = false;
+  }
+
+  handlePointerMove(event) {
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    this.pointer.x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+    this.pointer.y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+    this.pointer.active = true;
+
+    if (this.reducedMotion) {
+      this.drawFrame();
+    }
+  }
+
+  lerp(start, end, amount) {
+    return start + (end - start) * amount;
+  }
+
+  clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  shouldUseMeshModel() {
+    return this.lastWidth >= this.minMeshViewportWidth;
+  }
+
+  disableMeshModel() {
+    this.meshLoaded = false;
+    this.transitionActive = false;
+    this.meshBlend = 0;
+    this.meshTargets = [];
+    this.meshLoadRequestId += 1;
+  }
+
+  async loadMeshModel() {
+    if (!this.shouldUseMeshModel() || this.meshLoadAttempted || this.meshLoading) return;
+
+    this.meshLoadAttempted = true;
+    this.meshLoading = true;
+    const requestId = ++this.meshLoadRequestId;
+    this.meshLoaded = false;
+    this.transitionActive = false;
+    this.meshBlend = 0;
+
+    try {
+      const response = await fetch("/mesh.obj");
+      if (!response.ok) return;
+
+      const loadedModel = this.parseMeshModel(await response.text());
+      if (requestId !== this.meshLoadRequestId) return;
+
+      this.meshModel = loadedModel;
+      if (!this.shouldUseMeshModel()) return;
+
+      this.buildMeshTargets();
+      this.meshLoaded = this.meshTargets.length > 0;
+
+      if (this.reducedMotion || this.running) {
+        this.drawFrame();
+      }
+    } catch (error) {
+      console.error("Failed to load head mesh:", error);
+    } finally {
+      if (requestId === this.meshLoadRequestId) {
+        this.meshLoading = false;
+      }
+    }
+  }
+
+  parseMeshModel(text) {
+    const rawVertices = [];
+    const lines = text.split(/\r?\n/);
+    let minX = Infinity;
+    let minY = Infinity;
+    let minZ = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    let maxZ = -Infinity;
+
+    for (const line of lines) {
+      if (!line.startsWith("v ")) continue;
+
+      const parts = line.trim().split(/\s+/);
+      if (parts.length < 4) continue;
+
+      const x = Number(parts[1]);
+      const y = Number(parts[2]);
+      const z = Number(parts[3]);
+
+      if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) continue;
+
+      rawVertices.push({ x, y, z });
+
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (z < minZ) minZ = z;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+      if (z > maxZ) maxZ = z;
+    }
+
+    const sampleStep = rawVertices.length > 5000 ? Math.ceil(rawVertices.length / 5000) : 1;
+    const sampledVertices = rawVertices.filter((_, index) => index % sampleStep === 0);
+    const rangeX = Math.max(maxX - minX, 0.0001);
+    const rangeY = Math.max(maxY - minY, 0.0001);
+    const rangeZ = Math.max(maxZ - minZ, 0.0001);
+
+    const points = sampledVertices.map((vertex) => ({
+      x: (vertex.x - minX) / rangeX,
+      y: (vertex.y - minY) / rangeY,
+      z: (vertex.z - minZ) / rangeZ,
+    }));
+
+    const subsets = {
+      surface: points.filter((point) => point.z > 0.35),
+      contour: points.filter((point) => point.z > 0.22 && (point.x < 0.2 || point.x > 0.8 || point.y > 0.82 || point.y < 0.16)),
+      eyeLeft: points.filter((point) => point.z > 0.45 && point.x > 0.25 && point.x < 0.47 && point.y > 0.60 && point.y < 0.78),
+      eyeRight: points.filter((point) => point.z > 0.45 && point.x > 0.53 && point.x < 0.75 && point.y > 0.60 && point.y < 0.78),
+      brow: points.filter((point) => point.z > 0.35 && point.y > 0.68 && point.y < 0.84),
+      nose: points.filter((point) => point.z > 0.48 && point.x > 0.40 && point.x < 0.60 && point.y > 0.42 && point.y < 0.66),
+      mouth: points.filter((point) => point.z > 0.35 && point.x > 0.36 && point.x < 0.64 && point.y > 0.28 && point.y < 0.50),
+      jaw: points.filter((point) => point.y < 0.36 && point.z > 0.15),
+      ear: points.filter((point) => point.z > 0.18 && (point.x < 0.18 || point.x > 0.82) && point.y > 0.40 && point.y < 0.76),
+      neck: points.filter((point) => point.y < 0.28),
+      aura: points,
+    };
+
+    return { points, subsets, bounds: { minX, minY, minZ, maxX, maxY, maxZ } };
+  }
+
+  selectPoints(points, count, mode = "balanced") {
+    if (!points.length || count <= 0) return [];
+
+    const sorted = [...points].sort((left, right) => {
+      if (mode === "ring") {
+        const leftAngle = Math.atan2(left.y - 0.5, left.x - 0.5);
+        const rightAngle = Math.atan2(right.y - 0.5, right.x - 0.5);
+        return leftAngle - rightAngle;
+      }
+
+      if (mode === "depth") return right.z - left.z || left.y - right.y || left.x - right.x;
+      if (mode === "reverse") return right.y - left.y || left.x - right.x || left.z - right.z;
+      return left.y - right.y || left.x - right.x || left.z - right.z;
     });
+
+    const selected = [];
+    const total = Math.min(count, sorted.length);
+
+    for (let index = 0; index < total; index++) {
+      const sampleIndex = Math.floor(index * sorted.length / total);
+      selected.push(sorted[Math.min(sampleIndex, sorted.length - 1)]);
+    }
+
+    return selected;
   }
 
-  resize() {
-    const hero = this.canvas.parentElement;
-    this.canvas.width = hero.offsetWidth;
-    this.canvas.height = hero.offsetHeight;
+  createFaceLayout() {
+    const width = this.lastWidth;
+    const height = this.lastHeight;
+    const centerX = width * 0.2;
+    const centerY = height * 0.62;
+    const sizeMultiplier = 1.75;
+    const skullH = height * 0.43 * sizeMultiplier;
+    const skullW = Math.min(height * 0.33 * sizeMultiplier, width * 0.42 * sizeMultiplier);
+
+    return { centerX, centerY, skullW, skullH };
   }
 
-  initNodes() {
-    this.nodes = Array.from({ length: this.nodeCount }, () => ({
-      x: Math.random() * this.canvas.width,
-      y: Math.random() * this.canvas.height,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6,
+  projectMeshPoint(point, layout, kind, followWeight = 1) {
+    const localX = (point.x - 0.5) * layout.skullW * 0.96;
+    const localY = (0.5 - point.y) * layout.skullH * 0.96;
+    const localZ = (point.z - 0.5) * layout.skullW * 0.34;
+
+    return {
+      kind,
+      x: layout.centerX + localX,
+      y: layout.centerY + localY,
+      localX,
+      localY,
+      localZ,
+      z: point.z,
+      followWeight,
+      light: this.clamp(0.55 + point.z * 0.45, 0.2, 1),
+      depth: point.z,
+      size: 1,
+    };
+  }
+
+  buildNodes() {
+    const nodeCount = 384;
+    const width = Math.max(1, this.lastWidth);
+    const height = Math.max(1, this.lastHeight);
+
+    this.meshBlend = 0;
+    this.transitionActive = false;
+    this.meshTargets = [];
+    this.nodes = Array.from({ length: nodeCount }, () => ({
+      kind: "plexus",
+      x: Math.random() * width,
+      y: Math.random() * height,
+      startX: 0,
+      startY: 0,
+      targetX: 0,
+      targetY: 0,
+      targetZ: 0,
+      followWeight: 1,
+      vx: (Math.random() - 0.5) * 0.9,
+      vy: (Math.random() - 0.5) * 0.9,
+      size: 1 + Math.random() * 0.9,
+      twinkle: Math.random() * Math.PI * 2,
+      depth: Math.random(),
+      light: 1,
+      phase: Math.random() * Math.PI * 2,
     }));
   }
 
-  drawFrame() {
-    const { ctx, canvas, nodes, maxDist } = this;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  rebuildNodes() {
+    if (!this.shouldUseMeshModel()) {
+      this.disableMeshModel();
+      this.buildNodes();
+      return;
+    }
 
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const dx = nodes[i].x - nodes[j].x;
-        const dy = nodes[i].y - nodes[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < maxDist) {
-          ctx.beginPath();
-          ctx.moveTo(nodes[i].x, nodes[i].y);
-          ctx.lineTo(nodes[j].x, nodes[j].y);
-          ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / maxDist) * 0.35})`;
-          ctx.lineWidth = 0.7;
-          ctx.stroke();
+    if (!this.meshModel) {
+      this.buildNodes();
+      this.loadMeshModel();
+      return;
+    }
+
+    this.meshLoaded = false;
+    this.transitionActive = false;
+    this.meshBlend = 0;
+
+    this.buildMeshTargets();
+    this.meshLoaded = true;
+  }
+
+  buildMeshTargets() {
+    if (!this.meshModel || !this.nodes.length) return;
+
+    const layout = this.createFaceLayout();
+    const mesh = this.meshModel;
+
+    const meshPoints = mesh.points;
+    const targets = this.selectMeshPoints(meshPoints, this.nodes.length)
+      .map((point) => this.projectMeshPoint(point, layout, "mesh", 1));
+
+    const limitedTargets = targets.slice(0, this.nodes.length);
+    if (!limitedTargets.length) {
+      this.meshTargets = [];
+      this.transitionActive = false;
+      this.meshBlend = 0;
+      return;
+    }
+
+    // Preserve local continuity during morph by matching each live node
+    // to its nearest remaining mesh target instead of index pairing.
+    const available = limitedTargets.map((target, index) => ({ target, index }));
+    const assignedTargets = this.nodes.map((node) => {
+      let bestSlot = 0;
+      let bestDistance = Number.POSITIVE_INFINITY;
+
+      for (let slot = 0; slot < available.length; slot++) {
+        const candidate = available[slot].target;
+        const distance = Math.hypot(node.x - candidate.x, node.y - candidate.y);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestSlot = slot;
         }
+      }
+
+      const [{ target }] = available.splice(bestSlot, 1);
+      return target;
+    });
+
+    this.nodes = this.nodes.map((node, index) => {
+      const target = assignedTargets[index] || assignedTargets[assignedTargets.length - 1];
+      return {
+        ...node,
+        startX: node.x,
+        startY: node.y,
+        targetX: target.x,
+        targetY: target.y,
+        targetZ: target.z,
+        followWeight: target.followWeight,
+        kind: target.kind,
+        x: node.x,
+        y: node.y,
+      };
+    });
+
+    this.meshTargets = assignedTargets;
+    this.meshBlend = 0;
+    this.transitionActive = true;
+  }
+
+  selectMeshPoints(points, count) {
+    if (!points.length || count <= 0) return [];
+
+    const selected = [];
+    const used = new Set();
+    const distances = new Array(points.length).fill(Number.POSITIVE_INFINITY);
+
+    let seedIndex = 0;
+    let seedScore = Number.NEGATIVE_INFINITY;
+
+    for (let index = 0; index < points.length; index++) {
+      const point = points[index];
+      const score = point.z * 2.25 - Math.abs(point.x - 0.5) * 0.85 - Math.abs(point.y - 0.47) * 0.65;
+      if (score > seedScore) {
+        seedScore = score;
+        seedIndex = index;
       }
     }
 
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
-    for (const node of nodes) {
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, 2.5, 0, Math.PI * 2);
-      ctx.fill();
+    const addPoint = (index) => {
+      if (used.has(index)) return;
+      used.add(index);
+      selected.push(points[index]);
+
+      const anchor = points[index];
+      for (let pointIndex = 0; pointIndex < points.length; pointIndex++) {
+        const candidate = points[pointIndex];
+        const distance = Math.hypot(
+          candidate.x - anchor.x,
+          candidate.y - anchor.y,
+          (candidate.z - anchor.z) * 0.85,
+        );
+
+        if (distance < distances[pointIndex]) {
+          distances[pointIndex] = distance;
+        }
+      }
+    };
+
+    addPoint(seedIndex);
+
+    while (selected.length < count && used.size < points.length) {
+      let farthestIndex = -1;
+      let farthestDistance = Number.NEGATIVE_INFINITY;
+
+      for (let index = 0; index < points.length; index++) {
+        if (used.has(index)) continue;
+
+        const distance = distances[index];
+        if (distance > farthestDistance) {
+          farthestDistance = distance;
+          farthestIndex = index;
+        }
+      }
+
+      if (farthestIndex === -1) break;
+      addPoint(farthestIndex);
     }
+
+    return selected.sort((left, right) =>
+      left.y - right.y || left.x - right.x || right.z - left.z
+    ).slice(0, count);
+  }
+
+  getPose() {
+    const idleX = Math.sin(this.time * 0.0014) * 0.22;
+    const idleY = Math.cos(this.time * 0.0011) * 0.12;
+
+    if (!this.pointer.active) {
+      return { x: idleX, y: idleY, lookX: idleX, lookY: idleY };
+    }
+
+    const lookX = this.clamp((this.pointer.x - this.lastWidth * 0.5) / (this.lastWidth * 0.5), -1, 1);
+    const lookY = this.clamp((this.pointer.y - this.lastHeight * 0.45) / (this.lastHeight * 0.45), -1, 1);
+
+    return {
+      x: this.lerp(idleX, lookX, 0.85),
+      y: this.lerp(idleY, lookY, 0.85),
+      lookX,
+      lookY,
+    };
   }
 
   update() {
-    const { canvas, nodes } = this;
+    this.time += 16;
+
+    if (!this.meshLoaded || !this.meshTargets.length) {
+      const width = this.lastWidth;
+      const height = this.lastHeight;
+      const minSpeed = 0.12;
+      const restartSpeed = 0.26;
+
+      for (const node of this.nodes) {
+        node.x += node.vx;
+        node.y += node.vy;
+
+        if (node.x < 0 || node.x > width) {
+          node.vx *= -1;
+          node.x = this.clamp(node.x, 0, width);
+        }
+
+        if (node.y < 0 || node.y > height) {
+          node.vy *= -1;
+          node.y = this.clamp(node.y, 0, height);
+        }
+
+        node.vx *= 0.985;
+        node.vy *= 0.985;
+
+        const speed = Math.hypot(node.vx, node.vy);
+        if (speed < minSpeed) {
+          const angle = Math.random() * Math.PI * 2;
+          node.vx = Math.cos(angle) * restartSpeed;
+          node.vy = Math.sin(angle) * restartSpeed;
+        }
+      }
+
+      return;
+    }
+
+    if (this.transitionActive && this.meshBlend < 1) {
+      this.meshBlend = Math.min(1, this.meshBlend + 0.018);
+      if (this.meshBlend === 1) {
+        this.transitionActive = false;
+      }
+    }
+
+    const pose = this.getPose();
+    const offsetX = pose.x * this.lastWidth * 0.045;
+    const offsetY = pose.y * this.lastHeight * 0.038;
+    const yaw = pose.lookX * 0.42;
+    const pitch = -pose.lookY * 0.28;
+    const cosYaw = Math.cos(yaw);
+    const sinYaw = Math.sin(yaw);
+    const cosPitch = Math.cos(pitch);
+    const sinPitch = Math.sin(pitch);
+
+    this.nodes.forEach((node, index) => {
+      const target = this.meshTargets[index] || this.meshTargets[this.meshTargets.length - 1];
+      const localX = target.localX || 0;
+      const localY = target.localY || 0;
+      const localZ = target.localZ || 0;
+
+      const yawedX = localX * cosYaw + localZ * sinYaw;
+      const yawedZ = localZ * cosYaw - localX * sinYaw;
+      const pitchedY = localY * cosPitch - yawedZ * sinPitch;
+      const pitchedZ = yawedZ * cosPitch + localY * sinPitch;
+      const perspective = 1 + pitchedZ * 0.0016;
+      const rotatedX = yawedX * perspective;
+      const rotatedY = pitchedY * perspective;
+      const rotateOffsetX = rotatedX - localX;
+      const rotateOffsetY = rotatedY - localY;
+
+      if (this.meshBlend < 1) {
+        const baseX = this.lerp(node.startX, target.x, this.meshBlend);
+        const baseY = this.lerp(node.startY, target.y, this.meshBlend);
+        node.x = baseX;
+        node.y = baseY;
+      } else {
+        node.x = target.x + offsetX * target.followWeight + rotateOffsetX;
+        node.y = target.y + offsetY * target.followWeight + rotateOffsetY;
+      }
+
+      node.z = target.z;
+      node.kind = target.kind;
+      node.depth = this.clamp(0.45 + target.z * 0.55, 0.3, 1);
+      node.light = target.z;
+      node.scale = 1;
+    });
+  }
+
+  getNodeStyle(node) {
+    const palettes = {
+      outline: [173, 216, 255],
+      skull: [147, 205, 255],
+      "eye-left": [245, 250, 255],
+      "eye-right": [245, 250, 255],
+      brow: [160, 214, 255],
+      nose: [150, 208, 255],
+      mouth: [120, 188, 255],
+      jaw: [118, 176, 240],
+      ear: [126, 190, 250],
+      neck: [100, 162, 228],
+      mesh: [205, 233, 255],
+      plexus: [176, 224, 255],
+    };
+
+    return palettes[node.kind] || palettes.plexus;
+  }
+
+  drawFrame() {
+    const { ctx, nodes } = this;
+    const width = this.lastWidth;
+    const height = this.lastHeight;
+
+    ctx.clearRect(0, 0, width, height);
+
+    if (!nodes.length) return;
+
+    const blend = this.meshLoaded ? this.meshBlend : 0;
+    const pose = this.meshLoaded ? this.getPose() : { x: 0, y: 0 };
+    const glow = ctx.createRadialGradient(
+      width * 0.5 + pose.x * 30,
+      height * 0.5 - 10,
+      16,
+      width * 0.5 + pose.x * 24,
+      height * 0.5 - 12,
+      Math.max(width, height) * 0.45,
+    );
+    const glowAlpha = this.lerp(0.10, 0.16, blend);
+    glow.addColorStop(0, `rgba(96, 165, 250, ${glowAlpha})`);
+    glow.addColorStop(1, "rgba(15, 23, 42, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, width, height);
+
+    const maxDist = this.lerp(165, 138, blend);
+    const lineOpacity = this.lerp(0.18, 0.34, blend);
+
+    for (let i = 0; i < nodes.length; i++) {
+      const left = nodes[i];
+      for (let j = i + 1; j < nodes.length; j++) {
+        const right = nodes[j];
+        const dx = left.x - right.x;
+        const dy = left.y - right.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist >= maxDist) continue;
+
+        const alpha = this.clamp((1 - dist / maxDist) * lineOpacity, 0, lineOpacity);
+        ctx.beginPath();
+        ctx.moveTo(left.x, left.y);
+        ctx.lineTo(right.x, right.y);
+        ctx.strokeStyle = `rgba(185, 221, 255, ${alpha})`;
+        ctx.lineWidth = this.lerp(0.65, 0.8, blend);
+        ctx.stroke();
+      }
+    }
+
     for (const node of nodes) {
-      node.x += node.vx;
-      node.y += node.vy;
-      if (node.x < 0) node.x += canvas.width;
-      else if (node.x > canvas.width) node.x -= canvas.width;
-      if (node.y < 0) node.y += canvas.height;
-      else if (node.y > canvas.height) node.y -= canvas.height;
+      const [r, g, b] = this.getNodeStyle(node);
+      const plexusRadius = node.kind === "eye-left" || node.kind === "eye-right"
+        ? 3.0
+        : node.kind === "nose"
+          ? 2.4
+          : node.kind === "mouth"
+            ? 2.1
+            : 2.0;
+      const meshRadius = 1.2 + node.depth * 1.0;
+      const radius = this.lerp(plexusRadius, meshRadius, blend);
+      const meshAlpha = this.clamp(0.28 + node.depth * 0.75, 0.18, 0.92);
+      const alpha = this.lerp(0.78, meshAlpha, blend);
+
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 
@@ -414,8 +945,7 @@ class EqualHeightCardRows {
   }
 }
 
-// Initialize navbar when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
+function initializePage() {
   new NavbarController();
   document.querySelectorAll("canvas#network-graph").forEach((canvas) => {
     new NetworkGraph(canvas);
@@ -427,4 +957,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   new EqualHeightCardRows();
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializePage, { once: true });
+} else {
+  initializePage();
+}

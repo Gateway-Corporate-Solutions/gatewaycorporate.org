@@ -876,11 +876,8 @@ body {
 .hero-title {
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   margin-bottom: var(--spacing-md);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
+  text-shadow: 0 6px 18px rgba(2, 6, 23, 0.45);
   letter-spacing: -0.02em;
   text-align: center;
   margin-left: auto;

@@ -367,6 +367,16 @@ router.get("/papers/:paper.pdf", (context) => {
         context.response.body = "Paper not provided";
     }
 })
+router.get("/mesh.obj", (context) => {
+    try {
+        context.response.body = Deno.readFileSync("./static/mesh.obj");
+        context.response.headers.set("Content-Type", "text/plain; charset=utf-8");
+    } catch (error) {
+        console.error(`Error reading mesh file: ${error}`);
+        context.response.status = 404;
+        context.response.body = "Mesh not found";
+    }
+});
 router.post('/contact', async (context) => {
   try {
     const form = await context.request.body.form();
