@@ -1,5 +1,31 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
+const scriptLoadPromises = new Map();
+
+function loadExternalScript(src) {
+  if (scriptLoadPromises.has(src)) {
+    return scriptLoadPromises.get(src);
+  }
+
+  if (document.querySelector(`script[src="${src}"]`)) {
+    if ((src.includes("recaptcha") && window.grecaptcha) || (src.includes("devicer") && window.Devicer)) {
+      return Promise.resolve();
+    }
+  }
+
+  const promise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(script);
+  });
+
+  scriptLoadPromises.set(src, promise);
+  return promise;
+}
 
 if (urlParams.has("referral")) {
   const referral = urlParams.get("referral");
@@ -168,9 +194,16 @@ class NetworkGraph {
     this.currentPose = { x: 0, y: 0, lookX: 0, lookY: 0 };
     this.minMeshViewportWidth = 721;
     this.heroResizeObserver = null;
+    this.isStatic = this.reducedMotion || window.innerWidth < 960 || Boolean(navigator.connection?.saveData);
 
     this.resize(true);
     this.buildNodes();
+
+    if (this.isStatic) {
+      this.drawFrame();
+      return;
+    }
+
     this.bindEvents();
     this.rebuildNodes();
 
@@ -437,7 +470,7 @@ class NetworkGraph {
   }
 
   buildNodes() {
-    const nodeCount = 384;
+    const nodeCount = this.isStatic ? 120 : 220;
     const width = Math.max(1, this.lastWidth);
     const height = Math.max(1, this.lastHeight);
 
@@ -870,6 +903,8 @@ class ContactFormController {
     const email = formData.get("email")?.toString().trim() || "";
 
     try {
+      await loadExternalScript("https://nash.gatewaycorporate.org/api/devicer/snippet?key=c0d96747-b2c5-4fc3-bcd6-215bad9dedae");
+
       if (window.Devicer?.submitContact && name && email) {
         await window.Devicer.submitContact({
           name,
@@ -884,82 +919,27 @@ class ContactFormController {
   }
 }
 
-class EqualHeightCardRows {
-  constructor() {
-    this.rafId = null;
-    this.resizeObserver = new ResizeObserver(() => this.schedule());
-
-    this.observeContainers();
-    window.addEventListener("resize", () => this.schedule(), { passive: true });
-    window.addEventListener("load", () => this.schedule(), { passive: true });
-
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(() => this.schedule());
-    }
-
-    this.schedule();
+function setupDeferredContactAssets() {
+  const contactSection = document.getElementById("contact");
+  if (!contactSection) {
+    return;
   }
 
-  getContainers() {
-    return Array.from(document.querySelectorAll(".grid, .problem-grid, .pricing-grid"))
-      .filter((container) => this.getCards(container).length > 1);
-  }
+  const loadRecaptcha = () => loadExternalScript("https://www.google.com/recaptcha/api.js");
 
-  getCards(container) {
-    return Array.from(container.children).filter((child) =>
-      child instanceof HTMLElement && child.matches(".card, article.card")
-    );
-  }
-
-  observeContainers() {
-    this.getContainers().forEach((container) => this.resizeObserver.observe(container));
-  }
-
-  schedule() {
-    if (this.rafId !== null) {
-      cancelAnimationFrame(this.rafId);
-    }
-
-    this.rafId = requestAnimationFrame(() => {
-      this.rafId = null;
-      this.syncAll();
-    });
-  }
-
-  syncAll() {
-    this.getContainers().forEach((container) => this.syncContainer(container));
-  }
-
-  syncContainer(container) {
-    const cards = this.getCards(container);
-    if (cards.length < 2) {
-      return;
-    }
-
-    cards.forEach((card) => {
-      card.style.minHeight = "";
-    });
-
-    const rows = new Map();
-
-    cards.forEach((card) => {
-      const top = Math.round(card.getBoundingClientRect().top);
-      const rowTop = Array.from(rows.keys()).find((value) => Math.abs(value - top) <= 2) ?? top;
-
-      if (!rows.has(rowTop)) {
-        rows.set(rowTop, []);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        loadRecaptcha();
+        observer.disconnect();
       }
+    }, { rootMargin: "250px 0px" });
 
-      rows.get(rowTop).push(card);
-    });
-
-    rows.forEach((rowCards) => {
-      const maxHeight = Math.max(...rowCards.map((card) => card.offsetHeight));
-      rowCards.forEach((card) => {
-        card.style.minHeight = `${maxHeight}px`;
-      });
-    });
+    observer.observe(contactSection);
   }
+
+  contactSection.addEventListener("focusin", loadRecaptcha, { once: true });
+  contactSection.addEventListener("pointerenter", loadRecaptcha, { once: true });
 }
 
 function initializePage() {
@@ -973,7 +953,7 @@ function initializePage() {
     new ContactFormController(contactForm);
   }
 
-  new EqualHeightCardRows();
+  setupDeferredContactAssets();
 }
 
 if (document.readyState === "loading") {
