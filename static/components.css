@@ -908,8 +908,9 @@ body {
 
 /* Hero stats grid for consistent alignment */
 .hero .hero-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: clamp(1rem, 3vw, var(--spacing-lg));
   margin: var(--spacing-xl) auto;
   max-width: 800px;
@@ -918,6 +919,7 @@ body {
 
 /* Stat items within hero */
 .hero .stat-item {
+  flex: 0 1 16rem;
   text-align: center;
   min-width: 0;
   padding: clamp(1rem, 2vw, var(--spacing-md));
@@ -1360,7 +1362,13 @@ body {
   }
 
   .hero .hero-stats {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .hero .stat-item {
+    flex-basis: min(100%, 14rem);
   }
 
   .section {

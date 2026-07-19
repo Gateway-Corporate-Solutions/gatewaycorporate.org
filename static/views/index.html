@@ -103,12 +103,14 @@
 
       .hero-stats {
         margin-top: 2.2rem;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 0.9rem;
       }
 
       .stat-panel {
+        flex: 0 1 18rem;
         border: 1px solid rgba(125, 211, 252, 0.45);
         border-radius: 16px;
         padding: 1.1rem;
@@ -323,6 +325,16 @@
         .hero-stats,
         .service-track-grid {
           grid-template-columns: 1fr;
+        }
+
+        .hero-stats {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .hero-stats .stat-panel {
+          flex-basis: min(100%, 22rem);
         }
       }
     </style>
