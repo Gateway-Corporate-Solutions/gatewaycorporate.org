@@ -409,8 +409,101 @@
       text-align: center;
     }
 
+    .fit-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.15rem;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.58) 0%, rgba(30, 41, 59, 0.38) 100%);
+    }
+
+    .fit-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    .fit-card {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 14px;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .fit-card h3 {
+      margin-bottom: 0.55rem;
+    }
+
+    .fit-list {
+      margin: 0;
+      padding-left: 1rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .fit-proof {
+      margin-top: 0.95rem;
+      padding: 0.9rem;
+      border: 1px solid rgba(125, 211, 252, 0.32);
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.4);
+      font-weight: 600;
+      color: #dbeafe;
+      text-align: center;
+    }
+
+    .fit-actions {
+      margin-top: 1.05rem;
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .intent-nav {
+      max-width: 1100px;
+      margin: 1.2rem auto 0;
+      padding: 1rem;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.42);
+    }
+
+    .intent-nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+    }
+
+    .intent-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.45rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #dbeafe;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .intent-chip:hover {
+      border-color: rgba(96, 165, 250, 0.55);
+      background: rgba(59, 130, 246, 0.18);
+    }
+
+    .intent-nav .btn {
+      margin-top: 0.85rem;
+    }
+
     @media (max-width: 768px) {
       .hero-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .fit-grid {
         grid-template-columns: 1fr;
       }
 
@@ -496,9 +589,54 @@
         <a href="/papers/HyperLocal-2.pdf" class="btn btn-primary btn-lg" target="_blank" rel="noopener">
           Read Whitepaper
         </a>
-        <a href="/products/nashtwin" class="btn btn-accent btn-lg">
-					Bundle With NashTwin Pro
+        <a href="https://nash.gatewaycorporate.org/" class="btn btn-accent btn-lg">
+					Buy Now With NashTwin
 				</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0.5rem;">
+    <div class="intent-nav-links">
+      <a href="#problem" class="intent-chip">Failure Modes</a>
+      <a href="#runtime" class="intent-chip">Runtime Flow</a>
+      <a href="#features" class="intent-chip">Control Surfaces</a>
+      <a href="#whitepaper" class="intent-chip">Technical Paper</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Deployment Fit: Should HyperLocal 2 Be First?</h2>
+      <p class="text-lead">
+        If inbound messaging is revenue-critical and currently unmanaged, HyperLocal 2 gives
+        your team a governed route from conversation to CRM action.
+      </p>
+    </div>
+
+    <div class="fit-shell">
+      <div class="fit-grid">
+        <article class="fit-card">
+          <h3 class="heading-4">Strong Fit Right Now</h3>
+          <ul class="fit-list">
+            <li>Inbound SMS is high-volume and operationally inconsistent across teams.</li>
+            <li>You need tenant-aware routing plus explicit action permissions before scale.</li>
+            <li>CRM follow-through quality is inconsistent after first contact.</li>
+          </ul>
+        </article>
+        <article class="fit-card">
+          <h3 class="heading-4">Pair with NashTwin Early If</h3>
+          <ul class="fit-list">
+            <li>Messaging outcomes must immediately feed planning, staffing, or deal strategy.</li>
+            <li>You want one control surface for CRM execution and governance policy.</li>
+            <li>Leadership wants measurable workflow quality lift, not just faster replies.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="fit-proof">Teams with governed route ownership typically realize faster response consistency and fewer escalations.</div>
+      <div class="fit-actions">
+        <a href="https://nash.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer" class="btn btn-accent btn-lg">Buy Now With NashTwin</a>
+        <a href="/papers/HyperLocal-2.pdf" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Review Architecture</a>
       </div>
     </div>
   </section>
@@ -741,16 +879,6 @@
             <td class="check-other">✗</td>
           </tr>
           <tr>
-            <td>Active CRM context in messaging flow</td>
-            <td class="check-hl">✓</td>
-            <td class="check-hl">✓</td>
-          </tr>
-          <tr>
-            <td>Full operational transcripts and audit</td>
-            <td class="check-hl">✓</td>
-            <td class="check-hl">✓</td>
-          </tr>
-          <tr>
             <td>Dedicated operator control plane</td>
             <td class="check-hl">✓</td>
             <td class="check-other">✗</td>
@@ -764,6 +892,16 @@
             <td>Bundled deployment from $25/mo</td>
             <td class="check-hl">✓</td>
             <td class="check-other">✗</td>
+          </tr>
+          <tr>
+            <td>Active CRM context in messaging flow</td>
+            <td class="check-hl">✓</td>
+            <td class="check-hl">✓</td>
+          </tr>
+          <tr>
+            <td>Full operational transcripts and audit</td>
+            <td class="check-hl">✓</td>
+            <td class="check-hl">✓</td>
           </tr>
         </tbody>
       </table>
@@ -883,14 +1021,15 @@
     </div>
 
     <div class="cta-block">
-      <h3 class="heading-3" style="margin-bottom: 1rem;">Read the whitepaper, then review the operating model with us.</h3>
+      <h3 class="heading-3" style="margin-bottom: 1rem;">Run a technical review, then deploy with confidence.</h3>
       <p class="text-base" style="max-width: 700px; margin: 0 auto 2rem;">
         If the architecture aligns with how your team needs to manage messaging, permissions, and CRM-linked workflows,
         Gateway can walk you through the product surface and deployment model.
       </p>
       <div class="btn-group" style="justify-content: center;">
         <a href="/papers/HyperLocal-2.pdf" class="btn btn-primary btn-lg" target="_blank" rel="noopener">Download Whitepaper</a>
-        <a href="/#contact" class="btn btn-secondary btn-lg">Request Walkthrough</a>
+        <a href="/#contact" class="btn btn-secondary btn-lg">Book Workflow Review</a>
+        <a href="https://nash.gatewaycorporate.org/" class="btn btn-accent btn-lg">Buy Now With NashTwin</a>
       </div>
     </div>
   </section>

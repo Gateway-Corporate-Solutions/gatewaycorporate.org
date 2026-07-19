@@ -68,6 +68,47 @@
         gap: 0.75rem;
       }
 
+      .hero-actions {
+        margin-top: 1.35rem;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .flow-cue {
+        margin-top: 1rem;
+        color: #dbeafe;
+        font-weight: 600;
+      }
+
+      .evaluation-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+      }
+
+      .evaluation-card {
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 16px;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .evaluation-card h3 {
+        margin-bottom: 0.45rem;
+      }
+
+      .intent-bar {
+        margin-top: 1rem;
+        padding: 0.85rem 1rem;
+        text-align: center;
+        border: 1px solid rgba(125, 211, 252, 0.3);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.3);
+        color: #dbeafe;
+      }
+
       .product-section {
         scroll-margin-top: 100px;
       }
@@ -154,7 +195,8 @@
       }
 
       @media (max-width: 820px) {
-        .capability-grid {
+        .capability-grid,
+        .evaluation-grid {
           grid-template-columns: 1fr;
         }
       }
@@ -218,8 +260,38 @@
             <a href="#hyperlocal" class="btn btn-secondary btn-sm">HyperLocal 2</a>
             <a href="#nashtwin" class="btn btn-secondary btn-sm">NashTwin CRM</a>
           </div>
+          <div class="hero-actions">
+            <a href="/#contact" class="btn btn-primary btn-sm">Book Product Fit Review</a>
+            <a href="/services" class="btn btn-accent btn-sm">Need Custom Deployment?</a>
+          </div>
+          <p class="flow-cue">Start with the product that solves your highest-cost bottleneck today.</p>
           </div>
         </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header flow-note">
+          <h2 class="section-title">How Senior Teams Evaluate This Stack</h2>
+          <p class="text-lead">
+            Use this framework to select quickly: first by failure mode, then by integration effort,
+            then by measurable business impact.
+          </p>
+        </div>
+        <div class="evaluation-grid">
+          <article class="evaluation-card">
+            <h3 class="heading-4">1. Failure Mode</h3>
+            <p class="card-text">Identify where you are currently losing certainty: identity trust, communication control, or strategic planning.</p>
+          </article>
+          <article class="evaluation-card">
+            <h3 class="heading-4">2. Integration Surface</h3>
+            <p class="card-text">Estimate how much existing CRM, routing, and observability infrastructure should remain unchanged.</p>
+          </article>
+          <article class="evaluation-card">
+            <h3 class="heading-4">3. Time-to-Value</h3>
+            <p class="card-text">Choose the product that ships visible operator improvement first, then layer the remaining stack as needed.</p>
+          </article>
+        </div>
+        <div class="intent-bar">Teams that pick one primary objective before implementation usually deploy faster and expand usage with less friction.</div>
       </section>
 
       <section id="devicer" class="section product-section">
@@ -438,7 +510,10 @@
             Tell us your operating constraints and goals. We can scope the best fit,
             combine products into a stack, or design a tailored deployment path.
           </p>
-          <a href="/#contact" class="btn btn-primary btn-md">Talk To Gateway</a>
+          <div class="hero-actions">
+            <a href="/#contact" class="btn btn-primary btn-md">Book Architecture Review</a>
+            <a href="/services" class="btn btn-secondary btn-md">View Service-Led Rollout</a>
+          </div>
         </div>
       </section>
     </main>

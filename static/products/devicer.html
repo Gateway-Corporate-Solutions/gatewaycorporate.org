@@ -372,7 +372,100 @@
 			font-weight: 600;
 		}
 
+		.fit-shell {
+			max-width: 1100px;
+			margin: 0 auto;
+			padding: 1.15rem;
+			border: 1px solid rgba(148, 163, 184, 0.25);
+			border-radius: 20px;
+			background: linear-gradient(145deg, rgba(15, 23, 42, 0.58) 0%, rgba(30, 41, 59, 0.38) 100%);
+		}
+
+		.fit-grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.9rem;
+		}
+
+		.fit-card {
+			border: 1px solid rgba(148, 163, 184, 0.22);
+			border-radius: 14px;
+			padding: 1rem;
+			background: rgba(255, 255, 255, 0.02);
+		}
+
+		.fit-card h3 {
+			margin-bottom: 0.55rem;
+		}
+
+		.fit-list {
+			margin: 0;
+			padding-left: 1rem;
+			color: #cbd5e1;
+			line-height: 1.5;
+		}
+
+		.fit-proof {
+			margin-top: 0.95rem;
+			padding: 0.9rem;
+			border: 1px solid rgba(125, 211, 252, 0.32);
+			border-radius: 14px;
+			background: rgba(15, 23, 42, 0.4);
+			font-weight: 600;
+			color: #dbeafe;
+			text-align: center;
+		}
+
+		.fit-actions {
+			margin-top: 1.05rem;
+			display: flex;
+			justify-content: center;
+			gap: 0.8rem;
+			flex-wrap: wrap;
+		}
+
+		.intent-nav {
+			max-width: 1100px;
+			margin: 1.2rem auto 0;
+			padding: 1rem;
+			border-radius: 18px;
+			border: 1px solid rgba(148, 163, 184, 0.24);
+			background: rgba(15, 23, 42, 0.42);
+		}
+
+		.intent-nav-links {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.6rem;
+			justify-content: center;
+		}
+
+		.intent-chip {
+			display: inline-flex;
+			align-items: center;
+			padding: 0.45rem 0.75rem;
+			border-radius: 999px;
+			border: 1px solid rgba(148, 163, 184, 0.35);
+			color: #dbeafe;
+			text-decoration: none;
+			font-size: 0.88rem;
+			font-weight: 600;
+		}
+
+		.intent-chip:hover {
+			border-color: rgba(96, 165, 250, 0.55);
+			background: rgba(59, 130, 246, 0.18);
+		}
+
+		.intent-nav .btn {
+			margin-top: 0.85rem;
+		}
+
 		@media (max-width: 768px) {
+			.fit-grid {
+				grid-template-columns: 1fr;
+			}
+
 			.tier-row {
 				grid-template-columns: 1fr;
 				text-align: left;
@@ -468,8 +561,52 @@
 				</a>
 				<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
 					rel="noopener noreferrer" class="btn btn-accent btn-lg">
-					Buy Plugin License
+					Buy Now
 				</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="section" style="padding-top: 0.5rem;">
+		<div class="intent-nav-links">
+			<a href="#problem" class="intent-chip">Risk Profile</a>
+			<a href="#suite" class="intent-chip">Plugin Architecture</a>
+			<a href="#features" class="intent-chip">Production Readiness</a>
+			<a href="#pricing" class="intent-chip">Licensing</a>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="section-header">
+			<h2 class="section-title">Deployment Fit: Should Devicer Be First?</h2>
+			<p class="text-lead">
+				If false positives, account abuse, or ambiguous device trust are blocking growth,
+				Devicer is usually the fastest control layer to deploy and measure.
+			</p>
+		</div>
+		<div class="fit-shell">
+			<div class="fit-grid">
+				<article class="fit-card">
+					<h3 class="heading-4">Strong Fit Right Now</h3>
+					<ul class="fit-list">
+						<li>Fraud triage is manual and incident response is slowing product growth.</li>
+						<li>Device identity decisions require backend scoring, not browser-only heuristics.</li>
+						<li>You need measurable risk reduction before scaling self-serve acquisition.</li>
+					</ul>
+				</article>
+				<article class="fit-card">
+					<h3 class="heading-4">Use Open-Source FP-Devicer Core First If</h3>
+					<ul class="fit-list">
+						<li>You are validating signal coverage before moving into enforcement.</li>
+						<li>Your team is still deciding which plugin layers map to your threat model.</li>
+						<li>Procurement is gated but engineering evaluation can begin immediately.</li>
+					</ul>
+				</article>
+			</div>
+			<div class="fit-proof">Best practice for engineering teams: validate on open core quickly, then switch to premium enforcement in the same sprint window.</div>
+			<div class="fit-actions">
+				<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank" rel="noopener noreferrer" class="btn btn-accent btn-lg">Buy Now</a>
+				<a href="https://github.com/gatewaycorporate/fp-devicer" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">Evaluate Open-Source Core</a>
 			</div>
 		</div>
 	</section>
@@ -890,7 +1027,7 @@
 			</p>
 			<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
 				rel="noopener noreferrer" class="btn btn-accent btn-lg">
-				Buy Plugin License on Polar
+				Buy Now
 			</a>
 		</div>
 
@@ -992,7 +1129,7 @@
 			<div class="cta-stack">
 				<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
 					rel="noopener noreferrer" class="btn btn-accent btn-lg">
-					Buy License Now
+					Buy Now
 				</a>
 			</div>
 		</div>
@@ -1002,8 +1139,8 @@
 		<div class="section-header">
 			<h2 class="section-title">Get Started with the Devicer Intelligence Suite</h2>
 			<p class="text-lead">
-				Use the core today, review the architecture, and add premium plugins when you need production-grade enrichment
-				and enforcement.
+				Move from evaluation to deployment with one path: review the core, validate architecture fit,
+				then activate premium middleware for enforcement.
 			</p>
 		</div>
 
@@ -1082,15 +1219,18 @@
 			</div>
 
 			<div class="cta-block">
-				<h3 class="heading-3 mb-md">Need the premium plugins?</h3>
+				<h3 class="heading-3 mb-md">Ready to enforce with production-grade signals?</h3>
 				<p class="text-base" style="margin-bottom: 1.5rem;">
 					One checkout starts access to the premium Devicer middleware lineup. Use it for IP intelligence, TLS
 					enrichment, bot blocking, and peer reputation workflows.
 				</p>
-				<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
-					rel="noopener noreferrer" class="btn btn-accent btn-lg">
-					Buy Plugin License
-				</a>
+				<div class="btn-group" style="justify-content: center;">
+					<a href="https://buy.polar.sh/polar_cl_0Y4djPLDe5yLdNUDKdtPGlFW5TG2ZpFD5qkb93HsSQc" target="_blank"
+						rel="noopener noreferrer" class="btn btn-accent btn-lg">
+						Buy Now
+					</a>
+					<a href="/#contact" class="btn btn-secondary btn-lg">Request Threat Model Review</a>
+				</div>
 				<p class="micro-copy" style="margin-top: 1rem;">
 					One Polar checkout and one shared key for the full premium plugin lineup.
 				</p>

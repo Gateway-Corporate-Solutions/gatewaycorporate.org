@@ -263,9 +263,62 @@
         border: 1px solid rgba(148, 163, 184, 0.23);
       }
 
+      .intent-strip {
+        margin: 0.7rem auto 0;
+        max-width: 1050px;
+        padding: 1.05rem 1.2rem;
+        border-radius: 16px;
+        border: 1px solid rgba(125, 211, 252, 0.3);
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.45) 100%);
+      }
+
+      .intent-strip p {
+        margin: 0;
+        text-align: center;
+        color: #dbeafe;
+        font-weight: 600;
+      }
+
+      .path-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .path-card {
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 18px;
+        padding: 1.1rem;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .path-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #93c5fd;
+        margin-bottom: 0.7rem;
+      }
+
+      .path-card h3 {
+        margin-bottom: 0.55rem;
+      }
+
+      .path-actions {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+      }
+
       @media (max-width: 980px) {
         .offering-grid,
-        .steps-grid {
+        .steps-grid,
+        .path-grid {
           grid-template-columns: 1fr;
         }
 
@@ -405,7 +458,7 @@
         </div>
 
         <div class="portfolio-cta">
-          <a href="/products" class="btn btn-primary btn-lg">Open Full Product Portfolio</a>
+          <a href="/products" class="btn btn-primary btn-lg">Compare Products and Deployment Paths</a>
         </div>
 
         <div class="grid grid-3 gap-lg">
@@ -417,7 +470,7 @@
               IP intelligence, TLS consistency, bot defense, and peer graph risk.
             </p>
             <div class="btn-group mt-md">
-              <a href="/products#devicer" class="btn btn-primary btn-sm">View On Products Page</a>
+              <a href="/products#devicer" class="btn btn-primary btn-sm">View Technical Overview</a>
               <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
             </div>
           </div>
@@ -430,7 +483,7 @@
               permissioned actions, operator-owned knowledge, and audit-safe fallbacks.
             </p>
             <div class="btn-group mt-md">
-              <a href="/products#hyperlocal" class="btn btn-primary btn-sm">View On Products Page</a>
+              <a href="/products#hyperlocal" class="btn btn-primary btn-sm">View Technical Overview</a>
               <a href="/papers/HyperLocal-2.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
             </div>
           </div>
@@ -443,10 +496,49 @@
               game-theory optimization, and decision intelligence at leadership level.
             </p>
             <div class="btn-group mt-md">
-              <a href="/products#nashtwin" class="btn btn-primary btn-sm">View On Products Page</a>
+              <a href="/products#nashtwin" class="btn btn-primary btn-sm">View Technical Overview</a>
               <a href="https://nash.gatewaycorporate.org/" class="btn btn-accent btn-sm">Try NashTwin</a>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Choose Your Fastest Path to Value</h2>
+          <p class="text-lead">
+            Most teams start in one of these three tracks. Pick the track that matches
+            your current bottleneck, then move into implementation planning.
+          </p>
+        </div>
+        <div class="path-grid">
+          <article class="path-card">
+            <span class="path-label">Track 1</span>
+            <h3 class="heading-4">Need Product Fit Clarity</h3>
+            <p class="card-text">Compare Devicer, HyperLocal 2, and NashTwin on architecture fit, operator workflow, and deployment complexity.</p>
+            <div class="path-actions">
+              <a href="/products" class="btn btn-primary btn-sm">Open Product Hub</a>
+            </div>
+          </article>
+          <article class="path-card">
+            <span class="path-label">Track 2</span>
+            <h3 class="heading-4">Need Custom Deployment Support</h3>
+            <p class="card-text">Use service tracks for integration, governance controls, observability, and production hardening.</p>
+            <div class="path-actions">
+              <a href="/services" class="btn btn-primary btn-sm">View Service Tracks</a>
+            </div>
+          </article>
+          <article class="path-card">
+            <span class="path-label">Track 3</span>
+            <h3 class="heading-4">Need Executive-Technical Review</h3>
+            <p class="card-text">Bring your architecture and constraints. We will map risk, implementation sequence, and team ownership in one review.</p>
+            <div class="path-actions">
+              <a href="#contact" class="btn btn-accent btn-sm">Book Architecture Review</a>
+            </div>
+          </article>
+        </div>
+        <div class="intent-strip">
+          <p>Most buying cycles accelerate when product and implementation scope are decided in the same conversation.</p>
         </div>
       </section>
 
