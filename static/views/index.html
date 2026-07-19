@@ -104,13 +104,14 @@
       .hero-stats {
         margin-top: 2.2rem;
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: center;
         gap: 0.9rem;
       }
 
       .stat-panel {
-        flex: 0 1 18rem;
+        flex: 1 1 0;
+        max-width: 18rem;
         border: 1px solid rgba(125, 211, 252, 0.45);
         border-radius: 16px;
         padding: 1.1rem;
@@ -322,7 +323,6 @@
           grid-template-columns: 1fr;
         }
 
-        .hero-stats,
         .service-track-grid {
           grid-template-columns: 1fr;
         }

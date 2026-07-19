@@ -913,7 +913,7 @@ body {
   justify-content: center;
   gap: clamp(1rem, 3vw, var(--spacing-lg));
   margin: var(--spacing-xl) auto;
-  max-width: 800px;
+  max-width: 980px;
   width: 100%;
 }
 
@@ -928,6 +928,17 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+}
+
+@media (min-width: 1024px) {
+  .hero .hero-stats {
+    flex-wrap: nowrap;
+  }
+
+  .hero .stat-item {
+    flex: 1 1 0;
+    max-width: 18rem;
+  }
 }
 
 .hero .stat-number {
