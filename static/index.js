@@ -102,17 +102,21 @@ class NavbarController {
     this.isMenuOpen = true;
     this.menuBtn.classList.add("open");
     this.dropdownMenu.style.display = "block";
-    this.dropdownMenu.offsetHeight;
-    this.dropdownMenu.classList.add("show");
     document.body.style.overflow = "hidden";
 
-    this._openTimeout = setTimeout(() => {
-      this._openTimeout = null;
-      this.dropdownMenu.querySelectorAll("li").forEach((item, index) => {
-        item.style.animationDelay = `${index * 0.1}s`;
-        item.classList.add("animate-in");
-      });
-    }, 100);
+    requestAnimationFrame(() => {
+      if (!this.dropdownMenu) return;
+
+      this.dropdownMenu.classList.add("show");
+
+      this._openTimeout = setTimeout(() => {
+        this._openTimeout = null;
+        this.dropdownMenu.querySelectorAll("li").forEach((item, index) => {
+          item.style.animationDelay = `${index * 0.1}s`;
+          item.classList.add("animate-in");
+        });
+      }, 100);
+    });
   }
 
   closeMenu() {

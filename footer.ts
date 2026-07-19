@@ -85,7 +85,7 @@ function escapeHtml(value: string): string {
 function renderLinkList(column: FooterColumn): string {
   return `
           <div>
-            <h4 class="heading-4 mb-md">${escapeHtml(column.heading)}</h4>
+            <h3 class="heading-4 mb-md">${escapeHtml(column.heading)}</h3>
             <ul style="list-style: none; padding: 0">
               ${column.links.map((link) => `<li class="mb-xs"><a href="${escapeHtml(link.href)}" class="text-small footer-link">${escapeHtml(link.label)}</a></li>`).join("\n              ")}
             </ul>
@@ -111,7 +111,7 @@ export function renderSiteFooter(variant: FooterVariant = "default"): string {
       <div class="container">
         <div class="grid grid-4 gap-lg mb-xl" style="text-align: left; padding-bottom: var(--spacing-md);">
           <div>
-            <h4 class="heading-4 mb-md">Gateway Corporate</h4>
+            <h3 class="heading-4 mb-md">Gateway Corporate</h3>
             <p class="text-small">${escapeHtml(brandCopy)}</p>
           </div>
           ${renderLinkList(serviceColumn)}
