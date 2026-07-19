@@ -163,6 +163,9 @@ class NetworkGraph {
     this.lastHeight = 0;
     this.resizeTimer = null;
     this.time = 0;
+    this.trackingBlend = 0;
+    this.smoothedLook = { x: 0, y: 0 };
+    this.currentPose = { x: 0, y: 0, lookX: 0, lookY: 0 };
     this.minMeshViewportWidth = 721;
     this.heroResizeObserver = null;
 
@@ -605,27 +608,42 @@ class NetworkGraph {
     ).slice(0, count);
   }
 
-  getPose() {
+  updatePose() {
     const idleX = Math.sin(this.time * 0.0014) * 0.22;
     const idleY = Math.cos(this.time * 0.0011) * 0.12;
 
-    if (!this.pointer.active) {
-      return { x: idleX, y: idleY, lookX: idleX, lookY: idleY };
-    }
+    const targetLookX = this.pointer.active
+      ? this.clamp((this.pointer.x - this.lastWidth * 0.5) / (this.lastWidth * 0.5), -1, 1)
+      : 0;
+    const targetLookY = this.pointer.active
+      ? this.clamp((this.pointer.y - this.lastHeight * 0.45) / (this.lastHeight * 0.45), -1, 1)
+      : 0;
 
-    const lookX = this.clamp((this.pointer.x - this.lastWidth * 0.5) / (this.lastWidth * 0.5), -1, 1);
-    const lookY = this.clamp((this.pointer.y - this.lastHeight * 0.45) / (this.lastHeight * 0.45), -1, 1);
+    const lookLerp = this.pointer.active ? 0.16 : 0.08;
+    this.smoothedLook.x = this.lerp(this.smoothedLook.x, targetLookX, lookLerp);
+    this.smoothedLook.y = this.lerp(this.smoothedLook.y, targetLookY, lookLerp);
 
-    return {
-      x: this.lerp(idleX, lookX, 0.85),
-      y: this.lerp(idleY, lookY, 0.85),
-      lookX,
-      lookY,
+    const trackingTarget = this.pointer.active ? 1 : 0;
+    this.trackingBlend = this.lerp(this.trackingBlend, trackingTarget, 0.08);
+
+    const trackingSwayX = Math.sin(this.time * 0.0026 + 0.6) * 0.06;
+    const trackingSwayY = Math.cos(this.time * 0.0022 + 1.2) * 0.045;
+    const trackingX = this.smoothedLook.x * 0.92 + trackingSwayX;
+    const trackingY = this.smoothedLook.y * 0.92 + trackingSwayY;
+
+    this.currentPose = {
+      x: this.lerp(idleX, trackingX, this.trackingBlend),
+      y: this.lerp(idleY, trackingY, this.trackingBlend),
+      lookX: this.lerp(idleX * 0.6, this.smoothedLook.x + trackingSwayX * 0.55, this.trackingBlend),
+      lookY: this.lerp(idleY * 0.6, this.smoothedLook.y + trackingSwayY * 0.55, this.trackingBlend),
     };
+
+    return this.currentPose;
   }
 
   update() {
     this.time += 16;
+    const pose = this.updatePose();
 
     if (!this.meshLoaded || !this.meshTargets.length) {
       const width = this.lastWidth;
@@ -668,7 +686,6 @@ class NetworkGraph {
       }
     }
 
-    const pose = this.getPose();
     const offsetX = pose.x * this.lastWidth * 0.045;
     const offsetY = pose.y * this.lastHeight * 0.038;
     const yaw = pose.lookX * 0.42;
@@ -741,7 +758,7 @@ class NetworkGraph {
     if (!nodes.length) return;
 
     const blend = this.meshLoaded ? this.meshBlend : 0;
-    const pose = this.meshLoaded ? this.getPose() : { x: 0, y: 0 };
+    const pose = this.meshLoaded ? this.currentPose : { x: 0, y: 0 };
     const glow = ctx.createRadialGradient(
       width * 0.5 + pose.x * 30,
       height * 0.5 - 10,
