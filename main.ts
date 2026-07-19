@@ -125,6 +125,11 @@ router.get("/sitemap.xml", async (context) => {
                         changefreq: "weekly",
                         priority: 1.0,
                 },
+            {
+                loc: `${siteOrigin}/services`,
+                lastmod: await getSitemapLastModified("./static/views/services.html", today),
+                priority: 0.9,
+            },
                 {
                         loc: `${siteOrigin}/blog`,
                         lastmod: today,
@@ -135,6 +140,11 @@ router.get("/sitemap.xml", async (context) => {
                         lastmod: today,
                         priority: 0.8,
                 },
+            {
+                loc: `${siteOrigin}/products`,
+                lastmod: await getSitemapLastModified("./static/views/products.html", today),
+                priority: 0.9,
+            },
                 ...productEntries,
                 ...paperEntries,
         ];
@@ -169,6 +179,34 @@ router.get("/", async (context) => {
 });
 router.get("/index.html", async (context) => {
     await renderHomePage(context);
+});
+router.get("/services", (context) => {
+    try {
+        const servicesHtml = Deno.readTextFileSync("./static/views/services.html");
+        context.response.body = injectFooterIntoHtml(
+            servicesHtml,
+            resolveFooterVariant("index"),
+        );
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+    } catch (error) {
+        console.error(`Error reading services view file: ${error}`);
+        context.response.status = 404;
+        context.response.body = "Services page not found";
+    }
+});
+router.get("/products", (context) => {
+    try {
+        const productsHtml = Deno.readTextFileSync("./static/views/products.html");
+        context.response.body = injectFooterIntoHtml(
+            productsHtml,
+            resolveFooterVariant("index"),
+        );
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+    } catch (error) {
+        console.error(`Error reading products view file: ${error}`);
+        context.response.status = 404;
+        context.response.body = "Products page not found";
+    }
 });
 router.get("/blog", async (context) => {
     const blogPosts = await getBlogPosts();

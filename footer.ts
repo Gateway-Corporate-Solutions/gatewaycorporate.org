@@ -15,10 +15,12 @@ const brandCopy = "Premiere technology services for the St. Louis area and beyon
 const serviceColumn: FooterColumn = {
   heading: "Services",
   links: [
-    { label: "Web Development", href: "/#services" },
-    { label: "AI Integration", href: "/#services" },
-    { label: "Custom Software", href: "/#services" },
-    { label: "Maintenance", href: "/#services" },
+    { label: "Signals Intelligence", href: "/services#signals-intelligence" },
+    { label: "AI Operations", href: "/services#ai-operations" },
+    { label: "Digital Twins", href: "/services#simulated-governance" },
+    { label: "Strategic Advisory", href: "/services#strategic-advisory" },
+    { label: "Custom AI Platforms", href: "/services#custom-platforms" },
+    { label: "AI Governance", href: "/services#ai-governance" },
   ],
 };
 
@@ -26,10 +28,10 @@ const companyColumn: FooterColumn = {
   heading: "Company",
   links: [
     { label: "About", href: "/#about" },
+    { label: "Products", href: "/products" },
+    { label: "Team", href: "/#team" },
     { label: "Careers", href: "/careers" },
     { label: "Journal", href: "/blog" },
-    { label: "Team", href: "/#team" },
-    { label: "Projects", href: "/#projects" },
     { label: "Contact", href: "/#contact" },
   ],
 };

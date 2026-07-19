@@ -436,10 +436,12 @@ function renderPageShell(options: {
       <div id="dropdown-menu" class="dropdown-menu">
         <div class="menu-container">
           <ul class="nav-list">
-            <li><a href="/" class="nav-link">Home</a></li>
+            <li><a href="/#about" class="nav-link">About Us</a></li>
+            <li><a href="/services" class="nav-link">Services</a></li>
+            <li><a href="/products" class="nav-link">Products</a></li>
             <li><a href="/careers" class="nav-link">Careers</a></li>
             <li><a href="/blog" class="nav-link">Blog</a></li>
-            <li><a href="/#projects" class="nav-link">Projects</a></li>
+            <li><a href="/#team" class="nav-link">Our Team</a></li>
             <li><a href="/#contact" class="nav-link">Contact</a></li>
           </ul>
         </div>
