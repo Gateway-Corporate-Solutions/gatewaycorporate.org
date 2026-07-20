@@ -27,6 +27,13 @@ interface FrontMatter {
   tags?: string[];
 }
 
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+const imageDimensionsCache = new Map<string, Promise<ImageDimensions | undefined>>();
+
 marked.setOptions({
   gfm: true,
   breaks: false,
@@ -176,6 +183,228 @@ function extractFirstImageUrl(html: string): string {
   return absoluteUrl(match[1]);
 }
 
+function resolveStaticImagePath(source: string): string | undefined {
+  if (/^[a-z]+:/i.test(source) || source.startsWith("//")) {
+    return undefined;
+  }
+
+  const [pathWithoutQuery] = source.split(/[?#]/, 1);
+
+  if (!pathWithoutQuery) {
+    return undefined;
+  }
+
+  const decodedPath = decodeURIComponent(pathWithoutQuery);
+  if (decodedPath.includes("..")) {
+    return undefined;
+  }
+
+  if (decodedPath.startsWith("/")) {
+    return `./static${decodedPath}`;
+  }
+
+  return `./static/${decodedPath.replace(/^\.?\//, "")}`;
+}
+
+function readPngDimensions(bytes: Uint8Array): ImageDimensions | undefined {
+  const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
+  if (bytes.length < 24 || !pngSignature.every((value, index) => bytes[index] === value)) {
+    return undefined;
+  }
+
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  return {
+    width: view.getUint32(16),
+    height: view.getUint32(20),
+  };
+}
+
+function readJpegDimensions(bytes: Uint8Array): ImageDimensions | undefined {
+  if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) {
+    return undefined;
+  }
+
+  let offset = 2;
+  while (offset + 8 <= bytes.length) {
+    if (bytes[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+
+    const marker = bytes[offset + 1];
+    if (marker === 0xd9 || marker === 0xda) {
+      break;
+    }
+
+    const segmentLength = (bytes[offset + 2] << 8) | bytes[offset + 3];
+    if (segmentLength < 2 || offset + 2 + segmentLength > bytes.length) {
+      break;
+    }
+
+    const isStartOfFrame = marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker);
+    if (isStartOfFrame && offset + 9 <= bytes.length) {
+      return {
+        height: (bytes[offset + 5] << 8) | bytes[offset + 6],
+        width: (bytes[offset + 7] << 8) | bytes[offset + 8],
+      };
+    }
+
+    offset += 2 + segmentLength;
+  }
+
+  return undefined;
+}
+
+function readWebpDimensions(bytes: Uint8Array): ImageDimensions | undefined {
+  if (
+    bytes.length < 30 ||
+    String.fromCharCode(...bytes.slice(0, 4)) !== "RIFF" ||
+    String.fromCharCode(...bytes.slice(8, 12)) !== "WEBP"
+  ) {
+    return undefined;
+  }
+
+  const chunkType = String.fromCharCode(...bytes.slice(12, 16));
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+
+  if (chunkType === "VP8 ") {
+    if (bytes.length < 30) {
+      return undefined;
+    }
+
+    return {
+      width: view.getUint16(26, true) & 0x3fff,
+      height: view.getUint16(28, true) & 0x3fff,
+    };
+  }
+
+  if (chunkType === "VP8L") {
+    if (bytes.length < 25 || bytes[20] !== 0x2f) {
+      return undefined;
+    }
+
+    const value =
+      bytes[21] |
+      (bytes[22] << 8) |
+      (bytes[23] << 16) |
+      (bytes[24] << 24);
+
+    return {
+      width: (value & 0x3fff) + 1,
+      height: ((value >> 14) & 0x3fff) + 1,
+    };
+  }
+
+  if (chunkType === "VP8X") {
+    if (bytes.length < 30) {
+      return undefined;
+    }
+
+    return {
+      width: 1 + bytes[24] + (bytes[25] << 8) + (bytes[26] << 16),
+      height: 1 + bytes[27] + (bytes[28] << 8) + (bytes[29] << 16),
+    };
+  }
+
+  return undefined;
+}
+
+function readImageDimensions(bytes: Uint8Array, path: string): ImageDimensions | undefined {
+  const normalizedPath = path.toLowerCase();
+
+  if (normalizedPath.endsWith(".png")) {
+    return readPngDimensions(bytes);
+  }
+
+  if (normalizedPath.endsWith(".jpg") || normalizedPath.endsWith(".jpeg")) {
+    return readJpegDimensions(bytes);
+  }
+
+  if (normalizedPath.endsWith(".webp")) {
+    return readWebpDimensions(bytes);
+  }
+
+  return undefined;
+}
+
+async function getImageDimensions(source: string): Promise<ImageDimensions | undefined> {
+  const staticPath = resolveStaticImagePath(source);
+  if (!staticPath) {
+    return undefined;
+  }
+
+  const cached = imageDimensionsCache.get(staticPath);
+  if (cached) {
+    return cached;
+  }
+
+  const dimensionsPromise = (async () => {
+    try {
+      const bytes = await Deno.readFile(staticPath);
+      return readImageDimensions(bytes, staticPath);
+    } catch {
+      return undefined;
+    }
+  })();
+
+  imageDimensionsCache.set(staticPath, dimensionsPromise);
+  return dimensionsPromise;
+}
+
+async function optimizeBlogImages(html: string): Promise<string> {
+  const matches = [...html.matchAll(/<img\b[^>]*>/gi)];
+  if (!matches.length) {
+    return html;
+  }
+
+  const replacements = await Promise.all(matches.map(async (match) => {
+    const tag = match[0];
+    const sourceMatch = tag.match(/\ssrc\s*=\s*["']([^"']+)["']/i);
+    if (!sourceMatch) {
+      return tag;
+    }
+
+    const dimensions = await getImageDimensions(sourceMatch[1]);
+    const extraAttributes: string[] = [];
+
+    if (dimensions && !/\swidth\s*=\s*["'][^"']+["']/i.test(tag)) {
+      extraAttributes.push(`width="${dimensions.width}"`);
+    }
+
+    if (dimensions && !/\sheight\s*=\s*["'][^"']+["']/i.test(tag)) {
+      extraAttributes.push(`height="${dimensions.height}"`);
+    }
+
+    if (!/\sloading\s*=\s*["'][^"']+["']/i.test(tag)) {
+      extraAttributes.push('loading="lazy"');
+    }
+
+    if (!/\sdecoding\s*=\s*["'][^"']+["']/i.test(tag)) {
+      extraAttributes.push('decoding="async"');
+    }
+
+    if (!extraAttributes.length) {
+      return tag;
+    }
+
+    return tag.replace(/\s*\/?>$/, ` ${extraAttributes.join(" ")}$&`);
+  }));
+
+  let nextHtml = "";
+  let lastIndex = 0;
+
+  for (const [index, match] of matches.entries()) {
+    const start = match.index ?? 0;
+    const original = match[0];
+    nextHtml += html.slice(lastIndex, start);
+    nextHtml += replacements[index];
+    lastIndex = start + original.length;
+  }
+
+  nextHtml += html.slice(lastIndex);
+  return nextHtml;
+}
+
 function renderTags(tags: string[]): string {
   if (!tags.length) {
     return "";
@@ -255,9 +484,6 @@ function renderPageShell(options: {
     <meta name="twitter:title" content="${escapeHtml(options.title)}">
     <meta name="twitter:description" content="${escapeHtml(options.description)}">
     <meta name="twitter:image" content="${escapeHtml(options.imageUrl)}">${publishedTime}${articleTags}${jsonLdScript}${robotsMeta}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/components.css">
     <link rel="stylesheet" href="/enhancements.css">
     <script src="/index.js" defer></script>
@@ -330,7 +556,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     const excerpt = buildExcerpt(body, metadata.excerpt);
     const author = metadata.author?.trim() || "Gateway Corporate Team";
     const tags = metadata.tags || [];
-    const html = marked.parse(body) as string;
+    const html = await optimizeBlogImages(marked.parse(body) as string);
 
     posts.push({
       slug,
@@ -369,7 +595,7 @@ export function renderHomepageBlogSection(posts: BlogPost[]): string {
       <div class="blog-home-actions">
         <a href="/blog" class="btn btn-primary">Visit the blog</a>
       </div>
-      <div class="grid blog-grid gap-lg">
+      <div class="grid blog-grid gap-lg card-grid">
         ${featuredPosts.map((post) => renderPostCard(post)).join("")}
       </div>
     </section>
@@ -378,7 +604,7 @@ export function renderHomepageBlogSection(posts: BlogPost[]): string {
 
 export function renderBlogIndexPage(posts: BlogPost[]): string {
   const postMarkup = posts.length
-    ? `<div class="grid blog-grid gap-lg">${posts.map((post) => renderPostCard(post)).join("")}</div>`
+    ? `<div class="grid blog-grid gap-lg card-grid">${posts.map((post) => renderPostCard(post)).join("")}</div>`
     : `<div class="card card-primary blog-empty"><p class="card-text">No articles are published yet. Add markdown files to content/blog to populate the journal.</p></div>`;
 
   return renderPageShell({
@@ -419,7 +645,7 @@ export function renderBlogPostPage(post: BlogPost, allPosts: BlogPost[]): string
         <div class="section-header">
           <h2 class="section-title">More from the journal</h2>
         </div>
-        <div class="grid blog-grid gap-lg">${relatedPosts.map((candidate) => renderPostCard(candidate)).join("")}</div>
+        <div class="grid blog-grid gap-lg card-grid">${relatedPosts.map((candidate) => renderPostCard(candidate)).join("")}</div>
       </section>`
     : "";
 

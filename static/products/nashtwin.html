@@ -4,10 +4,6 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
-
 	<link rel="stylesheet" href="/components.css">
 	<link rel="stylesheet" href="/enhancements.css">
 	<script src="/index.js" defer></script>
@@ -16,7 +12,6 @@
 	<meta name="author" content="Gateway Corporate">
 	<meta name="keywords"
 		content="nashtwin, crm, digital twin, game theory, nash equilibrium, business simulation, operations optimization, gateway corporate">
-	<link rel="preconnect" href="https://gatewaycorporate.org/" crossorigin="anonymous">
 	<link rel="dns-prefetch" href="https://gatewaycorporate.org/">
 	<meta property="og:locale" content="en_US">
 
@@ -413,6 +408,13 @@
 			color: var(--gray-500);
 		}
 
+		.comparison-note {
+			color: #d6e0ea;
+			font-size: 0.95rem;
+			line-height: 1.6;
+			margin-top: 1rem;
+		}
+
 		.fit-shell {
 			max-width: 1100px;
 			margin: 0 auto;
@@ -587,6 +589,8 @@
 			</ul>
 		</div>
 	</div>
+
+	<main id="main-content">
 
 	<section class="hero">
 		<canvas id="network-graph" aria-hidden="true"></canvas>
@@ -818,7 +822,7 @@
 			</p>
 		</div>
 
-		<div class="grid grid-auto-fit gap-lg">
+		<div class="grid grid-auto-fit gap-lg card-grid">
 			<div class="card card-primary card-centered">
 				<div class="icon-circle icon-lg icon-primary">🧬</div>
 				<div class="card-header">
@@ -994,7 +998,7 @@
 			</p>
 		</div>
 
-		<div class="grid grid-3 gap-lg" style="max-width: 1200px; margin: 0 auto; align-items: start;">
+		<div class="grid grid-3 gap-lg card-grid" style="max-width: 1200px; margin: 0 auto; align-items: start;">
 			<div class="card card-centered pricing-card featured">
 				<div class="card-header">
 					<div class="featured-badge">Most Popular</div>
@@ -1125,7 +1129,7 @@
 		<div class="section-header">
 			<div class="cta-title-stack">
 				<h2 class="section-title">Your Next Best Move Is</h2>
-				<div class="rotating-promo" aria-label="Already Calculated, Winning, With Us">
+				<div class="rotating-promo">
 					<div class="rotating-promo-track" aria-hidden="true">
 						<span class="rotating-promo-item">Already Calculated</span>
 						<span class="rotating-promo-item">Winning</span>
@@ -1140,7 +1144,7 @@
 		</div>
 
 		<div class="container" style="max-width: 1000px; margin: 0 auto;">
-			<div class="grid grid-2 gap-xl" style="justify-items: center;">
+			<div class="grid grid-2 gap-xl card-grid" style="justify-items: center;">
 				<div class="card card-primary card-centered" style="max-width: 420px; width: 100%;">
 					<div class="card-header">
 						<div class="icon-circle icon-lg icon-primary">🚀</div>
@@ -1235,32 +1239,8 @@
 			</div>
 		</div>
 	</section>
+	</main>
 
-	<script>
-		document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-			anchor.addEventListener("click", function (e) {
-				e.preventDefault();
-				const target = document.querySelector(this.getAttribute("href"));
-				if (target) {
-					const navbarHeight = document.querySelector(".navbar")?.offsetHeight || 0;
-					const productNavbarHeight = document.querySelector(".product-navbar")?.offsetHeight || 0;
-					const targetPosition = target.offsetTop - navbarHeight - productNavbarHeight - 20;
-
-					window.scrollTo({
-						top: targetPosition,
-						behavior: "smooth",
-					});
-				}
-			});
-		});
-
-		window.addEventListener("scroll", () => {
-			const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-			const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-			const scrolled = (winScroll / height) * 100;
-			document.querySelector(".scroll-progress").style.width = scrolled + "%";
-		});
-	</script>
 </body>
 
 </html>

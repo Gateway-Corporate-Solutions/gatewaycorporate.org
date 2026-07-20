@@ -45,6 +45,10 @@ class NavbarController {
     this.scrollProgress = document.querySelector(".scroll-progress");
     this.lastScrollY = window.scrollY;
     this.isMenuOpen = false;
+    this.isNavbarScrolled = false;
+    this.isNavbarHidden = false;
+    this.scrollTicking = false;
+    this.progressMax = 0;
     this._openTimeout = null;
     this._closeTimeout = null;
 
@@ -52,6 +56,7 @@ class NavbarController {
   }
 
   init() {
+    this.updateProgressMetrics();
     this.bindEvents();
     this.updateScrollProgress();
   }
@@ -74,15 +79,37 @@ class NavbarController {
     });
 
     window.addEventListener("scroll", () => {
-      this.handleScroll();
-      this.updateScrollProgress();
+      this.scheduleScrollUpdate();
     }, { passive: true });
 
     window.addEventListener("resize", () => {
       if (window.innerWidth > 768 && this.isMenuOpen) {
         this.closeMenu();
       }
+
+      this.updateProgressMetrics();
+      this.scheduleScrollUpdate();
     }, { passive: true });
+  }
+
+  scheduleScrollUpdate() {
+    if (this.scrollTicking) {
+      return;
+    }
+
+    this.scrollTicking = true;
+    requestAnimationFrame(() => {
+      this.scrollTicking = false;
+      this.handleScroll();
+      this.updateScrollProgress();
+    });
+  }
+
+  updateProgressMetrics() {
+    this.progressMax = Math.max(
+      0,
+      document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    );
   }
 
   toggleMenu() {
@@ -144,17 +171,27 @@ class NavbarController {
     if (!this.navbar) return;
 
     const currentScrollY = window.scrollY;
+    const shouldBeScrolled = currentScrollY > 100;
+    const shouldBeHidden = currentScrollY > this.lastScrollY && currentScrollY > 100;
 
-    if (currentScrollY > 100) {
-      this.navbar.classList.add("scrolled");
-    } else {
-      this.navbar.classList.remove("scrolled");
+    if (shouldBeScrolled !== this.isNavbarScrolled) {
+      this.isNavbarScrolled = shouldBeScrolled;
+
+      if (shouldBeScrolled) {
+        this.navbar.classList.add("scrolled");
+      } else {
+        this.navbar.classList.remove("scrolled");
+      }
     }
 
-    if (currentScrollY > this.lastScrollY && currentScrollY > 100) {
-      this.navbar.classList.add("hidden");
-    } else {
-      this.navbar.classList.remove("hidden");
+    if (shouldBeHidden !== this.isNavbarHidden) {
+      this.isNavbarHidden = shouldBeHidden;
+
+      if (shouldBeHidden) {
+        this.navbar.classList.add("hidden");
+      } else {
+        this.navbar.classList.remove("hidden");
+      }
     }
 
     this.lastScrollY = currentScrollY;
@@ -163,10 +200,13 @@ class NavbarController {
   updateScrollProgress() {
     if (!this.scrollProgress) return;
 
-    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
-    this.scrollProgress.style.width = `${scrolled}%`;
+    const winScroll = window.scrollY;
+    const progressMax = this.progressMax || Math.max(
+      0,
+      document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    );
+    const scrolled = progressMax > 0 ? winScroll / progressMax : 0;
+    this.scrollProgress.style.transform = `scaleX(${Math.min(1, Math.max(0, scrolled))})`;
   }
 }
 
@@ -946,17 +986,62 @@ function setupDeferredContactAssets() {
   contactSection.addEventListener("pointerenter", loadRecaptcha, { once: true });
 }
 
+function setupAnchorNavigation() {
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const anchor = target.closest('a[href^="#"]');
+    if (!(anchor instanceof HTMLAnchorElement)) {
+      return;
+    }
+
+    const href = anchor.getAttribute("href") || "";
+    if (href.length <= 1) {
+      return;
+    }
+
+    const destination = document.querySelector(href);
+    if (!(destination instanceof HTMLElement)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const navbarHeight = document.querySelector(".navbar")?.getBoundingClientRect().height || 0;
+    const productNavbarHeight = document.querySelector(".product-navbar")?.getBoundingClientRect().height || 0;
+    const top = window.scrollY + destination.getBoundingClientRect().top - navbarHeight - productNavbarHeight - 20;
+
+    window.scrollTo({
+      top: Math.max(0, top),
+      behavior: "smooth",
+    });
+  });
+}
+
 function initializePage() {
   new NavbarController();
-  document.querySelectorAll("canvas#network-graph").forEach((canvas) => {
-    new NetworkGraph(canvas);
-  });
+
+  const startNetworkGraphs = () => {
+    document.querySelectorAll("canvas#network-graph").forEach((canvas) => {
+      new NetworkGraph(canvas);
+    });
+  };
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(startNetworkGraphs, { timeout: 1200 });
+  } else {
+    window.setTimeout(startNetworkGraphs, 150);
+  }
 
   const contactForm = document.getElementById("contact-form");
   if (contactForm instanceof HTMLFormElement) {
     new ContactFormController(contactForm);
   }
 
+  setupAnchorNavigation();
   setupDeferredContactAssets();
 }
 

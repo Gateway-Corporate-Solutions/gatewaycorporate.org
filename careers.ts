@@ -395,9 +395,6 @@ function renderPageShell(options: {
     <meta name="twitter:title" content="${escapeHtml(options.title)}">
     <meta name="twitter:description" content="${escapeHtml(options.description)}">
     <meta name="twitter:image" content="${escapeHtml(options.imageUrl)}">${recaptchaScript}${jsonLdScript}${robotsMeta}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/components.css">
     <link rel="stylesheet" href="/enhancements.css">
     <script src="/index.js" defer></script>
@@ -519,7 +516,7 @@ export async function getJobPostingBySlug(slug: string): Promise<JobPosting | un
 export function renderCareersIndexPage(jobs: JobPosting[]): string {
   const openJobs = jobs.filter(isJobOpen);
   const jobMarkup = openJobs.length
-    ? `<div class="grid careers-grid gap-lg">${openJobs.map((job) => renderJobCard(job)).join("")}</div>`
+    ? `<div class="grid careers-grid gap-lg card-grid">${openJobs.map((job) => renderJobCard(job)).join("")}</div>`
     : `<div class="card card-primary blog-empty"><p class="card-text">No open roles are published right now. Check back soon or email <a href="mailto:office@gatewaycorporate.org" class="careers-inline-link">office@gatewaycorporate.org</a>.</p></div>`;
 
   return renderPageShell({
@@ -556,7 +553,7 @@ export function renderJobPostingPage(
         <div class="section-header">
           <h2 class="section-title">More open roles</h2>
         </div>
-        <div class="grid careers-grid gap-lg">${relatedJobs.map((candidate) => renderJobCard(candidate)).join("")}</div>
+        <div class="grid careers-grid gap-lg card-grid">${relatedJobs.map((candidate) => renderJobCard(candidate)).join("")}</div>
       </section>
     `
     : "";
