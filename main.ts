@@ -62,12 +62,13 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
     <td>${escapeHtml(metric.variant)}</td>
     <td>${metric.exposures}</td>
     <td>${metric.contactSubmits}</td>
+    <td>${metric.clickthroughs}</td>
     <td>${rate}</td>
 </tr>`;
                 })
                 .join("\n");
 
-        const content = rows || `<tr><td colspan="5">No experiment events available for this time range.</td></tr>`;
+        const content = rows || `<tr><td colspan="6">No experiment events available for this time range.</td></tr>`;
 
         return `<!DOCTYPE html>
 <html lang="en">
@@ -129,6 +130,7 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                         <th>Variant</th>
                         <th>Exposures</th>
                         <th>Contact Submits</th>
+                        <th>Clickthroughs</th>
                         <th>Conversion Rate</th>
                     </tr>
                 </thead>

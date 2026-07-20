@@ -35,6 +35,7 @@ export interface VariantGuardrailMetrics {
   variant: string;
   exposures: number;
   contactSubmits: number;
+  clickthroughs: number;
   conversionRate: number;
 }
 
@@ -350,9 +351,26 @@ function extractAssignments(event: ExperimentEvent): ExperimentAssignment[] {
     .filter((item): item is ExperimentAssignment => item !== null);
 }
 
+function isBuyClickEvent(event: ExperimentEvent): boolean {
+  if (event.eventName !== "cta_click") {
+    return false;
+  }
+
+  const metadata = event.metadata;
+  if (!metadata || typeof metadata !== "object") {
+    return false;
+  }
+
+  const label = typeof metadata.label === "string" ? metadata.label.toLowerCase() : "";
+  const target = typeof metadata.target === "string" ? metadata.target.toLowerCase() : "";
+  const combined = `${label} ${target}`;
+
+  return combined.includes("buy") || combined.includes("checkout") || combined.includes("polar.sh");
+}
+
 export async function generateGuardrailSummary(lookbackDays = 1): Promise<GuardrailSummary> {
   const paths = await readEventFilesForLookback(Math.max(1, lookbackDays));
-  const aggregates = new Map<string, { exposures: number; contactSubmits: number }>();
+  const aggregates = new Map<string, { exposures: number; contactSubmits: number; clickthroughs: number }>();
 
   for (const filePath of paths) {
     let contents = "";
@@ -388,7 +406,7 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
 
       for (const assignment of assignments) {
         const key = `${assignment.experimentId}::${assignment.variant}`;
-        const current = aggregates.get(key) || { exposures: 0, contactSubmits: 0 };
+        const current = aggregates.get(key) || { exposures: 0, contactSubmits: 0, clickthroughs: 0 };
 
         if (event.eventName === "experiment_exposure") {
           const exposedExperimentId = typeof event.metadata?.experimentId === "string"
@@ -405,6 +423,10 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
 
         if (event.eventName === "contact_submit") {
           current.contactSubmits += 1;
+        }
+
+        if (isBuyClickEvent(event)) {
+          current.clickthroughs += 1;
         }
 
         aggregates.set(key, current);
@@ -424,6 +446,7 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
         variant,
         exposures: counts.exposures,
         contactSubmits: counts.contactSubmits,
+        clickthroughs: counts.clickthroughs,
         conversionRate,
       };
     })
