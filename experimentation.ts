@@ -109,14 +109,14 @@ const experimentDefinitions: ExperimentDefinition[] = [
   },
   {
     id: "services-whitepaper-cta-v1",
-    variants: ["control", "whitepaper-first", "contact-first"],
-    weights: [0.5, 0.25, 0.25],
+    variants: ["control"],
+    weights: [1.0],
     enabledInProduction: false,
   },
   {
     id: "products-whitepaper-cta-v1",
-    variants: ["control", "proof-copy", "technical-copy"],
-    weights: [0.5, 0.25, 0.25],
+    variants: ["control"],
+    weights: [1.0],
     enabledInProduction: false,
   },
 ];

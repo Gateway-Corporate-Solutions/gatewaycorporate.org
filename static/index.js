@@ -927,35 +927,6 @@ function applyWhitepaperCtaExperiments() {
 
   if (path === "/services") {
     const variant = getExperimentVariant("services-whitepaper-cta-v1");
-    if (!variant || variant === "control") {
-      return;
-    }
-
-    const signalsActions = document.querySelector("#signals-intelligence .service-actions");
-    if (signalsActions instanceof HTMLElement) {
-      const primaryCta = signalsActions.querySelector('a[href="/products/devicer"]');
-      const whitepaperCta = signalsActions.querySelector('a[href="/papers/FP-Devicer.pdf"]');
-
-      if (primaryCta instanceof HTMLAnchorElement && whitepaperCta instanceof HTMLAnchorElement) {
-        if (variant === "whitepaper-first") {
-          whitepaperCta.textContent = "Read Devicer Architecture Whitepaper";
-          signalsActions.append(whitepaperCta, primaryCta);
-        } else if (variant === "contact-first") {
-          whitepaperCta.textContent = "Download Devicer Whitepaper";
-          primaryCta.textContent = "Talk to a Deployment Architect";
-        }
-      }
-    }
-
-    const heroWhitepaper = document.querySelector('[data-hero-whitepaper="services"]');
-    if (heroWhitepaper instanceof HTMLAnchorElement) {
-      if (variant === "whitepaper-first") {
-        heroWhitepaper.textContent = "Open Whitepaper Briefs";
-      } else if (variant === "contact-first") {
-        heroWhitepaper.textContent = "Review Whitepaper Before Call";
-      }
-    }
-
     document.body.classList.add(`exp-services-whitepaper-cta-${variant}`);
     ExperimentTelemetry.emit("experiment_exposure", {
       experimentId: "services-whitepaper-cta-v1",
@@ -966,32 +937,6 @@ function applyWhitepaperCtaExperiments() {
 
   if (path === "/products") {
     const variant = getExperimentVariant("products-whitepaper-cta-v1");
-    if (!variant || variant === "control") {
-      return;
-    }
-
-    const whitepaperCtas = document.querySelectorAll('[data-whitepaper-cta="products"]');
-    whitepaperCtas.forEach((anchor) => {
-      if (!(anchor instanceof HTMLAnchorElement)) {
-        return;
-      }
-
-      if (variant === "proof-copy") {
-        anchor.textContent = "See Technical Proof";
-      } else if (variant === "technical-copy") {
-        anchor.textContent = "Read Integration Whitepaper";
-      }
-    });
-
-    const heroWhitepaper = document.querySelector('[data-hero-whitepaper="products"]');
-    if (heroWhitepaper instanceof HTMLAnchorElement) {
-      if (variant === "proof-copy") {
-        heroWhitepaper.textContent = "Compare Whitepaper Findings";
-      } else if (variant === "technical-copy") {
-        heroWhitepaper.textContent = "Open Integration Whitepapers";
-      }
-    }
-
     document.body.classList.add(`exp-products-whitepaper-cta-${variant}`);
     ExperimentTelemetry.emit("experiment_exposure", {
       experimentId: "products-whitepaper-cta-v1",
