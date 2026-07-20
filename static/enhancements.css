@@ -477,6 +477,14 @@
   width: 100%;
 }
 
+.card-grid.blog-grid {
+  justify-content: center;
+  justify-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  margin-inline: auto;
+  width: min(100%, 96rem);
+}
+
 .blog-page .blog-grid {
   justify-content: center;
   justify-items: center;
