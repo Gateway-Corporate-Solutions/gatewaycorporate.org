@@ -546,9 +546,11 @@ function renderPageShell(options: {
         <div class="menu-container">
           <ul class="nav-list">
             <li><a href="/" class="nav-link">Home</a></li>
+            <li><a href="/services" class="nav-link">Services</a></li>
+            <li><a href="/products" class="nav-link">Products</a></li>
+            <li><a href="/faq" class="nav-link">FAQ</a></li>
             <li><a href="/careers" class="nav-link">Careers</a></li>
             <li><a href="/blog" class="nav-link">Blog</a></li>
-            <li><a href="/#projects" class="nav-link">Projects</a></li>
             <li><a href="/#contact" class="nav-link">Contact</a></li>
           </ul>
         </div>

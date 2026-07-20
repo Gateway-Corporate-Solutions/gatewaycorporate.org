@@ -323,12 +323,21 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
     <td>${metric.totalVisits}</td>
     <td>${metric.contactSubmits}</td>
     <td>${metric.clickthroughs}</td>
+        <td>${metric.buyClickthroughs}</td>
+        <td>${metric.whitepaperClickthroughs}</td>
+        <td>${metric.contactClickthroughs}</td>
+        <td>${metric.formStarts}</td>
+        <td>${metric.captchaCompletes}</td>
+        <td>${metric.formValidationErrors}</td>
+        <td>${metric.formSubmitAttempts}</td>
+        <td>${metric.formSubmitSuccesses}</td>
+        <td>${metric.formSubmitErrors}</td>
     <td>${rate}</td>
 </tr>`;
                 })
                 .join("\n");
 
-        const content = rows || `<tr><td colspan="6">No experiment events available for this time range.</td></tr>`;
+        const content = rows || `<tr><td colspan="15">No experiment events available for this time range.</td></tr>`;
 
         return `<!DOCTYPE html>
 <html lang="en">
@@ -467,6 +476,18 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                     <option value="contacts_asc">Contact Submits (Low to High)</option>
                     <option value="clicks_desc">Clickthroughs (High to Low)</option>
                     <option value="clicks_asc">Clickthroughs (Low to High)</option>
+                    <option value="buy_clicks_desc">Buy Clickthroughs (High to Low)</option>
+                    <option value="buy_clicks_asc">Buy Clickthroughs (Low to High)</option>
+                    <option value="whitepaper_clicks_desc">Whitepaper Clickthroughs (High to Low)</option>
+                    <option value="whitepaper_clicks_asc">Whitepaper Clickthroughs (Low to High)</option>
+                    <option value="contact_clicks_desc">Contact Clickthroughs (High to Low)</option>
+                    <option value="contact_clicks_asc">Contact Clickthroughs (Low to High)</option>
+                    <option value="form_attempts_desc">Form Submit Attempts (High to Low)</option>
+                    <option value="form_attempts_asc">Form Submit Attempts (Low to High)</option>
+                    <option value="form_success_desc">Form Submit Successes (High to Low)</option>
+                    <option value="form_success_asc">Form Submit Successes (Low to High)</option>
+                    <option value="form_errors_desc">Form Validation Errors (High to Low)</option>
+                    <option value="form_errors_asc">Form Validation Errors (Low to High)</option>
                     <option value="experiment_asc">Experiment (A-Z)</option>
                     <option value="experiment_desc">Experiment (Z-A)</option>
                 </select>
@@ -493,6 +514,15 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                         <th>Total Visits</th>
                         <th>Contact Submits</th>
                         <th>Clickthroughs</th>
+                        <th>Buy Clicks</th>
+                        <th>Whitepaper Clicks</th>
+                        <th>Contact Clicks</th>
+                        <th>Form Starts</th>
+                        <th>Captcha Completes</th>
+                        <th>Validation Errors</th>
+                        <th>Submit Attempts</th>
+                        <th>Submit Successes</th>
+                        <th>Submit Errors</th>
                         <th>Conversion Rate</th>
                     </tr>
                 </thead>
@@ -514,7 +544,7 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
 
                 const originalRows = Array.from(tableBody.querySelectorAll("tr"));
                 const emptyState = document.createElement("tr");
-                emptyState.innerHTML = '<td class="table-empty" colspan="6">No rows match the selected filters.</td>';
+                emptyState.innerHTML = '<td class="table-empty" colspan="15">No rows match the selected filters.</td>';
 
                 function toNumber(value) {
                     const parsed = Number(String(value).replace(/[^0-9.-]/g, ""));
@@ -529,7 +559,16 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                         visits: toNumber(cells[2]?.textContent || "0"),
                         contacts: toNumber(cells[3]?.textContent || "0"),
                         clicks: toNumber(cells[4]?.textContent || "0"),
-                        conversion: toNumber(cells[5]?.textContent || "0"),
+                        buyClicks: toNumber(cells[5]?.textContent || "0"),
+                        whitepaperClicks: toNumber(cells[6]?.textContent || "0"),
+                        contactClicks: toNumber(cells[7]?.textContent || "0"),
+                        formStarts: toNumber(cells[8]?.textContent || "0"),
+                        captchaCompletes: toNumber(cells[9]?.textContent || "0"),
+                        validationErrors: toNumber(cells[10]?.textContent || "0"),
+                        formSubmitAttempts: toNumber(cells[11]?.textContent || "0"),
+                        formSubmitSuccesses: toNumber(cells[12]?.textContent || "0"),
+                        formSubmitErrors: toNumber(cells[13]?.textContent || "0"),
+                        conversion: toNumber(cells[14]?.textContent || "0"),
                     };
                 }
 
@@ -591,6 +630,18 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                             case "contacts_desc": return b.contacts - a.contacts;
                             case "clicks_asc": return a.clicks - b.clicks;
                             case "clicks_desc": return b.clicks - a.clicks;
+                            case "buy_clicks_asc": return a.buyClicks - b.buyClicks;
+                            case "buy_clicks_desc": return b.buyClicks - a.buyClicks;
+                            case "whitepaper_clicks_asc": return a.whitepaperClicks - b.whitepaperClicks;
+                            case "whitepaper_clicks_desc": return b.whitepaperClicks - a.whitepaperClicks;
+                            case "contact_clicks_asc": return a.contactClicks - b.contactClicks;
+                            case "contact_clicks_desc": return b.contactClicks - a.contactClicks;
+                            case "form_attempts_asc": return a.formSubmitAttempts - b.formSubmitAttempts;
+                            case "form_attempts_desc": return b.formSubmitAttempts - a.formSubmitAttempts;
+                            case "form_success_asc": return a.formSubmitSuccesses - b.formSubmitSuccesses;
+                            case "form_success_desc": return b.formSubmitSuccesses - a.formSubmitSuccesses;
+                            case "form_errors_asc": return a.validationErrors - b.validationErrors;
+                            case "form_errors_desc": return b.validationErrors - a.validationErrors;
                             case "experiment_desc": return b.experiment.localeCompare(a.experiment);
                             case "experiment_asc":
                             default:
@@ -735,6 +786,10 @@ function renderSitemapUrl({ loc, lastmod, priority, changefreq }: SitemapEntry):
     return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>${changefreqTag}\n    <priority>${priority.toFixed(1)}</priority>\n  </url>`;
 }
 
+function daysBetween(dateA: Date, dateB: Date): number {
+    return Math.floor(Math.abs(dateA.getTime() - dateB.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 async function renderHomePage(
     context: {
         request: { headers: Headers; url: URL };
@@ -837,6 +892,93 @@ router.get("/sitemap.xml", async (context) => {
 ${parts}
 </urlset>`;
     context.response.headers.set("Content-Type", "application/xml; charset=utf-8");
+});
+
+router.get("/seo/sitemap-health", async (context) => {
+    if (!isExperimentAdminAuthorized(context.request.headers, context.request.url.toString())) {
+        context.response.status = 401;
+        context.response.body = { ok: false, error: "Unauthorized" };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+        return;
+    }
+
+    try {
+        const staleAfterDays = Math.max(1, Number(context.request.url.searchParams.get("staleAfterDays") || "45"));
+        const now = new Date();
+        const [blogPosts, jobs] = await Promise.all([getBlogPosts(), getJobPostings()]);
+
+        const includedPaths = new Set<string>([
+            "/",
+            "/services",
+            "/faq",
+            "/blog",
+            "/careers",
+            "/products",
+            ...[...allowedProductViews].map((slug) => `/products/${slug}`),
+            ...[...allowedPapers].map((slug) => `/papers/${slug}.pdf`),
+            ...blogPosts.map((post) => `/blog/${post.slug}`),
+            ...jobs.filter((job) => job.status === "open").map((job) => `/careers/${job.slug}`),
+        ]);
+
+        const expectedPaths = [
+            "/",
+            "/services",
+            "/faq",
+            "/blog",
+            "/careers",
+            "/products",
+            ...[...allowedProductViews].map((slug) => `/products/${slug}`),
+            ...[...allowedPapers].map((slug) => `/papers/${slug}.pdf`),
+            ...blogPosts.map((post) => `/blog/${post.slug}`),
+            ...jobs.filter((job) => job.status === "open").map((job) => `/careers/${job.slug}`),
+        ];
+
+        const missingPaths = expectedPaths.filter((path) => !includedPaths.has(path));
+
+        const freshnessChecks = [
+            { path: "/", date: await getSitemapLastModified("./static/views/index.html", now.toISOString().slice(0, 10)) },
+            { path: "/services", date: await getSitemapLastModified("./static/views/services.html", now.toISOString().slice(0, 10)) },
+            { path: "/faq", date: await getSitemapLastModified("./static/views/faq.html", now.toISOString().slice(0, 10)) },
+            { path: "/products", date: await getSitemapLastModified("./static/views/products.html", now.toISOString().slice(0, 10)) },
+            ...blogPosts.map((post) => ({ path: `/blog/${post.slug}`, date: post.date })),
+            ...jobs.filter((job) => job.status === "open").map((job) => ({ path: `/careers/${job.slug}`, date: job.date })),
+        ];
+
+        const staleEntries = freshnessChecks
+            .map((entry) => {
+                const parsed = new Date(entry.date);
+                if (Number.isNaN(parsed.getTime())) {
+                    return {
+                        path: entry.path,
+                        lastmod: entry.date,
+                        ageDays: null,
+                    };
+                }
+
+                return {
+                    path: entry.path,
+                    lastmod: parsed.toISOString().slice(0, 10),
+                    ageDays: daysBetween(now, parsed),
+                };
+            })
+            .filter((entry) => entry.ageDays === null || entry.ageDays > staleAfterDays);
+
+        context.response.status = 200;
+        context.response.body = {
+            ok: missingPaths.length === 0 && staleEntries.length === 0,
+            generatedAt: new Date().toISOString(),
+            staleAfterDays,
+            totalTrackedPaths: expectedPaths.length,
+            missingPaths,
+            staleEntries,
+        };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    } catch (error) {
+        console.error("Failed to generate sitemap health report", error);
+        context.response.status = 500;
+        context.response.body = { ok: false, error: "Sitemap health report unavailable" };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    }
 });
 
 router.get("/", async (context) => {

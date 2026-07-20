@@ -37,6 +37,15 @@ export interface VariantGuardrailMetrics {
   exposures: number;
   contactSubmits: number;
   clickthroughs: number;
+  buyClickthroughs: number;
+  whitepaperClickthroughs: number;
+  contactClickthroughs: number;
+  formStarts: number;
+  captchaCompletes: number;
+  formValidationErrors: number;
+  formSubmitAttempts: number;
+  formSubmitSuccesses: number;
+  formSubmitErrors: number;
   conversionRate: number;
 }
 
@@ -95,6 +104,18 @@ const experimentDefinitions: ExperimentDefinition[] = [
   {
     id: "product-nashtwin-layout-v1",
     variants: ["control", "pricing-first", "comparison-first"],
+    weights: [0.5, 0.25, 0.25],
+    enabledInProduction: false,
+  },
+  {
+    id: "services-whitepaper-cta-v1",
+    variants: ["control", "whitepaper-first", "contact-first"],
+    weights: [0.5, 0.25, 0.25],
+    enabledInProduction: false,
+  },
+  {
+    id: "products-whitepaper-cta-v1",
+    variants: ["control", "proof-copy", "technical-copy"],
     weights: [0.5, 0.25, 0.25],
     enabledInProduction: false,
   },
@@ -352,14 +373,19 @@ function extractAssignments(event: ExperimentEvent): ExperimentAssignment[] {
     .filter((item): item is ExperimentAssignment => item !== null);
 }
 
-function isBuyClickEvent(event: ExperimentEvent): boolean {
+function getClickIntent(event: ExperimentEvent): "buy" | "whitepaper" | "contact" | "other" {
   if (event.eventName !== "cta_click") {
-    return false;
+    return "other";
   }
 
   const metadata = event.metadata;
   if (!metadata || typeof metadata !== "object") {
-    return false;
+    return "other";
+  }
+
+  const explicitIntent = typeof metadata.clickIntent === "string" ? metadata.clickIntent.trim().toLowerCase() : "";
+  if (explicitIntent === "buy" || explicitIntent === "whitepaper" || explicitIntent === "contact") {
+    return explicitIntent;
   }
 
   const label = typeof metadata.label === "string" ? metadata.label.toLowerCase() : "";
@@ -371,17 +397,52 @@ function isBuyClickEvent(event: ExperimentEvent): boolean {
   const hasAccentClass = classList.some((entry) => entry.toLowerCase() === "btn-accent");
   const combined = `${label} ${target}`;
 
-  const isWhitepaperClick =
+  if (
     combined.includes("whitepaper") ||
     target.includes("/papers/") ||
-    target.endsWith(".pdf");
+    target.endsWith(".pdf")
+  ) {
+    return "whitepaper";
+  }
 
-  return isAccentButton ||
+  if (
+    target.startsWith("#contact") ||
+    combined.includes("contact") ||
+    combined.includes("consultation") ||
+    combined.includes("architecture review")
+  ) {
+    return "contact";
+  }
+
+  if (
+    isAccentButton ||
     hasAccentClass ||
     combined.includes("buy") ||
     combined.includes("checkout") ||
-    combined.includes("polar.sh") ||
-    isWhitepaperClick;
+    combined.includes("polar.sh")
+  ) {
+    return "buy";
+  }
+
+  return "other";
+}
+
+function getFormSubmitResultStatus(event: ExperimentEvent): "success" | "error" | "other" {
+  if (event.eventName !== "form_submit_result") {
+    return "other";
+  }
+
+  const metadata = event.metadata;
+  if (!metadata || typeof metadata !== "object") {
+    return "other";
+  }
+
+  const status = typeof metadata.status === "string" ? metadata.status.trim().toLowerCase() : "";
+  if (status === "success" || status === "error") {
+    return status;
+  }
+
+  return "other";
 }
 
 function normalizePath(path: string): string {
@@ -413,6 +474,14 @@ function getActiveExperimentIdsForPath(path: string): Set<string> {
     return new Set(["product-nashtwin-layout-v1"]);
   }
 
+  if (normalizedPath === "/services") {
+    return new Set(["services-whitepaper-cta-v1"]);
+  }
+
+  if (normalizedPath === "/products") {
+    return new Set(["products-whitepaper-cta-v1"]);
+  }
+
   return new Set<string>();
 }
 
@@ -422,6 +491,15 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
     exposures: number;
     contactSubmits: number;
     clickthroughs: number;
+    buyClickthroughs: number;
+    whitepaperClickthroughs: number;
+    contactClickthroughs: number;
+    formStarts: number;
+    captchaCompletes: number;
+    formValidationErrors: number;
+    formSubmitAttempts: number;
+    formSubmitSuccesses: number;
+    formSubmitErrors: number;
     visitSessions: Set<string>;
     conversionSessions: Set<string>;
   }>();
@@ -466,6 +544,15 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
           exposures: 0,
           contactSubmits: 0,
           clickthroughs: 0,
+          buyClickthroughs: 0,
+          whitepaperClickthroughs: 0,
+          contactClickthroughs: 0,
+          formStarts: 0,
+          captchaCompletes: 0,
+          formValidationErrors: 0,
+          formSubmitAttempts: 0,
+          formSubmitSuccesses: 0,
+          formSubmitErrors: 0,
           visitSessions: new Set<string>(),
           conversionSessions: new Set<string>(),
         };
@@ -494,9 +581,37 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
           current.conversionSessions.add(event.sessionId);
         }
 
-        if (isBuyClickEvent(event) && isActiveOnPath) {
+        const clickIntent = getClickIntent(event);
+        if (clickIntent !== "other" && isActiveOnPath) {
           current.clickthroughs += 1;
+          if (clickIntent === "buy") {
+            current.buyClickthroughs += 1;
+          } else if (clickIntent === "whitepaper") {
+            current.whitepaperClickthroughs += 1;
+          } else if (clickIntent === "contact") {
+            current.contactClickthroughs += 1;
+          }
           current.conversionSessions.add(event.sessionId);
+        }
+
+        if (isActiveOnPath) {
+          if (event.eventName === "form_start") {
+            current.formStarts += 1;
+          } else if (event.eventName === "captcha_complete") {
+            current.captchaCompletes += 1;
+          } else if (event.eventName === "form_validation_error") {
+            current.formValidationErrors += 1;
+          } else if (event.eventName === "form_submit_attempt") {
+            current.formSubmitAttempts += 1;
+          }
+
+          const submitStatus = getFormSubmitResultStatus(event);
+          if (submitStatus === "success") {
+            current.formSubmitSuccesses += 1;
+            current.conversionSessions.add(event.sessionId);
+          } else if (submitStatus === "error") {
+            current.formSubmitErrors += 1;
+          }
         }
 
         aggregates.set(key, current);
@@ -519,6 +634,15 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
         exposures: counts.exposures,
         contactSubmits: counts.contactSubmits,
         clickthroughs: counts.clickthroughs,
+        buyClickthroughs: counts.buyClickthroughs,
+        whitepaperClickthroughs: counts.whitepaperClickthroughs,
+        contactClickthroughs: counts.contactClickthroughs,
+        formStarts: counts.formStarts,
+        captchaCompletes: counts.captchaCompletes,
+        formValidationErrors: counts.formValidationErrors,
+        formSubmitAttempts: counts.formSubmitAttempts,
+        formSubmitSuccesses: counts.formSubmitSuccesses,
+        formSubmitErrors: counts.formSubmitErrors,
         conversionRate,
       };
     })

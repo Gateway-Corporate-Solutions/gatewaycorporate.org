@@ -51,6 +51,10 @@
         text-align: center;
       }
 
+      .services-hero .section-header {
+        align-items: center;
+      }
+
       .services-hero .text-lead {
         max-width: 880px;
         margin: 0 auto;
@@ -62,6 +66,10 @@
         justify-content: center;
         flex-wrap: wrap;
         gap: 0.75rem;
+      }
+
+      .services-hero .hero-actions {
+        justify-content: center;
       }
 
       .service-section {
@@ -132,6 +140,13 @@
         margin-top: 1.2rem;
       }
 
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+
       .final-cta {
         text-align: center;
         max-width: 900px;
@@ -195,6 +210,10 @@
             Our service model is designed to move organizations from fragmented
             tooling to reliable, measurable operational capability.
           </p>
+          <div class="hero-actions">
+            <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm" data-hero-whitepaper="services">Open Whitepaper Briefs</a>
+            <a href="/#contact" class="btn btn-primary btn-sm">Book Service Architecture Review</a>
+          </div>
           <div class="jump-links">
             <a href="#signals-intelligence" class="btn btn-secondary btn-sm">Signals Intelligence</a>
             <a href="#ai-operations" class="btn btn-secondary btn-sm">AI Operations</a>
@@ -252,7 +271,7 @@
             </div>
             <div class="service-actions">
               <a href="/products/devicer" class="btn btn-primary btn-sm">See Devicer</a>
-              <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm">Read Whitepaper</a>
+              <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm" data-whitepaper-cta="services">Read Whitepaper</a>
             </div>
           </div>
         </div>

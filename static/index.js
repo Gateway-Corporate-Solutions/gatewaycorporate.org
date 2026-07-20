@@ -4,6 +4,10 @@ const scriptLoadPromises = new Map();
 const ANALYTICS_CONSENT_KEY = "gcx_analytics_consent";
 const ANALYTICS_CONSENT_ACCEPTED = "accepted";
 const ANALYTICS_CONSENT_DECLINED = "declined";
+const FUNNEL_FORMS_SELECTOR = "form#contact-form, form.careers-form";
+
+const recaptchaCompletedForms = new WeakSet();
+const recaptchaPollers = new WeakMap();
 
 function getStoredAnalyticsConsent() {
   try {
@@ -491,11 +495,13 @@ const ExperimentTelemetry = {
           const target = button.getAttribute("href") || button.getAttribute("id") || "";
           const classList = Array.from(button.classList || []);
           const isAccentButton = classList.includes("btn-accent");
+          const clickIntent = classifyClickIntent(label, target, classList);
           this.emit("cta_click", {
             label,
             target,
             classList,
             isAccentButton,
+            clickIntent,
           });
         });
       });
@@ -518,6 +524,175 @@ const ExperimentTelemetry = {
     }
   },
 };
+
+function classifyClickIntent(label, target, classList = []) {
+  const combined = `${label} ${target}`.toLowerCase();
+  const normalizedTarget = (target || "").toLowerCase();
+  const hasAccentClass = classList.some((entry) => String(entry).toLowerCase() === "btn-accent");
+
+  if (
+    combined.includes("whitepaper") ||
+    normalizedTarget.includes("/papers/") ||
+    normalizedTarget.endsWith(".pdf")
+  ) {
+    return "whitepaper";
+  }
+
+  if (
+    normalizedTarget.startsWith("#contact") ||
+    combined.includes("contact") ||
+    combined.includes("consultation") ||
+    combined.includes("architecture review")
+  ) {
+    return "contact";
+  }
+
+  if (
+    hasAccentClass ||
+    combined.includes("buy") ||
+    combined.includes("checkout") ||
+    combined.includes("polar.sh")
+  ) {
+    return "buy";
+  }
+
+  return "other";
+}
+
+function getFormTelemetryMetadata(form) {
+  const formId = form.getAttribute("id") || form.getAttribute("name") || "unnamed-form";
+  const action = form.getAttribute("action") || "";
+  const formType = action.includes("/careers/") || form.classList.contains("careers-form")
+    ? "careers_application"
+    : "contact";
+
+  return {
+    formId,
+    formType,
+    formAction: action,
+  };
+}
+
+function emitRecaptchaCompletionIfPresent(form, metadata) {
+  if (recaptchaCompletedForms.has(form)) {
+    return;
+  }
+
+  const responseField = form.querySelector('textarea[name="g-recaptcha-response"]');
+  if (!(responseField instanceof HTMLTextAreaElement)) {
+    return;
+  }
+
+  if (!responseField.value.trim()) {
+    return;
+  }
+
+  recaptchaCompletedForms.add(form);
+  ExperimentTelemetry.emit("captcha_complete", {
+    ...metadata,
+    tokenLength: responseField.value.trim().length,
+  });
+
+  const pollerId = recaptchaPollers.get(form);
+  if (pollerId) {
+    clearInterval(pollerId);
+    recaptchaPollers.delete(form);
+  }
+}
+
+function setupFunnelInstrumentation() {
+  const forms = document.querySelectorAll(FUNNEL_FORMS_SELECTOR);
+  if (!forms.length) {
+    return;
+  }
+
+  forms.forEach((form) => {
+    if (!(form instanceof HTMLFormElement)) {
+      return;
+    }
+
+    const metadata = getFormTelemetryMetadata(form);
+    let hasStarted = false;
+
+    const markStarted = (fieldName = "") => {
+      if (hasStarted) {
+        return;
+      }
+
+      hasStarted = true;
+      ExperimentTelemetry.emit("form_start", {
+        ...metadata,
+        triggerField: fieldName,
+      });
+    };
+
+    form.addEventListener("focusin", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      markStarted(target.getAttribute("name") || target.getAttribute("id") || target.tagName.toLowerCase());
+    });
+
+    form.addEventListener("invalid", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) {
+        return;
+      }
+
+      markStarted(target.name || target.id || target.tagName.toLowerCase());
+      ExperimentTelemetry.emit("form_validation_error", {
+        ...metadata,
+        field: target.name || target.id || target.tagName.toLowerCase(),
+        reason: target.validationMessage || "invalid",
+      });
+    }, true);
+
+    form.addEventListener("submit", () => {
+      emitRecaptchaCompletionIfPresent(form, metadata);
+      ExperimentTelemetry.emit("form_submit_attempt", metadata);
+    });
+
+    if (!recaptchaPollers.has(form)) {
+      const pollerId = setInterval(() => {
+        emitRecaptchaCompletionIfPresent(form, metadata);
+      }, 1000);
+      recaptchaPollers.set(form, pollerId);
+    }
+  });
+}
+
+function emitCareersSubmissionResultIfPresent() {
+  const path = window.location.pathname.replace(/\/$/, "") || "/";
+
+  if (path === "/careers/success") {
+    const job = new URLSearchParams(window.location.search).get("job") || "";
+    ExperimentTelemetry.emit("form_submit_result", {
+      formType: "careers_application",
+      formId: "careers-form",
+      status: "success",
+      job,
+    });
+    return;
+  }
+
+  const careersForm = document.querySelector("form.careers-form");
+  if (!(careersForm instanceof HTMLFormElement)) {
+    return;
+  }
+
+  const errorBanner = careersForm.querySelector(".form-banner-error");
+  if (!errorBanner) {
+    return;
+  }
+
+  ExperimentTelemetry.emit("form_submit_result", {
+    formType: "careers_application",
+    formId: careersForm.getAttribute("id") || "careers-form",
+    status: "error",
+  });
+}
 
 function getExperimentVariant(experimentId) {
   const overrideKeys = [
@@ -745,6 +920,84 @@ function applyProductLayoutExperiments() {
     experimentId: routeConfig.experimentId,
     variant,
   });
+}
+
+function applyWhitepaperCtaExperiments() {
+  const path = window.location.pathname.replace(/\/$/, "") || "/";
+
+  if (path === "/services") {
+    const variant = getExperimentVariant("services-whitepaper-cta-v1");
+    if (!variant || variant === "control") {
+      return;
+    }
+
+    const signalsActions = document.querySelector("#signals-intelligence .service-actions");
+    if (signalsActions instanceof HTMLElement) {
+      const primaryCta = signalsActions.querySelector('a[href="/products/devicer"]');
+      const whitepaperCta = signalsActions.querySelector('a[href="/papers/FP-Devicer.pdf"]');
+
+      if (primaryCta instanceof HTMLAnchorElement && whitepaperCta instanceof HTMLAnchorElement) {
+        if (variant === "whitepaper-first") {
+          whitepaperCta.textContent = "Read Devicer Architecture Whitepaper";
+          signalsActions.append(whitepaperCta, primaryCta);
+        } else if (variant === "contact-first") {
+          whitepaperCta.textContent = "Download Devicer Whitepaper";
+          primaryCta.textContent = "Talk to a Deployment Architect";
+        }
+      }
+    }
+
+    const heroWhitepaper = document.querySelector('[data-hero-whitepaper="services"]');
+    if (heroWhitepaper instanceof HTMLAnchorElement) {
+      if (variant === "whitepaper-first") {
+        heroWhitepaper.textContent = "Open Whitepaper Briefs";
+      } else if (variant === "contact-first") {
+        heroWhitepaper.textContent = "Review Whitepaper Before Call";
+      }
+    }
+
+    document.body.classList.add(`exp-services-whitepaper-cta-${variant}`);
+    ExperimentTelemetry.emit("experiment_exposure", {
+      experimentId: "services-whitepaper-cta-v1",
+      variant,
+    });
+    return;
+  }
+
+  if (path === "/products") {
+    const variant = getExperimentVariant("products-whitepaper-cta-v1");
+    if (!variant || variant === "control") {
+      return;
+    }
+
+    const whitepaperCtas = document.querySelectorAll('[data-whitepaper-cta="products"]');
+    whitepaperCtas.forEach((anchor) => {
+      if (!(anchor instanceof HTMLAnchorElement)) {
+        return;
+      }
+
+      if (variant === "proof-copy") {
+        anchor.textContent = "See Technical Proof";
+      } else if (variant === "technical-copy") {
+        anchor.textContent = "Read Integration Whitepaper";
+      }
+    });
+
+    const heroWhitepaper = document.querySelector('[data-hero-whitepaper="products"]');
+    if (heroWhitepaper instanceof HTMLAnchorElement) {
+      if (variant === "proof-copy") {
+        heroWhitepaper.textContent = "Compare Whitepaper Findings";
+      } else if (variant === "technical-copy") {
+        heroWhitepaper.textContent = "Open Integration Whitepapers";
+      }
+    }
+
+    document.body.classList.add(`exp-products-whitepaper-cta-${variant}`);
+    ExperimentTelemetry.emit("experiment_exposure", {
+      experimentId: "products-whitepaper-cta-v1",
+      variant,
+    });
+  }
 }
 
 function loadExternalScript(src) {
@@ -1819,8 +2072,18 @@ function renderContactStatusBanner() {
 
   if (status === "success") {
     container.innerHTML = '<div class="form-banner" role="status" aria-live="polite" style="max-width: 820px; width: 95%;">Your message was sent successfully. We will follow up shortly.</div>';
+    ExperimentTelemetry.emit("form_submit_result", {
+      formType: "contact",
+      formId: "contact-form",
+      status: "success",
+    });
   } else if (status === "error") {
     container.innerHTML = '<div class="form-banner form-banner-error" role="alert" style="max-width: 820px; width: 95%;">We could not send your message right now. Please try again shortly or email office@gatewaycorporate.org directly.</div>';
+    ExperimentTelemetry.emit("form_submit_result", {
+      formType: "contact",
+      formId: "contact-form",
+      status: "error",
+    });
   }
 
   params.delete("contact");
@@ -1911,11 +2174,14 @@ function initializePage() {
   }
 
   setupAnchorNavigation();
+  setupFunnelInstrumentation();
   setupDeferredContactAssets();
   renderContactStatusBanner();
+  emitCareersSubmissionResultIfPresent();
   applyHomepageLayoutExperiment();
   applyHomepageCtaExperiment();
   applyProductLayoutExperiments();
+  applyWhitepaperCtaExperiments();
 
   if (hasAnalyticsConsent()) {
     DevicerAnalytics.ensureReady().catch((error) => {
