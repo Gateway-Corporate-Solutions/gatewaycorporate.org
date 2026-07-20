@@ -149,11 +149,17 @@ function injectExperimentBootstrap(html: string, request: Request): string {
         sessionHeader: request.headers.get("x-gcx-session"),
     }, isProduction);
 
+    const devicerSnippetKey = (Deno.env.get("DEVICER_LICENSE_KEY") || "").trim();
+    const devicerBootstrap = devicerSnippetKey
+        ? `<script>window.__GCX__ = window.__GCX__ || {}; window.__GCX__.devicerSnippetKey = ${JSON.stringify(devicerSnippetKey)};</script>`
+        : "";
+    const bootstrapScripts = `${scriptTag}${devicerBootstrap}`;
+
     if (html.includes("</head>")) {
-        return html.replace("</head>", `${scriptTag}\n  </head>`);
+        return html.replace("</head>", `${bootstrapScripts}\n  </head>`);
     }
 
-    return `${scriptTag}${html}`;
+    return `${bootstrapScripts}${html}`;
 }
 
 function listStaticFileSlugs(directoryPath: string, extension: string): Set<string> {

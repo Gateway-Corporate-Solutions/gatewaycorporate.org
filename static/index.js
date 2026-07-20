@@ -1,10 +1,172 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const scriptLoadPromises = new Map();
+const ANALYTICS_CONSENT_KEY = "gcx_analytics_consent";
+const ANALYTICS_CONSENT_ACCEPTED = "accepted";
+const ANALYTICS_CONSENT_DECLINED = "declined";
+
+function getStoredAnalyticsConsent() {
+  try {
+    return window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function hasAnalyticsConsent() {
+  return getStoredAnalyticsConsent() === ANALYTICS_CONSENT_ACCEPTED;
+}
+
+function setAnalyticsConsent(status) {
+  try {
+    window.localStorage.setItem(ANALYTICS_CONSENT_KEY, status);
+  } catch {
+    // Ignore storage errors in privacy-restricted contexts.
+  }
+}
+
+function removeCloudflareBeaconScripts() {
+  const selectors = [
+    'script[src*="cloudflareinsights"]',
+    'script[src*="beacon.min.js"]',
+  ];
+
+  for (const selector of selectors) {
+    document.querySelectorAll(selector).forEach((script) => {
+      if (script instanceof HTMLScriptElement) {
+        script.remove();
+      }
+    });
+  }
+
+  if (window.__CFBEACON__) {
+    try {
+      delete window.__CFBEACON__;
+    } catch {
+      // Ignore readonly global deletion errors.
+    }
+  }
+}
+
+function resolveDevicerSnippetKey() {
+  const fromMeta = document
+    .querySelector('meta[name="devicer-snippet-key"]')
+    ?.getAttribute("content")
+    ?.trim();
+
+  if (fromMeta) {
+    return fromMeta;
+  }
+
+  const fromBootstrap = window.__GCX__?.devicerSnippetKey;
+  return typeof fromBootstrap === "string" && fromBootstrap.trim()
+    ? fromBootstrap.trim()
+    : "";
+}
+
+function extractDeviceId(candidate) {
+  if (!candidate) {
+    return null;
+  }
+
+  if (typeof candidate === "string") {
+    return candidate.trim() || null;
+  }
+
+  if (typeof candidate !== "object") {
+    return null;
+  }
+
+  const fields = ["deviceId", "id", "fingerprint", "fingerprintId"];
+  for (const field of fields) {
+    const value = candidate[field];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return null;
+}
+
+const DevicerAnalytics = {
+  _readyPromise: null,
+  _deviceId: null,
+
+  async ensureReady() {
+    if (this._readyPromise) {
+      return this._readyPromise;
+    }
+
+    this._readyPromise = (async () => {
+      const devicerKey = resolveDevicerSnippetKey();
+      if (!devicerKey) {
+        return;
+      }
+
+      await loadExternalScript(
+        `https://nash.gatewaycorporate.org/api/devicer/snippet?key=${encodeURIComponent(devicerKey)}`,
+      );
+
+      const api = window.Devicer;
+      if (!api) {
+        return;
+      }
+
+      const methods = [
+        () => (typeof api.identifyDevice === "function" ? api.identifyDevice() : null),
+        () => (typeof api.identify === "function" ? api.identify() : null),
+        () => (typeof api.getFingerprint === "function" ? api.getFingerprint() : null),
+      ];
+
+      for (const method of methods) {
+        let result = null;
+        try {
+          result = await method();
+        } catch {
+          continue;
+        }
+
+        const deviceId = extractDeviceId(result);
+        if (deviceId) {
+          this._deviceId = deviceId;
+          break;
+        }
+      }
+    })();
+
+    return this._readyPromise;
+  },
+
+  getTrackingMetadata() {
+    return {
+      trackingConsent: hasAnalyticsConsent() ? "granted" : "denied",
+      deviceId: this._deviceId,
+    };
+  },
+
+  async submitContactIdentity(name, email) {
+    if (!hasAnalyticsConsent()) {
+      return;
+    }
+
+    await this.ensureReady();
+
+    if (!window.Devicer?.submitContact || !name || !email) {
+      return;
+    }
+
+    await window.Devicer.submitContact({
+      name,
+      emails: [{ address: email, isPrimary: true }],
+    });
+  },
+};
 
 const ExperimentTelemetry = {
   queue: [],
   isSending: false,
+  handlersBound: false,
+  hasSentInitialPageView: false,
 
   getContext() {
     const ctx = window.__GCX__;
@@ -16,6 +178,10 @@ const ExperimentTelemetry = {
   },
 
   emit(eventName, metadata = {}) {
+    if (!hasAnalyticsConsent()) {
+      return;
+    }
+
     const context = this.getContext();
     if (!context) {
       return;
@@ -28,6 +194,7 @@ const ExperimentTelemetry = {
       timestamp: new Date().toISOString(),
       metadata: {
         assignments: context.assignments || [],
+        ...DevicerAnalytics.getTrackingMetadata(),
         ...metadata,
       },
     });
@@ -71,28 +238,35 @@ const ExperimentTelemetry = {
       return;
     }
 
-    this.emit("page_view", {
-      referrer: document.referrer || "",
-    });
+    if (!this.handlersBound) {
+      this.handlersBound = true;
 
-    const ctaButtons = document.querySelectorAll("a.btn, button.btn");
-    ctaButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const label = button.textContent?.trim() || "";
-        const target = button.getAttribute("href") || button.getAttribute("id") || "";
-        this.emit("cta_click", {
-          label,
-          target,
+      const ctaButtons = document.querySelectorAll("a.btn, button.btn");
+      ctaButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const label = button.textContent?.trim() || "";
+          const target = button.getAttribute("href") || button.getAttribute("id") || "";
+          this.emit("cta_click", {
+            label,
+            target,
+          });
         });
       });
-    });
 
-    const contactForm = document.getElementById("contact-form");
-    if (contactForm instanceof HTMLFormElement) {
-      contactForm.addEventListener("submit", () => {
-        this.emit("contact_submit", {
-          formId: "contact-form",
+      const contactForm = document.getElementById("contact-form");
+      if (contactForm instanceof HTMLFormElement) {
+        contactForm.addEventListener("submit", () => {
+          this.emit("contact_submit", {
+            formId: "contact-form",
+          });
         });
+      }
+    }
+
+    if (!this.hasSentInitialPageView && hasAnalyticsConsent()) {
+      this.hasSentInitialPageView = true;
+      this.emit("page_view", {
+        referrer: document.referrer || "",
       });
     }
   },
@@ -583,7 +757,7 @@ class NetworkGraph {
     this.currentPose = { x: 0, y: 0, lookX: 0, lookY: 0 };
     this.minMeshViewportWidth = 721;
     this.heroResizeObserver = null;
-    this.isStatic = this.reducedMotion || window.innerWidth < 960 || Boolean(navigator.connection?.saveData);
+    this.isStatic = this.reducedMotion || Boolean(navigator.connection?.saveData);
 
     this.resize(true);
     this.buildNodes();
@@ -859,8 +1033,14 @@ class NetworkGraph {
   }
 
   buildNodes() {
-    const nodeCount = this.isStatic ? 120 : 220;
     const width = Math.max(1, this.lastWidth);
+    const nodeCount = this.isStatic
+      ? 120
+      : width < 600
+        ? 120
+        : width < 900
+          ? 160
+          : 220;
     const height = Math.max(1, this.lastHeight);
 
     this.meshBlend = 0;
@@ -1290,28 +1470,72 @@ class ContactFormController {
     const formData = new FormData(this.form);
     const name = formData.get("name")?.toString().trim() || "";
     const email = formData.get("email")?.toString().trim() || "";
-    const devicerKey = document
-      .querySelector('meta[name="devicer-snippet-key"]')
-      ?.getAttribute("content")
-      ?.trim();
 
     try {
-      if (devicerKey) {
-        await loadExternalScript(`https://nash.gatewaycorporate.org/api/devicer/snippet?key=${encodeURIComponent(devicerKey)}`);
-      }
-
-      if (devicerKey && window.Devicer?.submitContact && name && email) {
-        await window.Devicer.submitContact({
-          name,
-          emails: [{ address: email, isPrimary: true }],
-        });
-      }
+      await DevicerAnalytics.submitContactIdentity(name, email);
     } catch (error) {
       console.error("Devicer contact submission failed:", error);
     } finally {
       this.form.submit();
     }
   }
+}
+
+function renderAnalyticsConsentBanner() {
+  if (getStoredAnalyticsConsent()) {
+    return;
+  }
+
+  const existing = document.querySelector(".privacy-consent-banner");
+  if (existing) {
+    return;
+  }
+
+  const banner = document.createElement("aside");
+  banner.className = "privacy-consent-banner";
+  banner.setAttribute("role", "dialog");
+  banner.setAttribute("aria-live", "polite");
+  banner.setAttribute("aria-label", "Analytics consent");
+  banner.innerHTML = `
+    <div class="privacy-consent-content">
+      <p class="privacy-consent-eyebrow">Privacy Controls</p>
+      <p class="privacy-consent-title">Allow privacy-safe analytics?</p>
+      <p class="privacy-consent-copy">We use first-party Devicer fingerprint analytics to measure site reliability, experiment outcomes, and buyer intent. Data is pseudonymous and never sold.</p>
+      <div class="privacy-consent-actions">
+        <button type="button" class="btn btn-primary btn-sm" data-consent-action="accept">Allow Analytics</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-consent-action="decline">Decline</button>
+      </div>
+    </div>
+  `;
+
+  banner.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const action = target.getAttribute("data-consent-action");
+    if (action === "accept") {
+      setAnalyticsConsent(ANALYTICS_CONSENT_ACCEPTED);
+      banner.remove();
+
+      try {
+        await DevicerAnalytics.ensureReady();
+      } catch (error) {
+        console.error("Devicer analytics setup failed:", error);
+      }
+
+      ExperimentTelemetry.initialize();
+      return;
+    }
+
+    if (action === "decline") {
+      setAnalyticsConsent(ANALYTICS_CONSENT_DECLINED);
+      banner.remove();
+    }
+  });
+
+  document.body.appendChild(banner);
 }
 
 function renderContactStatusBanner() {
@@ -1398,6 +1622,8 @@ function setupAnchorNavigation() {
 }
 
 function initializePage() {
+  removeCloudflareBeaconScripts();
+
   const navbarController = new NavbarController();
   window.navbarController = navbarController;
 
@@ -1424,7 +1650,15 @@ function initializePage() {
   applyHomepageLayoutExperiment();
   applyHomepageCtaExperiment();
   applyProductLayoutExperiments();
+
+  if (hasAnalyticsConsent()) {
+    DevicerAnalytics.ensureReady().catch((error) => {
+      console.error("Devicer analytics setup failed:", error);
+    });
+  }
+
   ExperimentTelemetry.initialize();
+  renderAnalyticsConsentBanner();
 }
 
 if (document.readyState === "loading") {
