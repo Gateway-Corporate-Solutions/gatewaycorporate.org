@@ -60,7 +60,7 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                         return `<tr>
     <td>${escapeHtml(metric.experimentId)}</td>
     <td>${escapeHtml(metric.variant)}</td>
-    <td>${metric.exposures}</td>
+    <td>${metric.totalVisits}</td>
     <td>${metric.contactSubmits}</td>
     <td>${metric.clickthroughs}</td>
     <td>${rate}</td>
@@ -128,7 +128,7 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                     <tr>
                         <th>Experiment</th>
                         <th>Variant</th>
-                        <th>Exposures</th>
+                        <th>Total Visits</th>
                         <th>Contact Submits</th>
                         <th>Clickthroughs</th>
                         <th>Conversion Rate</th>

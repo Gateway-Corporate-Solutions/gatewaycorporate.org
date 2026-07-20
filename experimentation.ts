@@ -33,6 +33,7 @@ export interface ExperimentEvent {
 export interface VariantGuardrailMetrics {
   experimentId: string;
   variant: string;
+  totalVisits: number;
   exposures: number;
   contactSubmits: number;
   clickthroughs: number;
@@ -402,7 +403,13 @@ function getActiveExperimentIdsForPath(path: string): Set<string> {
 
 export async function generateGuardrailSummary(lookbackDays = 1): Promise<GuardrailSummary> {
   const paths = await readEventFilesForLookback(Math.max(1, lookbackDays));
-  const aggregates = new Map<string, { exposures: number; contactSubmits: number; clickthroughs: number }>();
+  const aggregates = new Map<string, {
+    exposures: number;
+    contactSubmits: number;
+    clickthroughs: number;
+    visitSessions: Set<string>;
+    conversionSessions: Set<string>;
+  }>();
 
   for (const filePath of paths) {
     let contents = "";
@@ -440,7 +447,19 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
 
       for (const assignment of assignments) {
         const key = `${assignment.experimentId}::${assignment.variant}`;
-        const current = aggregates.get(key) || { exposures: 0, contactSubmits: 0, clickthroughs: 0 };
+        const current = aggregates.get(key) || {
+          exposures: 0,
+          contactSubmits: 0,
+          clickthroughs: 0,
+          visitSessions: new Set<string>(),
+          conversionSessions: new Set<string>(),
+        };
+
+        const isActiveOnPath = activeExperimentIds.has(assignment.experimentId);
+
+        if (event.eventName === "page_view" && isActiveOnPath) {
+          current.visitSessions.add(event.sessionId);
+        }
 
         if (event.eventName === "experiment_exposure") {
           const exposedExperimentId = typeof event.metadata?.experimentId === "string"
@@ -455,12 +474,14 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
           }
         }
 
-        if (event.eventName === "contact_submit") {
+        if (event.eventName === "contact_submit" && isActiveOnPath) {
           current.contactSubmits += 1;
+          current.conversionSessions.add(event.sessionId);
         }
 
-        if (isBuyClickEvent(event) && activeExperimentIds.has(assignment.experimentId)) {
+        if (isBuyClickEvent(event) && isActiveOnPath) {
           current.clickthroughs += 1;
+          current.conversionSessions.add(event.sessionId);
         }
 
         aggregates.set(key, current);
@@ -471,13 +492,15 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
   const metrics: VariantGuardrailMetrics[] = [...aggregates.entries()]
     .map(([key, counts]) => {
       const [experimentId, variant] = key.split("::");
-      const conversionRate = counts.exposures > 0
-        ? counts.contactSubmits / counts.exposures
+      const totalVisits = counts.visitSessions.size;
+      const conversionRate = totalVisits > 0
+        ? counts.conversionSessions.size / totalVisits
         : 0;
 
       return {
         experimentId,
         variant,
+        totalVisits,
         exposures: counts.exposures,
         contactSubmits: counts.contactSubmits,
         clickthroughs: counts.clickthroughs,
@@ -533,7 +556,7 @@ export async function evaluateAndOptionallyDisableExperiments(
 
   for (const [experimentId, metrics] of metricsByExperiment.entries()) {
     const control = metrics.find((item) => item.variant === "control");
-    if (!control || control.exposures < minExposures || control.conversionRate <= 0) {
+    if (!control || control.totalVisits < minExposures || control.conversionRate <= 0) {
       continue;
     }
 
@@ -544,7 +567,7 @@ export async function evaluateAndOptionallyDisableExperiments(
 
       const relativeDrop = (control.conversionRate - treatment.conversionRate) / control.conversionRate;
       const shouldDisableExperiment =
-        treatment.exposures >= minExposures && relativeDrop >= dropThreshold;
+        treatment.totalVisits >= minExposures && relativeDrop >= dropThreshold;
 
       comparisons.push({
         experimentId,
@@ -552,7 +575,7 @@ export async function evaluateAndOptionallyDisableExperiments(
         treatmentVariant: treatment.variant,
         treatmentRate: treatment.conversionRate,
         relativeDrop,
-        treatmentExposures: treatment.exposures,
+        treatmentExposures: treatment.totalVisits,
         action: shouldDisableExperiment ? "disable" : "none",
       });
 
