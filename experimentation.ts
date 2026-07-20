@@ -371,7 +371,17 @@ function isBuyClickEvent(event: ExperimentEvent): boolean {
   const hasAccentClass = classList.some((entry) => entry.toLowerCase() === "btn-accent");
   const combined = `${label} ${target}`;
 
-  return isAccentButton || hasAccentClass || combined.includes("buy") || combined.includes("checkout") || combined.includes("polar.sh");
+  const isWhitepaperClick =
+    combined.includes("whitepaper") ||
+    target.includes("/papers/") ||
+    target.endsWith(".pdf");
+
+  return isAccentButton ||
+    hasAccentClass ||
+    combined.includes("buy") ||
+    combined.includes("checkout") ||
+    combined.includes("polar.sh") ||
+    isWhitepaperClick;
 }
 
 function normalizePath(path: string): string {
