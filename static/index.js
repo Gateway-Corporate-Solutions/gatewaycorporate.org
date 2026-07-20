@@ -2,6 +2,330 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const scriptLoadPromises = new Map();
 
+const ExperimentTelemetry = {
+  queue: [],
+  isSending: false,
+
+  getContext() {
+    const ctx = window.__GCX__;
+    if (!ctx || !ctx.enabled) {
+      return null;
+    }
+
+    return ctx;
+  },
+
+  emit(eventName, metadata = {}) {
+    const context = this.getContext();
+    if (!context) {
+      return;
+    }
+
+    this.queue.push({
+      eventName,
+      path: window.location.pathname,
+      sessionId: context.sessionId,
+      timestamp: new Date().toISOString(),
+      metadata: {
+        assignments: context.assignments || [],
+        ...metadata,
+      },
+    });
+
+    this.flush();
+  },
+
+  async flush() {
+    if (this.isSending || !this.queue.length) {
+      return;
+    }
+
+    const event = this.queue.shift();
+    if (!event) {
+      return;
+    }
+
+    this.isSending = true;
+    try {
+      await fetch("/events/experiment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(event),
+        keepalive: true,
+      });
+    } catch (error) {
+      console.error("Experiment telemetry send failed", error);
+    } finally {
+      this.isSending = false;
+      if (this.queue.length) {
+        this.flush();
+      }
+    }
+  },
+
+  initialize() {
+    const context = this.getContext();
+    if (!context) {
+      return;
+    }
+
+    this.emit("page_view", {
+      referrer: document.referrer || "",
+    });
+
+    const ctaButtons = document.querySelectorAll("a.btn, button.btn");
+    ctaButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const label = button.textContent?.trim() || "";
+        const target = button.getAttribute("href") || button.getAttribute("id") || "";
+        this.emit("cta_click", {
+          label,
+          target,
+        });
+      });
+    });
+
+    const contactForm = document.getElementById("contact-form");
+    if (contactForm instanceof HTMLFormElement) {
+      contactForm.addEventListener("submit", () => {
+        this.emit("contact_submit", {
+          formId: "contact-form",
+        });
+      });
+    }
+  },
+};
+
+function getExperimentVariant(experimentId) {
+  const overrideKeys = [
+    `exp_${experimentId.replaceAll("-", "_")}`,
+    `exp_${experimentId}`,
+    experimentId,
+  ];
+
+  for (const key of overrideKeys) {
+    const overrideVariant = urlParams.get(key);
+    if (overrideVariant && overrideVariant.trim()) {
+      return overrideVariant.trim();
+    }
+  }
+
+  const ctx = window.__GCX__;
+  if (!ctx || !ctx.enabled || !Array.isArray(ctx.assignments)) {
+    return null;
+  }
+
+  const match = ctx.assignments.find((item) => item.experimentId === experimentId);
+  return match?.variant || null;
+}
+
+function applyHomepageLayoutExperiment() {
+  const path = window.location.pathname;
+  if (path !== "/" && path !== "/index.html") {
+    return;
+  }
+
+  const variant = getExperimentVariant("homepage-layout-v1");
+  if (!variant || variant === "control") {
+    return;
+  }
+
+  document.body.classList.add(`exp-homepage-layout-${variant}`);
+
+  if (variant === "proof-first") {
+    const main = document.querySelector("main");
+    const aboutSection = document.getElementById("about");
+    const projectsSection = document.getElementById("projects");
+
+    if (
+      main instanceof HTMLElement &&
+      aboutSection instanceof HTMLElement &&
+      projectsSection instanceof HTMLElement
+    ) {
+      // Move product proof content above about copy for proof-first treatment.
+      main.insertBefore(projectsSection, aboutSection);
+    }
+  }
+
+  ExperimentTelemetry.emit("experiment_exposure", {
+    experimentId: "homepage-layout-v1",
+    variant,
+  });
+}
+
+function applyHomepageCtaExperiment() {
+  const path = window.location.pathname;
+  if (path !== "/" && path !== "/index.html") {
+    return;
+  }
+
+  const variant = getExperimentVariant("homepage-cta-v1");
+  if (!variant || variant === "control") {
+    return;
+  }
+
+  const heroButtons = document.querySelector(".hero-buttons");
+  if (!(heroButtons instanceof HTMLElement)) {
+    return;
+  }
+
+  const buttonMap = {
+    services: heroButtons.querySelector('a[href="/services"]'),
+    products: heroButtons.querySelector('a[href="/products"]'),
+    contact: heroButtons.querySelector('a[href="#contact"]'),
+  };
+
+  if (
+    !(buttonMap.services instanceof HTMLAnchorElement) ||
+    !(buttonMap.products instanceof HTMLAnchorElement) ||
+    !(buttonMap.contact instanceof HTMLAnchorElement)
+  ) {
+    return;
+  }
+
+  if (variant === "consultation-first") {
+    buttonMap.contact.textContent = "Book Architecture Review";
+    heroButtons.append(buttonMap.contact, buttonMap.services, buttonMap.products);
+  } else if (variant === "product-first") {
+    buttonMap.products.textContent = "See Product Fit First";
+    heroButtons.append(buttonMap.products, buttonMap.services, buttonMap.contact);
+  }
+
+  document.body.classList.add(`exp-homepage-cta-${variant}`);
+
+  ExperimentTelemetry.emit("experiment_exposure", {
+    experimentId: "homepage-cta-v1",
+    variant,
+  });
+}
+
+function resolveExperimentContainer(main, orderedIds) {
+  if (main instanceof HTMLElement) {
+    return main;
+  }
+
+  for (const id of orderedIds) {
+    const section = document.getElementById(id);
+    if (section instanceof HTMLElement && section.parentElement instanceof HTMLElement) {
+      return section.parentElement;
+    }
+  }
+
+  return null;
+}
+
+function reorderSections(container, orderedIds) {
+  if (!(container instanceof HTMLElement) || !Array.isArray(orderedIds) || !orderedIds.length) {
+    return;
+  }
+
+  const sections = orderedIds
+    .map((id) => document.getElementById(id))
+    .filter((section) => section instanceof HTMLElement);
+
+  if (sections.length !== orderedIds.length) {
+    return;
+  }
+
+  const sharedParent = sections[0]?.parentElement;
+  if (!(sharedParent instanceof HTMLElement)) {
+    return;
+  }
+
+  const sameParent = sections.every((section) => section.parentElement === sharedParent);
+  if (!sameParent) {
+    return;
+  }
+
+  const firstSection = sections
+    .slice()
+    .sort((left, right) => {
+      if (left === right) {
+        return 0;
+      }
+
+      const position = left.compareDocumentPosition(right);
+      if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+        return -1;
+      }
+
+      return 1;
+    })[0];
+
+  if (!(firstSection instanceof HTMLElement)) {
+    return;
+  }
+
+  // Reorder in place at the original section block location.
+  const anchor = document.createComment("exp-reorder-anchor");
+  sharedParent.insertBefore(anchor, firstSection);
+
+  for (const section of sections) {
+    sharedParent.insertBefore(section, anchor);
+  }
+
+  anchor.remove();
+}
+
+function applyProductLayoutExperiments() {
+  const path = window.location.pathname.replace(/\/$/, "") || "/";
+  const main = document.querySelector("main");
+
+  const config = {
+    "/products/devicer": {
+      experimentId: "product-devicer-layout-v1",
+      variants: {
+        "pricing-first": ["problem", "pricing", "suite", "features", "comparison", "bundle", "cta"],
+        "comparison-first": ["problem", "comparison", "suite", "features", "pricing", "bundle", "cta"],
+      },
+    },
+    "/products/hyperlocal": {
+      experimentId: "product-hyperlocal-layout-v1",
+      variants: {
+        "whitepaper-first": ["problem", "whitepaper", "runtime", "features", "comparison", "bundle", "cta"],
+        "runtime-first": ["runtime", "problem", "features", "comparison", "bundle", "whitepaper", "cta"],
+      },
+    },
+    "/products/nashtwin": {
+      experimentId: "product-nashtwin-layout-v1",
+      variants: {
+        "pricing-first": ["problem", "pricing", "twin", "features", "comparison", "cta"],
+        "comparison-first": ["problem", "comparison", "twin", "features", "pricing", "cta"],
+      },
+    },
+  };
+
+  const routeConfig = config[path];
+  if (!routeConfig) {
+    return;
+  }
+
+  const variant = getExperimentVariant(routeConfig.experimentId);
+  if (!variant || variant === "control") {
+    return;
+  }
+
+  const sectionOrder = routeConfig.variants[variant];
+  if (!Array.isArray(sectionOrder)) {
+    return;
+  }
+
+  const container = resolveExperimentContainer(main, sectionOrder);
+  if (!(container instanceof HTMLElement)) {
+    return;
+  }
+
+  reorderSections(container, sectionOrder);
+  document.body.classList.add(`exp-${routeConfig.experimentId}-${variant}`);
+
+  ExperimentTelemetry.emit("experiment_exposure", {
+    experimentId: routeConfig.experimentId,
+    variant,
+  });
+}
+
 function loadExternalScript(src) {
   if (scriptLoadPromises.has(src)) {
     return scriptLoadPromises.get(src);
@@ -72,6 +396,23 @@ class NavbarController {
       });
     }
 
+    document.addEventListener("click", (event) => {
+      if (!this.isMenuOpen || !this.menuBtn || !this.dropdownMenu) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (this.menuBtn.contains(target) || this.dropdownMenu.contains(target)) {
+        return;
+      }
+
+      this.closeMenu();
+    });
+
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && this.isMenuOpen) {
         this.closeMenu();
@@ -128,6 +469,8 @@ class NavbarController {
 
     this.isMenuOpen = true;
     this.menuBtn.classList.add("open");
+    this.menuBtn.setAttribute("aria-expanded", "true");
+    this.menuBtn.setAttribute("aria-label", "Close Menu");
     this.dropdownMenu.style.display = "block";
     document.body.style.overflow = "hidden";
 
@@ -154,6 +497,8 @@ class NavbarController {
 
     this.isMenuOpen = false;
     this.menuBtn.classList.remove("open");
+    this.menuBtn.setAttribute("aria-expanded", "false");
+    this.menuBtn.setAttribute("aria-label", "Open Menu");
     this.dropdownMenu.classList.remove("show");
     document.body.style.overflow = "";
 
@@ -945,11 +1290,17 @@ class ContactFormController {
     const formData = new FormData(this.form);
     const name = formData.get("name")?.toString().trim() || "";
     const email = formData.get("email")?.toString().trim() || "";
+    const devicerKey = document
+      .querySelector('meta[name="devicer-snippet-key"]')
+      ?.getAttribute("content")
+      ?.trim();
 
     try {
-      await loadExternalScript("https://nash.gatewaycorporate.org/api/devicer/snippet?key=c0d96747-b2c5-4fc3-bcd6-215bad9dedae");
+      if (devicerKey) {
+        await loadExternalScript(`https://nash.gatewaycorporate.org/api/devicer/snippet?key=${encodeURIComponent(devicerKey)}`);
+      }
 
-      if (window.Devicer?.submitContact && name && email) {
+      if (devicerKey && window.Devicer?.submitContact && name && email) {
         await window.Devicer.submitContact({
           name,
           emails: [{ address: email, isPrimary: true }],
@@ -961,6 +1312,31 @@ class ContactFormController {
       this.form.submit();
     }
   }
+}
+
+function renderContactStatusBanner() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get("contact");
+
+  if (!status) {
+    return;
+  }
+
+  const container = document.getElementById("contact-status");
+  if (!(container instanceof HTMLElement)) {
+    return;
+  }
+
+  if (status === "success") {
+    container.innerHTML = '<div class="form-banner" role="status" aria-live="polite" style="max-width: 820px; width: 95%;">Your message was sent successfully. We will follow up shortly.</div>';
+  } else if (status === "error") {
+    container.innerHTML = '<div class="form-banner form-banner-error" role="alert" style="max-width: 820px; width: 95%;">We could not send your message right now. Please try again shortly or email office@gatewaycorporate.org directly.</div>';
+  }
+
+  params.delete("contact");
+  const nextQuery = params.toString();
+  const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
+  window.history.replaceState({}, "", nextUrl);
 }
 
 function setupDeferredContactAssets() {
@@ -1022,7 +1398,8 @@ function setupAnchorNavigation() {
 }
 
 function initializePage() {
-  new NavbarController();
+  const navbarController = new NavbarController();
+  window.navbarController = navbarController;
 
   const startNetworkGraphs = () => {
     document.querySelectorAll("canvas#network-graph").forEach((canvas) => {
@@ -1043,6 +1420,11 @@ function initializePage() {
 
   setupAnchorNavigation();
   setupDeferredContactAssets();
+  renderContactStatusBanner();
+  applyHomepageLayoutExperiment();
+  applyHomepageCtaExperiment();
+  applyProductLayoutExperiments();
+  ExperimentTelemetry.initialize();
 }
 
 if (document.readyState === "loading") {

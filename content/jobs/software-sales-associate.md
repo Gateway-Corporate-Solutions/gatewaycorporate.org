@@ -38,7 +38,7 @@ This role is for those who can build trust quickly, understand business problems
 
 ## Compensation
 
-This position includes a commission structure where you receive **20% of the recurring revenue** brought in from the accounts you close, subject to the final compensation terms discussed during the hiring process.
+This position includes a commission structure where you receive **20% of the recurring revenue** brought in from the accounts you close, subject to final written compensation terms, plan rules, and applicable law in your jurisdiction.
 
 ## Helpful background
 

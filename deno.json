@@ -1,10 +1,12 @@
 {
   "lock": false,
   "tasks": {
-    "start": "deno run --allow-all --env-file=.env.list main.ts"
+    "start": "deno run --allow-read=./static,./content,./.env.list --allow-write=./content/experiment-events,./content/experiment-control --allow-net=0.0.0.0,127.0.0.1,localhost,api.resend.com,www.google.com,api.twilio.com --allow-env --env-file=.env.list main.ts"
   },
   "imports": {
     "oak": "jsr:@oak/oak",
+    "sanitize-html": "npm:sanitize-html@^2.17.6",
+		"marked": "npm:marked@^15.0.12",
     "twilio": "npm:twilio"
   },
   "nodeModulesDir": "auto",

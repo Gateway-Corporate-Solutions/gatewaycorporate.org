@@ -1,5 +1,5 @@
-// deno-lint-ignore no-import-prefix
-import { marked } from "npm:marked@15.0.12";
+import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 import { renderSiteFooter } from "./footer.ts";
 
 const JOBS_DIR = new URL("./content/jobs/", import.meta.url);
@@ -350,6 +350,28 @@ function renderApplicationForm(job: JobPosting, state?: JobApplicationState): st
   `;
 }
 
+function sanitizeRenderedHtml(html: string): string {
+  return sanitizeHtml(html, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      "img",
+      "h1",
+      "h2",
+      "span",
+    ]),
+    allowedAttributes: {
+      a: ["href", "name", "target", "rel"],
+      img: ["src", "alt", "title", "width", "height", "loading", "decoding"],
+      code: ["class"],
+      span: ["class"],
+      "*": ["id"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }),
+    },
+  });
+}
+
 function renderPageShell(options: {
   title: string;
   description: string;
@@ -422,7 +444,7 @@ function renderPageShell(options: {
         </div>
       </section>
 
-      <button id="menu-btn" class="menu-icon" aria-label="Open Menu">
+      <button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
         <div class="hamburger">
           <span></span>
           <span></span>
@@ -467,7 +489,7 @@ export async function getJobPostings(): Promise<JobPosting[]> {
       const title = metadata.title?.trim() || entry.name.replace(/\.md$/, "");
       const slug = slugify(metadata.slug?.trim() || title);
       const date = metadata.date?.trim() || new Date().toISOString().slice(0, 10);
-      const html = marked.parse(body) as string;
+      const html = sanitizeRenderedHtml(marked.parse(body) as string);
 
       jobs.push({
         slug,

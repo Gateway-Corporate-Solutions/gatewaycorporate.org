@@ -10,7 +10,6 @@ const ALLOWED_RESUME_MIME_TYPES = new Set([
 const BLOCKED_EMAILS = new Set([
   "mike7778uk@gmail.com",
 ]);
-const BLOCKED_EMAIL_SUFFIXES = [".ru", ".cn", ".in", ".kr"];
 
 export interface ApplicationSubmissionResult {
   ok: boolean;
@@ -180,14 +179,6 @@ async function parseApplication(
     };
   }
 
-  if (!areUrlsSafe(values.linkedinUrl, values.portfolioUrl)) {
-    return {
-      error: "Only standard LinkedIn or portfolio links are allowed.",
-      status: 400,
-      values,
-    };
-  }
-
   const recaptchaToken = sanitizeText(form.get("g-recaptcha-response"), 4000);
   if (!recaptchaToken) {
     return {
@@ -313,21 +304,7 @@ function isValidEmail(email: string): boolean {
 
 function isBlockedEmail(email: string): boolean {
   const normalized = email.trim().toLowerCase();
-  if (BLOCKED_EMAILS.has(normalized)) {
-    return true;
-  }
-
-  return BLOCKED_EMAIL_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
-}
-
-function areUrlsSafe(...urls: string[]): boolean {
-  return urls.every((candidate) => {
-    if (!candidate) {
-      return true;
-    }
-
-    return !/(http|https):\/\/[^\s]+\.(ru|cn|in|kr)(\/|$)/i.test(candidate);
-  });
+  return BLOCKED_EMAILS.has(normalized);
 }
 
 function looksLikePdf(bytes: Uint8Array): boolean {

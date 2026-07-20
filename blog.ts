@@ -1,5 +1,5 @@
-// deno-lint-ignore no-import-prefix
-import { marked } from "npm:marked@15.0.12";
+import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 import { renderSiteFooter } from "./footer.ts";
 
 const BLOG_DIR = new URL("./content/blog/", import.meta.url);
@@ -417,6 +417,28 @@ function renderTags(tags: string[]): string {
   `;
 }
 
+function sanitizeRenderedHtml(html: string): string {
+  return sanitizeHtml(html, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      "img",
+      "h1",
+      "h2",
+      "span",
+    ]),
+    allowedAttributes: {
+      a: ["href", "name", "target", "rel"],
+      img: ["src", "alt", "title", "width", "height", "loading", "decoding"],
+      code: ["class"],
+      span: ["class"],
+      "*": ["id"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }),
+    },
+  });
+}
+
 function renderPostCard(post: BlogPost): string {
   return `
     <article class="card card-primary blog-card">
@@ -511,7 +533,7 @@ function renderPageShell(options: {
         </div>
       </section>
 
-      <button id="menu-btn" class="menu-icon" aria-label="Open Menu">
+      <button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
         <div class="hamburger">
           <span></span>
           <span></span>
@@ -556,7 +578,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     const excerpt = buildExcerpt(body, metadata.excerpt);
     const author = metadata.author?.trim() || "Gateway Corporate Team";
     const tags = metadata.tags || [];
-    const html = await optimizeBlogImages(marked.parse(body) as string);
+    const html = await optimizeBlogImages(sanitizeRenderedHtml(marked.parse(body) as string));
 
     posts.push({
       slug,

@@ -1054,10 +1054,21 @@ body {
 
 /* Problem grid layout */
 .problem-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
   gap: var(--spacing-lg);
   margin-top: var(--spacing-xl);
+}
+
+.problem-grid > .card,
+.problem-grid > article.card {
+  align-self: stretch;
+  flex: 0 1 min(100%, 24rem);
+  height: auto;
+  max-width: 24rem;
+  width: 100%;
 }
 
 /* Problem icon circles for consistency with index.html style */

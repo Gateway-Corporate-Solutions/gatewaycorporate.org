@@ -1,10 +1,9 @@
 import twilio from "twilio";
 
 const CONTACT_INBOX = "office@gatewaycorporate.org";
-const BLOCKED_EMAILS = new Set([
-  "mike7778uk@gmail.com",
-]);
-const BLOCKED_EMAIL_SUFFIXES = [".ru", ".cn", ".in", ".kr"];
+const BLOCKED_EMAILS = new Set<string>(
+  ([] as string[]).map((value) => value.trim().toLowerCase()),
+);
 
 interface UserRequest {
   name: string;
@@ -104,10 +103,6 @@ function parseUserRequest(form: URLSearchParams): UserRequest {
     throw new Error("Please use a different email address.");
   }
 
-  if (containsBlockedUrl(request.message) || containsBlockedUrl(request.referral)) {
-    throw new Error("Your message contains a blocked link.");
-  }
-
   return request;
 }
 
@@ -172,15 +167,7 @@ function isValidEmail(email: string): boolean {
 
 function isBlockedEmail(email: string): boolean {
   const normalized = email.trim().toLowerCase();
-  if (BLOCKED_EMAILS.has(normalized)) {
-    return true;
-  }
-
-  return BLOCKED_EMAIL_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
-}
-
-function containsBlockedUrl(value: string): boolean {
-  return /(http|https):\/\/[^\s]+\.(ru|cn|in|kr)(\/|$)/i.test(value);
+  return normalized.length > 0 && BLOCKED_EMAILS.has(normalized);
 }
 
 function escapeHtml(value: string): string {

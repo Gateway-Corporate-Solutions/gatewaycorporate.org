@@ -40,3 +40,35 @@ The site footer is rendered from `footer.ts` for both blog pages and static HTML
 
 - Update footer content and per-page footer link groups in `footer.ts`
 - Do not reintroduce literal `<footer class="footer">` blocks in `static/views/*.html`
+
+## Experimentation and A/B telemetry
+
+The site now includes a passive experimentation telemetry foundation for staged rollouts.
+
+- Server injects experiment bootstrap context into rendered HTML.
+- Client emits events to `POST /events/experiment` when experiments are enabled.
+- Events are stored as JSONL files under `content/experiment-events/` by default.
+
+Environment variables:
+
+- `EXPERIMENTS_ENABLED` (optional): `true/1` to enable assignment + telemetry, `false/0` to disable.
+- `DENO_ENV` (optional): set to `production` to keep production-safe defaults.
+- `EXPERIMENT_EVENTS_DIR` (optional): override event output directory.
+- `EXPERIMENTS_DISABLED_IDS` (optional): comma-separated experiment ids to force-disable.
+- `EXPERIMENTS_DISABLED_FILE` (optional): JSON file path for persistent disabled experiments.
+- `EXPERIMENTS_AUTO_DISABLE` (optional): `true/1` enables auto-disable writes from guardrail evaluation.
+- `EXPERIMENT_GUARDRAIL_DROP_THRESHOLD` (optional): relative conversion drop threshold (default `0.2`).
+- `EXPERIMENT_GUARDRAIL_MIN_EXPOSURES` (optional): minimum exposures before action (default `50`).
+- `EXPERIMENT_ADMIN_KEY` (optional): protects guardrail evaluate endpoint when set.
+
+Guardrail endpoints:
+
+- `GET /experiments/guardrails?days=7` returns per-variant exposure and contact-submit conversion summary.
+- `GET /experiments/dashboard?days=7` renders an internal HTML dashboard for quick visual inspection.
+- `POST /experiments/guardrails/evaluate` evaluates treatment vs control drops and can persist disables when auto-disable is enabled.
+- Provide header `x-experiment-admin-key` when `EXPERIMENT_ADMIN_KEY` is configured.
+- For browser-only access, `key=<EXPERIMENT_ADMIN_KEY>` query string is also accepted.
+
+Rollout plan:
+
+- See `docs/rollout-plan-ab-ml.md` for strict 3-phase deployment and ML readiness criteria.
