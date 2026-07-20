@@ -1,0 +1,5 @@
+node_modules/
+.env.list
+.unlighthouse/
+data/*.db
+experiment-events/*.jsonl
