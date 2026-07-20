@@ -477,8 +477,12 @@
   width: 100%;
 }
 
-.blog-grid {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+.blog-page .blog-grid {
+  justify-content: center;
+  justify-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 24rem));
+  margin-inline: auto;
+  width: min(100%, 96rem);
 }
 
 .careers-grid {
