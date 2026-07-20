@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/components.css">
+		<link rel="stylesheet" href="/enhancements.css">
+		<script src="/bundle.js" defer></script>
+		<script src="/index.js" defer></script>
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+		<meta name="author" content="Gateway Corporate">
+		<meta name="keywords" content="Gateway Corporate FAQ, services questions, products questions, AI governance, intelligence software">
+		<meta property="og:locale" content="en_US">
+
+		<title>FAQ | Gateway Corporate</title>
+		<meta name="title" content="FAQ | Gateway Corporate">
+		<meta name="description" content="Answers to common questions about Gateway Corporate services, product deployment, timelines, support, and engagement model.">
+
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://gatewaycorporate.org/faq">
+		<meta property="og:title" content="FAQ | Gateway Corporate">
+		<meta property="og:description" content="Find answers about delivery approach, product fit, deployment options, and how Gateway Corporate engagements work.">
+		<meta property="og:image" content="https://gatewaycorporate.org/embed.png">
+
+		<meta property="twitter:card" content="summary_large_image">
+		<meta property="twitter:url" content="https://gatewaycorporate.org/faq">
+		<meta property="twitter:title" content="FAQ | Gateway Corporate">
+		<meta property="twitter:description" content="Common questions about Gateway Corporate services, products, and engagement structure.">
+		<meta property="twitter:image" content="https://gatewaycorporate.org/embed.png">
+
+		<link rel="canonical" href="https://gatewaycorporate.org/faq">
+
+		<style>
+			.section {
+				max-width: 1200px;
+			}
+
+			.faq-hero {
+				text-align: center;
+			}
+
+			.faq-hero .text-lead {
+				max-width: 900px;
+				margin: 0 auto;
+			}
+
+			.jump-links {
+				margin-top: 1.5rem;
+				display: flex;
+				justify-content: center;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+			}
+
+			.faq-grid {
+				display: grid;
+				grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
+				gap: 1rem;
+				align-items: start;
+			}
+
+			.faq-card,
+			.faq-side-card {
+				border: 1px solid rgba(148, 163, 184, 0.22);
+				border-radius: 18px;
+				background: rgba(255, 255, 255, 0.02);
+			}
+
+			.faq-card {
+				padding: 1.05rem;
+			}
+
+			.faq-side-card {
+				padding: 1rem;
+				position: sticky;
+				top: 1.5rem;
+			}
+
+			.faq-stack {
+				display: grid;
+				gap: 0.9rem;
+			}
+
+			.faq-item {
+				border: 1px solid rgba(148, 163, 184, 0.18);
+				border-radius: 14px;
+				background: linear-gradient(180deg, rgba(15, 23, 42, 0.5) 0%, rgba(30, 41, 59, 0.28) 100%);
+				overflow: hidden;
+			}
+
+			.faq-item summary {
+				list-style: none;
+				cursor: pointer;
+				padding: 1rem 1rem 0.9rem;
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 1rem;
+				color: #f8fafc;
+				font-weight: 700;
+				letter-spacing: -0.01em;
+			}
+
+			.faq-item summary::-webkit-details-marker {
+				display: none;
+			}
+
+			.faq-item summary::after {
+				content: "+";
+				flex: 0 0 auto;
+				width: 1.75rem;
+				height: 1.75rem;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 999px;
+				border: 1px solid rgba(125, 211, 252, 0.35);
+				color: #bfdbfe;
+				background: rgba(15, 23, 42, 0.55);
+			}
+
+			.faq-item[open] summary::after {
+				content: "–";
+			}
+
+			.faq-answer {
+				padding: 0 1rem 1rem;
+				color: #cbd5e1;
+			}
+
+			.faq-answer p {
+				margin: 0 0 0.75rem;
+			}
+
+			.faq-answer p:last-child {
+				margin-bottom: 0;
+			}
+
+			.faq-answer ul {
+				margin: 0.5rem 0 0;
+				padding-left: 1.1rem;
+			}
+
+			.faq-answer li + li {
+				margin-top: 0.4rem;
+			}
+
+			.support-card {
+				border: 1px solid rgba(125, 211, 252, 0.22);
+				border-radius: 16px;
+				padding: 1rem;
+				background: linear-gradient(140deg, rgba(15, 23, 42, 0.72) 0%, rgba(30, 41, 59, 0.56) 100%);
+			}
+
+			.support-card h3 {
+				margin-bottom: 0.55rem;
+			}
+
+			.support-card p {
+				margin-bottom: 0;
+				color: #dbeafe;
+			}
+
+			.faq-points {
+				display: grid;
+				gap: 0.75rem;
+				margin-top: 1rem;
+			}
+
+			.faq-point {
+				border: 1px solid rgba(148, 163, 184, 0.18);
+				border-radius: 14px;
+				padding: 0.85rem 0.95rem;
+				background: rgba(255, 255, 255, 0.02);
+			}
+
+			.faq-point strong {
+				display: block;
+				margin-bottom: 0.2rem;
+				color: #f8fafc;
+			}
+
+			.faq-point span {
+				color: #cbd5e1;
+				font-size: 0.95rem;
+			}
+
+			.faq-cta {
+				margin-top: 1rem;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: flex-start;
+				align-items: center;
+				gap: 0.75rem;
+			}
+
+			.final-cta {
+				text-align: center;
+			}
+
+			.final-cta .card {
+				padding-bottom: var(--spacing-md);
+			}
+
+			.final-cta .btn-group {
+				justify-content: center;
+			}
+
+			@media (max-width: 920px) {
+				.faq-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.faq-side-card {
+					position: static;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<nav class="navbar">
+				<div class="nav-content">
+					<a href="/" class="nav-brand">
+						<img src="/logo.png" alt="Gateway Corporate Logo" class="nav-logo">
+						Gateway Corporate
+					</a>
+					<div class="nav-indicator"></div>
+				</div>
+			</nav>
+			<div class="scroll-progress"></div>
+
+			<button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
+				<div class="hamburger">
+					<span></span>
+					<span></span>
+					<span></span>
+				</div>
+			</button>
+
+			<div id="dropdown-menu" class="dropdown-menu">
+				<div class="menu-container">
+					<ul class="nav-list">
+						<li><a href="/#about" class="nav-link">About Us</a></li>
+						<li><a href="/services" class="nav-link">Services</a></li>
+						<li><a href="/products" class="nav-link">Products</a></li>
+						<li><a href="/faq" class="nav-link">FAQ</a></li>
+						<li><a href="/careers" class="nav-link">Careers</a></li>
+						<li><a href="/blog" class="nav-link">Blog</a></li>
+						<li><a href="/#team" class="nav-link">Our Team</a></li>
+						<li><a href="/#contact" class="nav-link">Contact</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+
+		<main>
+			<section class="hero faq-hero">
+				<canvas id="network-graph" aria-hidden="true"></canvas>
+				<div class="hero-content section">
+					<div class="section-header">
+						<p class="hero-kicker">Questions answered before the first call</p>
+						<h1 class="section-title">Frequently Asked Questions</h1>
+						<p class="text-lead">
+							Gateway Corporate engagements are designed to be specific, measurable,
+							and operationally useful. These answers cover how we scope work, how
+							our products fit together, and what it looks like to start.
+						</p>
+						<div class="jump-links">
+							<a href="#engagement" class="btn btn-secondary btn-sm">Engagement Model</a>
+							<a href="#products" class="btn btn-secondary btn-sm">Products</a>
+							<a href="#delivery" class="btn btn-secondary btn-sm">Delivery</a>
+							<a href="#support" class="btn btn-secondary btn-sm">Support</a>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section faq-grid" id="engagement">
+				<div class="faq-card">
+					<div class="section-header" style="text-align: left; margin-bottom: 1rem;">
+						<h2 class="section-title">Common Questions</h2>
+						<p class="text-lead" style="text-align: left; margin-left: 0; margin-right: 0; padding-bottom: 0;">
+							Start here if you need a quick read on fit, scope, and how we work.
+						</p>
+					</div>
+
+					<div class="faq-stack">
+						<details class="faq-item" open>
+							<summary>What kinds of work does Gateway Corporate take on?</summary>
+							<div class="faq-answer">
+								<p>We focus on high-stakes systems where reliability, governance, and clear decision support matter. That usually means one of three lanes:</p>
+								<ul>
+									<li>Signals intelligence and identity confidence tooling.</li>
+									<li>AI operations systems that need guardrails and observability.</li>
+									<li>Strategic simulation and digital twin platforms for planning.</li>
+								</ul>
+							</div>
+						</details>
+
+						<details class="faq-item" id="products">
+							<summary>Do you build custom software, products, or both?</summary>
+							<div class="faq-answer">
+								<p>Both. Some clients need a scoped engagement that produces a production-ready internal system. Others need one of our product surfaces deployed, integrated, or adapted to their environment.</p>
+								<p>When the requirement is broader than the product boundary, we design the custom layer around the operational problem instead of forcing a generic implementation.</p>
+							</div>
+						</details>
+
+						<details class="faq-item">
+							<summary>How do you structure an engagement?</summary>
+							<div class="faq-answer">
+								<p>We typically begin with discovery, then move into an architecture and delivery plan, followed by implementation and handoff. The goal is to keep scope tight enough to ship, while still leaving room for the real operational constraints that show up in production.</p>
+							</div>
+						</details>
+
+						<details class="faq-item" id="delivery">
+							<summary>How long does delivery usually take?</summary>
+							<div class="faq-answer">
+								<p>It depends on the complexity of the systems involved. Simple advisory or integration work can move quickly, while multi-system intelligence platforms take longer because reliability, data handling, and governance need to be built in from the start.</p>
+							</div>
+						</details>
+
+						<details class="faq-item">
+							<summary>Do you only work with large organizations?</summary>
+							<div class="faq-answer">
+								<p>No. We work best with teams that have a real operational problem, a clear owner, and a need for disciplined execution. That can be a large enterprise, a growing technical team, or a specialized organization with a narrow but important mandate.</p>
+							</div>
+						</details>
+
+						<details class="faq-item">
+							<summary>Can you help us if we already have a product team?</summary>
+							<div class="faq-answer">
+								<p>Yes. We often work alongside internal teams to accelerate a specific capability, fill an architecture gap, or build the connective tissue between existing systems and the operating environment.</p>
+							</div>
+						</details>
+					</div>
+				</div>
+
+				<aside class="faq-side-card">
+					<div class="support-card" id="support">
+						<h3 class="heading-4">Need a direct answer?</h3>
+						<p>
+							If the question is about fit, scope, or deployment, start with
+							services and products. If the question is about a specific problem,
+							contact us and we will route it to the right conversation.
+						</p>
+						<div class="faq-cta">
+							<a href="/services" class="btn btn-primary btn-sm">See Services</a>
+							<a href="/products" class="btn btn-accent btn-sm">See Products</a>
+							<a href="/#contact" class="btn btn-secondary btn-sm">Contact Us</a>
+						</div>
+					</div>
+
+					<div class="faq-points" id="supporting-info">
+						<div class="faq-point">
+							<strong>Primary focus</strong>
+							<span>Production intelligence, AI operations, and strategic simulation.</span>
+						</div>
+						<div class="faq-point">
+							<strong>What we optimize for</strong>
+							<span>Reliability, clarity, and systems that operators can actually use.</span>
+						</div>
+						<div class="faq-point">
+							<strong>What to bring</strong>
+							<span>A concrete problem, the current stack, and the outcome you need.</span>
+						</div>
+					</div>
+				</aside>
+			</section>
+
+			<section class="section final-cta">
+				<div class="card card-primary">
+					<div class="section-header">
+						<h2 class="section-title">Still have an open question?</h2>
+						<p class="text-lead">
+							Reach out with the problem you are trying to solve and we will tell you
+							whether the right answer is a service engagement, a product deployment,
+							or a narrower technical conversation.
+						</p>
+						<div class="btn-group mt-md">
+							<a href="/#contact" class="btn btn-primary btn-lg">Start the Conversation</a>
+							<a href="/blog" class="btn btn-secondary btn-lg">Read the Journal</a>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

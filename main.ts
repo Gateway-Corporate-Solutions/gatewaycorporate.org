@@ -791,6 +791,11 @@ router.get("/sitemap.xml", async (context) => {
                 lastmod: await getSitemapLastModified("./static/views/services.html", today),
                 priority: 0.9,
             },
+            {
+                loc: `${siteOrigin}/faq`,
+                lastmod: await getSitemapLastModified("./static/views/faq.html", today),
+                priority: 0.7,
+            },
                 {
                         loc: `${siteOrigin}/blog`,
                         lastmod: today,
@@ -869,6 +874,21 @@ router.get("/products", async (context) => {
         console.error(`Error reading products view file: ${error}`);
         context.response.status = 404;
         context.response.body = "Products page not found";
+    }
+});
+router.get("/faq", async (context) => {
+    try {
+        const faqHtml = Deno.readTextFileSync("./static/views/faq.html");
+        const rendered = injectFooterIntoHtml(
+            faqHtml,
+            resolveFooterVariant("index"),
+        );
+        context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+    } catch (error) {
+        console.error(`Error reading FAQ view file: ${error}`);
+        context.response.status = 404;
+        context.response.body = "FAQ page not found";
     }
 });
 router.get("/blog", async (context) => {
@@ -1299,7 +1319,6 @@ router.get("/wss", async (context) => {
             }
 
             fingerprintIngestStats.identifySucceeded += 1;
-
             // Keep admin analytics snapshot close to real time without
             // recomputing for every single websocket payload.
             void refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 2_500);
