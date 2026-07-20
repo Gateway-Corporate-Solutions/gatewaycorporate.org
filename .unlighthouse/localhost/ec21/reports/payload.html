@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="enhancements.css">
+    <script src="index.js" defer></script>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <meta name="author" content="Gateway Corporate">
+    <meta name="devicer-snippet-key" content="">
+    <meta name="keywords" content="gateway corporate, signals intelligence, ai operations, digital twins, strategic governance">
+    <link rel="dns-prefetch" href="https://gatewaycorporate.org/">
+    <meta property="og:locale" content="en_US">
+
+    <title>Gateway Corporate | Production Intelligence and AI Operations</title>
+    <meta name="title" content="Gateway Corporate | Production Intelligence and AI Operations">
+    <meta name="description" content="Gateway Corporate builds production intelligence software, AI operations systems, and strategic simulation platforms for teams making high-stakes decisions.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gatewaycorporate.org/">
+    <meta property="og:title" content="Gateway Corporate | Production Intelligence and AI Operations">
+    <meta property="og:description" content="Production-ready intelligence platforms, governed automation, and strategic simulation systems for high-stakes decisions.">
+    <meta property="og:image" content="https://gatewaycorporate.org/embed.png">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://gatewaycorporate.org/">
+    <meta property="twitter:title" content="Gateway Corporate | Production Intelligence and AI Operations">
+    <meta property="twitter:description" content="Production-ready intelligence platforms, governed automation, and strategic simulation systems for high-stakes decisions.">
+    <meta property="twitter:image" content="https://gatewaycorporate.org/embed.png">
+
+    <link rel="canonical" href="https://gatewaycorporate.org/">
+
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Gateway Corporate","url":"https://gatewaycorporate.org","logo":"https://gatewaycorporate.org/logo.png","description":"Gateway Corporate builds intelligence systems, AI operations, and strategic simulation platforms.","address":{"@type":"PostalAddress","addressLocality":"St. Louis","addressRegion":"MO","addressCountry":"US"},"sameAs":[]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Gateway Corporate","url":"https://gatewaycorporate.org","description":"Intelligence systems, AI operations, and strategic digital twins."}</script>
+
+    <style>
+      :root {
+        --hero-shell: radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 42%),
+          radial-gradient(circle at 88% 8%, rgba(59, 130, 246, 0.14) 0%, rgba(59, 130, 246, 0) 35%),
+          linear-gradient(140deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.97) 48%, rgba(15, 23, 42, 0.99) 100%);
+      }
+
+      .section {
+        max-width: 1200px;
+      }
+
+      main > section:not(.hero) {
+        content-visibility: auto;
+        contain-intrinsic-size: 1px 900px;
+      }
+
+      .hero {
+        min-height: 82vh;
+        background: var(--hero-shell);
+        overflow: hidden;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 1080px;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 999px;
+        padding: 0.4rem 0.8rem;
+        color: #cbd5e1;
+        margin-bottom: 1.2rem;
+        margin-inline: auto;
+      }
+
+      .hero-title {
+        font-size: clamp(2.1rem, 5.3vw, 4.4rem);
+        line-height: 1.04;
+        margin-bottom: 1rem;
+        letter-spacing: -0.025em;
+        color: #ffffff;
+        text-shadow: 0 8px 22px rgba(2, 6, 23, 0.5);
+      }
+
+      .hero-subtitle {
+        color: #dbeafe;
+        font-size: clamp(1rem, 2vw, 1.35rem);
+        max-width: 850px;
+        line-height: 1.55;
+        margin-inline: auto;
+      }
+
+      .hero-stats {
+        margin-top: 2.2rem;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 0.9rem;
+      }
+
+      .stat-panel {
+        flex: 1 1 0;
+        max-width: 18rem;
+        border: 1px solid rgba(125, 211, 252, 0.45);
+        border-radius: 16px;
+        padding: 1.1rem;
+        text-align: center;
+        background: linear-gradient(160deg, rgba(15, 23, 42, 0.72) 0%, rgba(30, 41, 59, 0.52) 100%);
+        box-shadow: 0 10px 24px rgba(2, 6, 23, 0.35);
+      }
+
+      .stat-value {
+        font-size: clamp(1.7rem, 3vw, 2.25rem);
+        font-weight: 800;
+        color: #f8fafc;
+        margin-bottom: 0.3rem;
+        letter-spacing: -0.01em;
+      }
+
+      .stat-label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #dbeafe;
+        line-height: 1.45;
+      }
+
+      .product-lines span {
+        display: block;
+        white-space: nowrap;
+      }
+
+      .hero-buttons {
+        margin-top: 2rem;
+        gap: 0.9rem;
+        justify-content: center;
+      }
+
+      .splash-band {
+        position: relative;
+        margin-top: 1.25rem;
+      }
+
+      .splash-card {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: linear-gradient(150deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.9) 100%);
+      }
+
+      .offering-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .offering-card {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 18px;
+        padding: 1.05rem;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .offering-card h3 {
+        margin-bottom: 0.5rem;
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.9rem;
+      }
+
+      .pill-row span {
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: 999px;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.8rem;
+        color: #dbeafe;
+      }
+
+      .product-spotlight {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 20px;
+        padding: 1.1rem;
+        background: linear-gradient(180deg, rgba(30, 41, 59, 0.62) 0%, rgba(15, 23, 42, 0.78) 100%);
+      }
+
+      .product-offerings-row {
+        --offerings-gap: var(--spacing-lg);
+        min-width: 400px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--offerings-gap);
+      }
+
+      .product-offerings-row > .product-spotlight {
+        flex: 0 1 calc((100% - (2 * var(--offerings-gap))) / 3);
+        max-width: calc((100% - (2 * var(--offerings-gap))) / 3);
+      }
+
+      .service-track-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+      }
+
+      .service-track {
+        border: 1px solid rgba(148, 163, 184, 0.23);
+        border-radius: 16px;
+        padding: 0.9rem 1rem;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .service-track h3 {
+        margin-bottom: 0.4rem;
+      }
+
+      .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+      }
+
+      .step-card {
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 16px;
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.32);
+      }
+
+      .step-index {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(147, 197, 253, 0.4);
+        color: #bfdbfe;
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+      }
+
+      .section-cta {
+        margin-top: 1.2rem;
+      }
+
+      .portfolio-cta {
+        text-align: center;
+        margin: 0.6rem auto 1.35rem;
+      }
+
+      .portfolio-cta .btn {
+        width: min(100%, 560px);
+        font-size: 1rem;
+        font-weight: 700;
+        padding: 0.95rem 1.2rem;
+        letter-spacing: 0.01em;
+        box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+      }
+
+      .team-card {
+        border: 1px solid rgba(148, 163, 184, 0.23);
+      }
+
+      .intent-strip {
+        margin: 0.7rem auto 0;
+        max-width: 1050px;
+        padding: 1.05rem 1.2rem;
+        border-radius: 16px;
+        border: 1px solid rgba(125, 211, 252, 0.3);
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.45) 100%);
+      }
+
+      .intent-strip p {
+        margin: 0;
+        text-align: center;
+        color: #dbeafe;
+        font-weight: 600;
+      }
+
+      .path-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .path-card {
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 18px;
+        padding: 1.1rem;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .path-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #93c5fd;
+        margin-bottom: 0.7rem;
+      }
+
+      .path-card h3 {
+        margin-bottom: 0.55rem;
+      }
+
+      .path-actions {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+      }
+
+      @media (max-width: 980px) {
+        .offering-grid,
+        .steps-grid,
+        .path-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .product-offerings-row {
+          min-width: 0;
+        }
+
+        .product-offerings-row > .product-spotlight {
+          flex-basis: calc((100% - var(--offerings-gap)) / 2);
+          max-width: calc((100% - var(--offerings-gap)) / 2);
+        }
+
+        .service-track-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-stats {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .hero-stats .stat-panel {
+          flex-basis: min(100%, 22rem);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .product-offerings-row > .product-spotlight {
+          flex-basis: 100%;
+          max-width: 100%;
+        }
+      }
+    </style>
+  <script>window.__GCX__ = {"enabled":true,"sessionId":"d613da63dac149388c5fe40a","assignments":[{"experimentId":"homepage-layout-v1","variant":"control"},{"experimentId":"homepage-cta-v1","variant":"control"},{"experimentId":"product-devicer-layout-v1","variant":"pricing-first"},{"experimentId":"product-hyperlocal-layout-v1","variant":"control"},{"experimentId":"product-nashtwin-layout-v1","variant":"pricing-first"}],"emittedAt":"2026-07-20T04:58:16.679Z"};window.__GCX__.assignmentsHash = "W3siZXhwZXJpbWVudElkIjoiaG9tZXBhZ2UtbGF5b3V0LXYxIiwidmFyaWFudCI6ImNvbnRyb2wifSx7ImV4cGVyaW1lbnRJZCI6ImhvbWVwYWdlLWN0YS12MSIsInZhcmlhbnQiOiJjb250cm9sIn0seyJleHBlcmltZW50SWQiOiJwcm9kdWN0LWRldmljZXItbGF5b3V0LXYxIiwidmFyaWFudCI6InByaWNpbmctZmlyc3QifSx7ImV4cGVyaW1lbnRJZCI6InByb2R1Y3QtaHlwZXJsb2NhbC1sYXlvdXQtdjEiLCJ2YXJpYW50IjoiY29udHJvbCJ9LHsiZXhwZXJpbWVudElkIjoicHJvZHVjdC1uYXNodHdpbi1sYXlvdXQtdjEiLCJ2YXJpYW50IjoicHJpY2luZy1maXJzdCJ9XQ";</script>
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-content">
+          <a href="/" class="nav-brand">
+            <img src="logo.png" alt="Gateway Corporate Logo" class="nav-logo">
+            Gateway Corporate
+          </a>
+          <div class="nav-indicator"></div>
+        </div>
+      </nav>
+      <div class="scroll-progress"></div>
+
+      <section class="hero">
+        <canvas id="network-graph" aria-hidden="true"></canvas>
+        <div class="hero-content">
+          <p class="hero-kicker">Intelligence Systems and Strategic AI</p>
+          <h1 class="hero-title">Build A Decision Advantage That Survives Real Operations</h1>
+          <p class="hero-subtitle">
+            Gateway Corporate helps organizations design, deploy, and govern
+            intelligence software, AI operations pipelines, and simulation-backed
+            planning systems so they can build a decision advantage that survives
+            real operations.
+          </p>
+
+          <div class="hero-stats">
+            <div class="stat-panel">
+              <p class="stat-value">3 Core Products</p>
+              <p class="stat-label product-lines">
+                <span>Devicer,</span>
+                <span>HyperLocal 2,</span>
+								<span>and</span>
+                <span>NashTwin CRM</span>
+              </p>
+            </div>
+            <div class="stat-panel">
+              <p class="stat-value">6 Service Tracks</p>
+              <p class="stat-label">From intelligence tooling to governance assurance</p>
+            </div>
+            <div class="stat-panel">
+              <p class="stat-value">Production Focus</p>
+              <p class="stat-label">Architected for reliability, control, and scale</p>
+            </div>
+          </div>
+
+          <div class="hero-buttons">
+            <a href="/services" class="btn btn-primary btn-lg">Explore Services</a>
+            <a href="/products" class="btn btn-accent btn-lg">Explore Products</a>
+            <a href="#contact" class="btn btn-secondary btn-lg">Start A Conversation</a>
+          </div>
+        </div>
+      </section>
+
+      <button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
+        <div class="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+
+      <div id="dropdown-menu" class="dropdown-menu">
+        <div class="menu-container">
+          <ul class="nav-list">
+            <li><a href="#about" class="nav-link">About Us</a></li>
+            <li><a href="/services" class="nav-link">Services</a></li>
+            <li><a href="/products" class="nav-link">Products</a></li>
+            <li><a href="/careers" class="nav-link">Careers</a></li>
+            <li><a href="/blog" class="nav-link">Blog</a></li>
+            <li><a href="#team" class="nav-link">Our Team</a></li>
+            <li><a href="#contact" class="nav-link">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="about" class="section splash-band">
+        <div class="card splash-card">
+          <div class="section-header" style="text-align: left; margin-bottom: 1.2rem;">
+            <h2 class="section-title">What We Build And Why It Matters</h2>
+            <p class="text-lead">
+              We partner with operators who cannot afford fragile systems. Our
+              engagements combine software engineering, domain intelligence, and
+              governance design so teams can execute with confidence under real
+              uncertainty.
+            </p>
+          </div>
+          <div class="offering-grid">
+            <article class="offering-card">
+              <h3 class="heading-4">Signals Intelligence Systems</h3>
+              <p class="card-text">Convert fragmented technical signals into explainable trust and risk decisions.</p>
+              <div class="pill-row">
+                <span>Identity analysis</span>
+                <span>Signal fusion</span>
+                <span>Decision controls</span>
+              </div>
+            </article>
+            <article class="offering-card">
+              <h3 class="heading-4">Operational AI Infrastructure</h3>
+              <p class="card-text">Move from model experiments to governed, measurable automation in production.</p>
+              <div class="pill-row">
+                <span>Reliability tuning</span>
+                <span>Observability</span>
+                <span>Fallback safety</span>
+              </div>
+            </article>
+            <article class="offering-card">
+              <h3 class="heading-4">Strategic Simulation Platforms</h3>
+              <p class="card-text">Evaluate high-impact decisions before committing capital, reputation, or execution bandwidth.</p>
+              <div class="pill-row">
+                <span>Digital twins</span>
+                <span>Scenario planning</span>
+                <span>Equilibrium analysis</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="projects" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Latest Product Offerings</h2>
+          <p class="text-lead">
+            Our product stack is designed to work independently or as a unified
+            operating layer across trust, communication, and strategic planning.
+          </p>
+        </div>
+
+        <div class="portfolio-cta">
+          <a href="/products" class="btn btn-primary btn-lg">Compare Products and Deployment Paths</a>
+        </div>
+
+        <div class="grid grid-3 gap-lg product-offerings-row">
+          <div class="product-spotlight">
+            <div class="icon-circle icon-lg icon-primary">🔍</div>
+            <h3 class="card-title">Devicer Intelligence Suite</h3>
+            <p class="card-text">
+              Server-side identity confidence engine with premium modules for
+              IP intelligence, TLS consistency, bot defense, and peer graph risk.
+            </p>
+            <div class="btn-group mt-md">
+              <a href="/products/devicer" class="btn btn-primary btn-sm">View Technical Overview</a>
+              <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
+            </div>
+          </div>
+
+          <div class="product-spotlight">
+            <div class="icon-circle icon-lg icon-secondary">💬</div>
+            <h3 class="card-title">HyperLocal 2</h3>
+            <p class="card-text">
+              CRM-native SMS operations runtime with route controls,
+              permissioned actions, operator-owned knowledge, and audit-safe fallbacks.
+            </p>
+            <div class="btn-group mt-md">
+              <a href="/products/hyperlocal" class="btn btn-primary btn-sm">View Technical Overview</a>
+              <a href="/papers/HyperLocal-2.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
+            </div>
+          </div>
+
+          <div class="product-spotlight">
+            <div class="icon-circle icon-lg icon-primary">♟️</div>
+            <h3 class="card-title">NashTwin CRM</h3>
+            <p class="card-text">
+              Digital twin platform for simulation-backed strategy,
+              game-theory optimization, and decision intelligence at leadership level.
+            </p>
+            <div class="btn-group mt-md">
+              <a href="/products/nashtwin" class="btn btn-primary btn-sm">View Technical Overview</a>
+              <a href="https://nash.gatewaycorporate.org/" class="btn btn-accent btn-sm">Try NashTwin</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Choose Your Fastest Path to Value</h2>
+          <p class="text-lead">
+            Most teams start in one of these three tracks. Pick the track that matches
+            your current bottleneck, then move into implementation planning.
+          </p>
+        </div>
+        <div class="path-grid">
+          <article class="path-card">
+            <span class="path-label">Track 1</span>
+            <h3 class="heading-4">"I Need Product Fit Clarity"</h3>
+            <p class="card-text">Compare Devicer, HyperLocal 2, and NashTwin on architecture fit, operator workflow, and deployment complexity.</p>
+            <div class="path-actions">
+              <a href="/products" class="btn btn-primary btn-sm">Open Product Hub</a>
+            </div>
+          </article>
+          <article class="path-card">
+            <span class="path-label">Track 2</span>
+            <h3 class="heading-4">"I Need Custom Deployment Support"</h3>
+            <p class="card-text">Use service tracks for integration, governance controls, observability, and production hardening.</p>
+            <div class="path-actions">
+              <a href="/services" class="btn btn-primary btn-sm">View Service Tracks</a>
+            </div>
+          </article>
+          <article class="path-card">
+            <span class="path-label">Track 3</span>
+            <h3 class="heading-4">"I Need Executive-Technical Review"</h3>
+            <p class="card-text">Bring your architecture and constraints. We will map risk, implementation sequence, and team ownership in one review.</p>
+            <div class="path-actions">
+              <a href="#contact" class="btn btn-accent btn-sm">Book Architecture Review</a>
+            </div>
+          </article>
+        </div>
+        <div class="intent-strip">
+          <p>Most buying cycles accelerate when product and implementation scope are decided in the same conversation.</p>
+        </div>
+      </section>
+
+      <section id="services" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Service Tracks Built For Execution</h2>
+          <p class="text-lead">
+            Beyond products, we deliver end-to-end service engagements to help
+            teams deploy, adapt, and govern these capabilities in context.
+          </p>
+        </div>
+
+        <div class="service-track-grid">
+          <article class="service-track">
+            <h3 class="heading-4">Signals Intelligence Software</h3>
+            <p class="card-text">Custom pipelines and confidence models for complex telemetry and identity scenarios.</p>
+          </article>
+          <article class="service-track">
+            <h3 class="heading-4">AI Operations and Automation</h3>
+            <p class="card-text">Production AI deployment support, monitoring, hardening, and operational safeguards.</p>
+          </article>
+          <article class="service-track">
+            <h3 class="heading-4">Simulated Governance and Twins</h3>
+            <p class="card-text">Decision rehearsal environments for policy, strategy, and resource allocation testing.</p>
+          </article>
+          <article class="service-track">
+            <h3 class="heading-4">Strategic Technology Advisory</h3>
+            <p class="card-text">Executive-aligned roadmaps that connect architecture choices to business outcomes.</p>
+          </article>
+          <article class="service-track">
+            <h3 class="heading-4">Custom Intelligence Platforms</h3>
+            <p class="card-text">Tailored AI systems designed around domain constraints and secure operations.</p>
+          </article>
+          <article class="service-track">
+            <h3 class="heading-4">AI Governance and Alignment</h3>
+            <p class="card-text">Policy-to-practice governance programs with testable controls before deployment.</p>
+          </article>
+        </div>
+
+        <div class="section-cta" style="text-align: center;">
+          <a href="/services" class="btn btn-primary btn-md">Open Full Services Page</a>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">How We Engage</h2>
+          <p class="text-lead">A practical operating model from discovery to production confidence.</p>
+        </div>
+        <div class="steps-grid">
+          <article class="step-card">
+            <span class="step-index">1</span>
+            <h3 class="heading-4">Map Constraints</h3>
+            <p class="card-text">We identify mission-critical decisions, risk boundaries, and technical dependencies.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-index">2</span>
+            <h3 class="heading-4">Build and Integrate</h3>
+            <p class="card-text">We implement the right blend of products and custom systems in your operating context.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-index">3</span>
+            <h3 class="heading-4">Stabilize and Transfer</h3>
+            <p class="card-text">We validate behavior, define controls, and hand off documentation your team can use.</p>
+          </article>
+        </div>
+      </section>
+
+      
+    <section id="blog" class="section">
+      <div class="section-header">
+        <p class="eyebrow">Gateway Corporate Journal</p>
+        <h2 class="section-title">What we are seeing, shipping, and learning</h2>
+        <p class="text-lead blog-home-intro">
+          Notes from client work, AI operations, and product strategy written directly from the team building it.
+        </p>
+      </div>
+      <div class="blog-home-actions">
+        <a href="/blog" class="btn btn-primary">Visit the blog</a>
+      </div>
+      <div class="grid blog-grid gap-lg card-grid">
+        
+    <article class="card card-primary blog-card">
+      <div class="card-header blog-card-header">
+        <p class="blog-card-meta">April 22, 2026 <span aria-hidden="true">•</span> 22 min read</p>
+        <h3 class="card-title blog-card-title">The ASI Must Be Christ-Aligned</h3>
+      </div>
+      <div class="card-body">
+        <p class="card-text">Artificial superintelligence will inherit the deepest assumptions of its makers. If it is not aligned to Christ, humanity will eventually be governed by a god that cannot love.</p>
+        
+    <div class="post-tags">
+      <span class="post-tag">ai</span><span class="post-tag">ai-safety</span><span class="post-tag">ethics</span><span class="post-tag">christianity</span>
+    </div>
+  
+      </div>
+      <div class="card-footer blog-card-footer">
+        <a href="/blog/the-asi-must-be-christ-aligned" class="btn btn-primary btn-sm">Read article</a>
+      </div>
+    </article>
+  
+    <article class="card card-primary blog-card">
+      <div class="card-header blog-card-header">
+        <p class="blog-card-meta">April 17, 2026 <span aria-hidden="true">•</span> 7 min read</p>
+        <h3 class="card-title blog-card-title">Intelligence in the Machine</h3>
+      </div>
+      <div class="card-body">
+        <p class="card-text">HyperLocal&#39;s first launch taught us that conversational software is only valuable when it can operate inside real business workflows. HyperLocal 2 is the result of learning that lesson the hard way.</p>
+        
+    <div class="post-tags">
+      <span class="post-tag">ai</span><span class="post-tag">retrospective</span><span class="post-tag">crm</span><span class="post-tag">messaging</span><span class="post-tag">operations</span>
+    </div>
+  
+      </div>
+      <div class="card-footer blog-card-footer">
+        <a href="/blog/intelligence-in-the-machine" class="btn btn-primary btn-sm">Read article</a>
+      </div>
+    </article>
+  
+    <article class="card card-primary blog-card">
+      <div class="card-header blog-card-header">
+        <p class="blog-card-meta">April 15, 2026 <span aria-hidden="true">•</span> 5 min read</p>
+        <h3 class="card-title blog-card-title">A Brief History of Signals Intelligence</h3>
+      </div>
+      <div class="card-body">
+        <p class="card-text">Signals intelligence evolved from improvised radio interception into a global machine for collecting, correlating, and acting on vast streams of data before events outrun analysis.</p>
+        
+    <div class="post-tags">
+      <span class="post-tag">intelligence</span><span class="post-tag">sigint</span><span class="post-tag">cryptography</span><span class="post-tag">surveillance</span><span class="post-tag">history</span>
+    </div>
+  
+      </div>
+      <div class="card-footer blog-card-footer">
+        <a href="/blog/brief-history-of-signals-intelligence" class="btn btn-primary btn-sm">Read article</a>
+      </div>
+    </article>
+  
+      </div>
+    </section>
+  
+
+      <section id="team" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Leadership Team</h2>
+          <p class="text-lead">Cross-disciplinary leadership across engineering, design, and strategic operations.</p>
+        </div>
+
+        <div class="grid grid-3 gap-lg card-grid">
+          <div class="card card-primary card-centered team-card">
+            <div class="icon-circle icon-lg icon-primary">👨‍💻</div>
+            <div class="card-header">
+              <h3 class="card-title">Sam Roux</h3>
+              <p class="text-secondary">Founder and CEO</p>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Leads systems strategy, product direction, and technical execution across the stack.</p>
+            </div>
+          </div>
+
+          <div class="card card-primary card-centered team-card">
+            <div class="icon-circle icon-lg icon-secondary">🎨</div>
+            <div class="card-header">
+              <h3 class="card-title">Stephen Perso</h3>
+              <p class="text-secondary">Co-Founder and Lead Design</p>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Owns product experience, communication design, and interface clarity for operators.</p>
+            </div>
+          </div>
+
+          <div class="card card-primary card-centered team-card">
+            <div class="icon-circle icon-lg icon-primary">💼</div>
+            <div class="card-header">
+              <h3 class="card-title">Jonathan Walling</h3>
+              <p class="text-secondary">Mentor and Business Expert</p>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Supports strategic planning, operational alignment, and scalable commercialization.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Contact Us</h2>
+          <p class="text-lead">
+            Share your mission, constraints, and timeline. We will outline a tailored
+            service and product path for your organization.
+          </p>
+        </div>
+
+        <div class="container" style="display: flex; justify-content: center;">
+          <form
+            id="contact-form"
+            method="post"
+            action="/contact"
+            style="width: 95%; max-width: 820px; justify-content: center; text-align: center"
+            class="form"
+            aria-label="Contact Form"
+          >
+            <div class="form-group">
+              <label for="name" style="text-align: left" class="form-label">Your Name:</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                class="form-input"
+                required
+                aria-required="true"
+                placeholder="Enter your full name"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="email" style="text-align: left" class="form-label">Your Email:</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-input"
+                required
+                aria-required="true"
+                placeholder="your.email@example.com"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="referral" style="text-align: left" class="form-label">How did you hear about us? (optional):</label>
+              <input
+                type="text"
+                id="referral"
+                name="referral"
+                class="form-input"
+                placeholder="Search engine, referral, social media, etc."
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="message" style="text-align: left" class="form-label">How can we help you?:</label>
+              <textarea
+                id="message"
+                name="message"
+                class="form-textarea"
+                required
+                aria-required="true"
+                placeholder="Tell us about your project or how we can assist you..."
+              ></textarea>
+            </div>
+
+            <div
+              class="form-group"
+              style="display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap"
+            >
+              <div
+                class="g-recaptcha"
+                data-sitekey="6LcIVHArAAAAAPZ1scQS8vrN_JRhCBzjOoJHuw2i"
+              >
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary w-full btn-lg"
+                aria-label="Send Message"
+              >
+                Send Message
+              </button>
+            </div>
+            <p class="text-small" style="margin-top: 1rem; text-align: left; color: #cbd5e1;">
+              By submitting this form, you consent to Gateway Corporate contacting you about your request. We typically respond within 1 business day.
+            </p>
+          </form>
+        </div>
+        <div id="contact-status" class="container" style="display: flex; justify-content: center; margin-top: 1rem;"></div>
+      </section>
+    </main>
+  
+    <footer class="footer">
+      <div class="container">
+        <div class="grid grid-4 gap-lg mb-xl" style="text-align: left; padding-bottom: var(--spacing-md);">
+          <div>
+            <h3 class="heading-4 mb-md">Gateway Corporate</h3>
+            <p class="text-small">Premiere technology services for the St. Louis area and beyond. Guiding you towards unprecedented success.</p>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">Services</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/services#signals-intelligence" class="text-small footer-link">Signals Intelligence</a></li>
+              <li class="mb-xs"><a href="/services#ai-operations" class="text-small footer-link">AI Operations</a></li>
+              <li class="mb-xs"><a href="/services#simulated-governance" class="text-small footer-link">Digital Twins</a></li>
+              <li class="mb-xs"><a href="/services#strategic-advisory" class="text-small footer-link">Strategic Advisory</a></li>
+              <li class="mb-xs"><a href="/services#custom-platforms" class="text-small footer-link">Custom AI Platforms</a></li>
+              <li class="mb-xs"><a href="/services#ai-governance" class="text-small footer-link">AI Governance</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">Journal</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/blog" class="text-small footer-link">All articles</a></li>
+              <li class="mb-xs"><a href="/#projects" class="text-small footer-link">Project work</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">Company</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/#about" class="text-small footer-link">About</a></li>
+              <li class="mb-xs"><a href="/products" class="text-small footer-link">Products</a></li>
+              <li class="mb-xs"><a href="/#team" class="text-small footer-link">Team</a></li>
+              <li class="mb-xs"><a href="/careers" class="text-small footer-link">Careers</a></li>
+              <li class="mb-xs"><a href="/blog" class="text-small footer-link">Journal</a></li>
+              <li class="mb-xs"><a href="/#contact" class="text-small footer-link">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--spacing-md); text-align: center">
+          <p class="text-base">&copy; 2026 Gateway Corporate. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

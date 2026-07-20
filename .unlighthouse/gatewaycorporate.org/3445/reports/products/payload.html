@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/components.css">
+    <link rel="stylesheet" href="/enhancements.css">
+    <script src="/index.js" defer></script>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+    <meta name="author" content="Gateway Corporate">
+    <meta name="keywords" content="Gateway Corporate products, FP-Devicer, HyperLocal 2, NashTwin CRM, AI products">
+    <meta property="og:locale" content="en_US">
+
+    <title>Products | Gateway Corporate</title>
+    <meta name="title" content="Products | Gateway Corporate">
+    <meta
+      name="description"
+      content="Explore Gateway Corporate products in one place: FP-Devicer, HyperLocal 2, and NashTwin CRM. Compare capabilities and jump directly to the product you need."
+    >
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gatewaycorporate.org/products">
+    <meta property="og:title" content="Products | Gateway Corporate">
+    <meta
+      property="og:description"
+      content="Explore Gateway Corporate products in one place and jump directly to product details."
+    >
+    <meta property="og:image" content="https://gatewaycorporate.org/embed.png">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://gatewaycorporate.org/products">
+    <meta property="twitter:title" content="Products | Gateway Corporate">
+    <meta
+      property="twitter:description"
+      content="Explore FP-Devicer, HyperLocal 2, and NashTwin CRM from a single products homepage."
+    >
+    <meta property="twitter:image" content="https://gatewaycorporate.org/embed.png">
+
+    <link rel="canonical" href="https://gatewaycorporate.org/products">
+
+    <style>
+      .section {
+        max-width: 1200px;
+      }
+
+      .products-hero {
+        text-align: center;
+      }
+
+      .products-hero .text-lead {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+
+      .jump-links {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .hero-actions {
+        margin-top: 1.35rem;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .flow-cue {
+        margin-top: 1rem;
+        color: #dbeafe;
+        font-weight: 600;
+      }
+
+      .evaluation-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+      }
+
+      .evaluation-card {
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 16px;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .evaluation-card h3 {
+        margin-bottom: 0.45rem;
+      }
+
+      .intent-bar {
+        margin-top: 1rem;
+        padding: 0.85rem 1rem;
+        text-align: center;
+        border: 1px solid rgba(125, 211, 252, 0.3);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.3);
+        color: #dbeafe;
+      }
+
+      .product-section {
+        scroll-margin-top: 100px;
+      }
+
+      .product-card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .product-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+      }
+
+      .pill-list {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0;
+        margin: 1rem 0 0;
+      }
+
+      .pill-list li {
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 999px;
+        padding: 0.3rem 0.7rem;
+        font-size: 0.85rem;
+      }
+
+      .detail-block {
+        background: rgba(15, 23, 42, 0.28);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 14px;
+        padding: 1rem;
+      }
+
+      .detail-block.commitment {
+        margin-top: 1rem;
+      }
+
+      .detail-block h3 {
+        margin: 0 0 0.6rem;
+      }
+
+      .detail-block p {
+        margin: 0;
+      }
+
+      .capabilities-panel {
+        margin-top: 1rem;
+      }
+
+      .capability-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+      }
+
+      .capability-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 12px;
+        padding: 0.75rem 0.85rem;
+      }
+
+      .capability-item strong {
+        display: block;
+        margin-bottom: 0.2rem;
+        color: #e2e8f0;
+      }
+
+      .capability-item span {
+        display: block;
+        font-size: 0.92rem;
+        color: #cbd5e1;
+        line-height: 1.4;
+      }
+
+      .pricing-snapshot {
+        margin-top: 1rem;
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 820px) {
+        .capability-grid,
+        .evaluation-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .flow-note {
+        text-align: center;
+        max-width: 820px;
+        margin: 0 auto;
+      }
+    </style>
+  <script>window.__GCX__ = {"enabled":true,"sessionId":"c4d0fab7a29a4c5babcd16cd","assignments":[{"experimentId":"homepage-layout-v1","variant":"proof-first"},{"experimentId":"homepage-cta-v1","variant":"control"},{"experimentId":"product-devicer-layout-v1","variant":"comparison-first"},{"experimentId":"product-hyperlocal-layout-v1","variant":"control"},{"experimentId":"product-nashtwin-layout-v1","variant":"pricing-first"}],"emittedAt":"2026-07-20T05:21:00.955Z"};window.__GCX__.assignmentsHash = "W3siZXhwZXJpbWVudElkIjoiaG9tZXBhZ2UtbGF5b3V0LXYxIiwidmFyaWFudCI6InByb29mLWZpcnN0In0seyJleHBlcmltZW50SWQiOiJob21lcGFnZS1jdGEtdjEiLCJ2YXJpYW50IjoiY29udHJvbCJ9LHsiZXhwZXJpbWVudElkIjoicHJvZHVjdC1kZXZpY2VyLWxheW91dC12MSIsInZhcmlhbnQiOiJjb21wYXJpc29uLWZpcnN0In0seyJleHBlcmltZW50SWQiOiJwcm9kdWN0LWh5cGVybG9jYWwtbGF5b3V0LXYxIiwidmFyaWFudCI6ImNvbnRyb2wifSx7ImV4cGVyaW1lbnRJZCI6InByb2R1Y3QtbmFzaHR3aW4tbGF5b3V0LXYxIiwidmFyaWFudCI6InByaWNpbmctZmlyc3QifV0";</script>
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-content">
+          <a href="/" class="nav-brand">
+            <img src="/logo.png" alt="Gateway Corporate Logo" class="nav-logo">
+            Gateway Corporate
+          </a>
+          <div class="nav-indicator"></div>
+        </div>
+      </nav>
+      <div class="scroll-progress"></div>
+
+      <button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
+        <div class="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+
+      <div id="dropdown-menu" class="dropdown-menu">
+        <div class="menu-container">
+          <ul class="nav-list">
+            <li><a href="/#about" class="nav-link">About Us</a></li>
+            <li><a href="/services" class="nav-link">Services</a></li>
+            <li><a href="/products" class="nav-link">Products</a></li>
+            <li><a href="/careers" class="nav-link">Careers</a></li>
+            <li><a href="/blog" class="nav-link">Blog</a></li>
+            <li><a href="/#team" class="nav-link">Our Team</a></li>
+            <li><a href="/#contact" class="nav-link">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero products-hero">
+        <canvas id="network-graph" aria-hidden="true"></canvas>
+        <div class="hero-content section">
+          <div class="section-header">
+          <h1 class="section-title">Product Portfolio</h1>
+          <p class="text-lead">
+            See every Gateway product on one page, compare use cases quickly,
+            and jump straight to the solution you need without extra page hops.
+          </p>
+          <div class="jump-links">
+            <a href="#devicer" class="btn btn-secondary btn-sm">FP-Devicer</a>
+            <a href="#hyperlocal" class="btn btn-secondary btn-sm">HyperLocal 2</a>
+            <a href="#nashtwin" class="btn btn-secondary btn-sm">NashTwin CRM</a>
+          </div>
+          <div class="hero-actions">
+            <a href="/#contact" class="btn btn-primary btn-sm">Book Product Fit Review</a>
+            <a href="/services" class="btn btn-accent btn-sm">Need Custom Deployment?</a>
+          </div>
+          <p class="flow-cue">Start with the product that solves your highest-cost bottleneck today.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header flow-note">
+          <h2 class="section-title">How Senior Teams Evaluate This Stack</h2>
+          <p class="text-lead">
+            Use this framework to select quickly: first by failure mode, then by integration effort,
+            then by measurable business impact.
+          </p>
+        </div>
+        <div class="evaluation-grid">
+          <article class="evaluation-card">
+            <h3 class="heading-4">1. Failure Mode</h3>
+            <p class="card-text">Identify where you are currently losing certainty: identity trust, communication control, or strategic planning.</p>
+          </article>
+          <article class="evaluation-card">
+            <h3 class="heading-4">2. Integration Surface</h3>
+            <p class="card-text">Estimate how much existing CRM, routing, and observability infrastructure should remain unchanged.</p>
+          </article>
+          <article class="evaluation-card">
+            <h3 class="heading-4">3. Time-to-Value</h3>
+            <p class="card-text">Choose the product that ships visible operator improvement first, then layer the remaining stack as needed.</p>
+          </article>
+        </div>
+        <div class="intent-bar">Teams that pick one primary objective before implementation usually deploy faster and expand usage with less friction.</div>
+      </section>
+
+      <section id="devicer" class="section product-section">
+        <div class="card card-primary product-card">
+          <div class="card-header">
+            <div class="icon-circle icon-lg icon-primary">🔍</div>
+            <h2 class="card-title">FP-Devicer Intelligence Suite</h2>
+            <p class="text-secondary">Signals intelligence and anti-fraud middleware for device trust.</p>
+          </div>
+          <div class="card-body">
+            <p class="card-text">
+              Open-source fingerprinting core with premium modules for IP intelligence,
+              JA4/TLS consistency checks, bot blocking, and peer reputation networking.
+            </p>
+            <div class="detail-block commitment">
+              <h3 class="heading-4">Operational Thesis</h3>
+              <p class="card-text">
+                Devicer solves server-side identity where browser state alone breaks down.
+                It computes an explainable confidence score from fingerprint similarity,
+                evidence richness, entropy, missingness, and historical drift so teams can
+                make trust decisions with context instead of raw hashes.
+              </p>
+            </div>
+            <div class="detail-block capabilities-panel">
+              <h3 class="heading-4">Capabilities</h3>
+              <div class="capability-grid">
+                <div class="capability-item">
+                  <strong>Open Core Architecture</strong>
+                  <span>TypeScript core with plugin-first extensibility for custom identity logic.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Framework-Agnostic Runtime</strong>
+                  <span>Deploy across Express, Fastify, and Oak without rewriting trust logic.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Flexible Data Backends</strong>
+                  <span>Operate on memory, SQLite, Postgres, or Redis based on scale and latency needs.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Scalable Candidate Search</strong>
+                  <span>LSH indexing reduces matching cost as device history volume grows.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Premium Signal Modules</strong>
+                  <span>Layer IP, TLS, bot, and peer-graph intelligence into request decisions.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Explainable Confidence Output</strong>
+                  <span>Clear 0-100 scoring helps operators justify actions and thresholds.</span>
+                </div>
+              </div>
+            </div>
+            <ul class="pill-list">
+              <li>Device fingerprinting</li>
+              <li>TLS/JA4 consistency</li>
+              <li>Bot risk scoring</li>
+              <li>Peer reputation</li>
+            </ul>
+            <p class="pricing-snapshot">
+              Pricing snapshot: core stays open-source; each premium plugin includes Free,
+              Pro ($49/mo), and Enterprise ($299/mo) tiers. Bundle with NashTwin Pro from
+              $25/mo for integrated CRM + fraud-aware operations.
+            </p>
+            <div class="product-actions">
+              <a href="/products/devicer" class="btn btn-primary btn-sm">Full Product Page</a>
+              <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
+              <!-- <a href="https://cicis.info/" class="btn btn-secondary btn-sm">Try Demo</a> -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="hyperlocal" class="section product-section">
+        <div class="card card-primary product-card">
+          <div class="card-header">
+            <div class="icon-circle icon-lg icon-secondary">💬</div>
+            <h2 class="card-title">HyperLocal 2</h2>
+            <p class="text-secondary">CRM-native assistant for routed SMS and governed automation.</p>
+          </div>
+          <div class="card-body">
+            <p class="card-text">
+              Multi-tenant conversational operations platform with permissioned CRM actions,
+              operator-controlled knowledge, and business-safe automations.
+            </p>
+            <div class="detail-block commitment">
+              <h3 class="heading-4">Operational Thesis</h3>
+              <p class="card-text">
+                HyperLocal 2 treats inbound SMS as a governed business workflow, not a
+                generic chatbot. Every conversation is routed through tenant-specific
+                profiles, CRM context, explicit permissions, auditable records, and safe
+                fallback behavior when AI or actions are constrained.
+              </p>
+            </div>
+            <div class="detail-block capabilities-panel">
+              <h3 class="heading-4">Capabilities</h3>
+              <div class="capability-grid">
+                <div class="capability-item">
+                  <strong>Route-Aware Message Ingress</strong>
+                  <span>Per-number routing with tenant-scoped webhook controls and policy boundaries.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Agent Identity Profiles</strong>
+                  <span>Capability flags and directives keep behavior aligned to approved actions.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Operator-Owned Knowledge</strong>
+                  <span>Retrieval uses approved sources your team can inspect, manage, and update.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Permissioned CRM Actions</strong>
+                  <span>Contact and calendar operations execute only when explicitly authorized.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Deterministic Fallback Logic</strong>
+                  <span>Safe runtime degradation prevents silent overreach when AI is constrained.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Audit-Ready Records</strong>
+                  <span>Conversation and event traces remain reviewable for compliance and QA.</span>
+                </div>
+              </div>
+            </div>
+            <ul class="pill-list">
+              <li>Routed SMS operations</li>
+              <li>Permissioned CRM actions</li>
+              <li>Operator knowledge control</li>
+              <li>Governed workflows</li>
+            </ul>
+            <p class="pricing-snapshot">
+              Packaging snapshot: designed for governed SMS deployments and available as a
+              NashTwin Pro bundle from $25/mo. Best fit for teams that need route-aware,
+              policy-safe automation tied directly to CRM execution state.
+            </p>
+            <div class="product-actions">
+              <a href="/products/hyperlocal" class="btn btn-primary btn-sm">Full Product Page</a>
+              <a href="/papers/HyperLocal-2.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="nashtwin" class="section product-section">
+        <div class="card card-primary product-card">
+          <div class="card-header">
+            <div class="icon-circle icon-lg icon-primary">♟️</div>
+            <h2 class="card-title">NashTwin CRM</h2>
+            <p class="text-secondary">Strategic digital twin for scenario simulation and equilibrium planning.</p>
+          </div>
+          <div class="card-body">
+            <p class="card-text">
+              Model your operating system, run strategic simulations, and evaluate policy,
+              resource, and execution decisions before committing real-world capital.
+            </p>
+            <div class="detail-block commitment">
+              <h3 class="heading-4">Operational Thesis</h3>
+              <p class="card-text">
+                NashTwin extends traditional CRM with a live digital twin and game-theory
+                simulation layer. Teams map real operations, run what-if scenarios,
+                then converge on equilibrium strategies before committing budget,
+                staffing, pricing, or workflow changes.
+              </p>
+            </div>
+            <div class="detail-block capabilities-panel">
+              <h3 class="heading-4">Capabilities</h3>
+              <div class="capability-grid">
+                <div class="capability-item">
+                  <strong>Operational Digital Twin</strong>
+                  <span>Mirror teams, clients, vendors, and constraints in a live planning model.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Equilibrium Optimization Engine</strong>
+                  <span>Apply game-theory workflows to evaluate strategic stability before execution.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Scenario Simulation</strong>
+                  <span>Forecast downstream tradeoffs for policy, staffing, and pricing decisions.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Decision Intelligence Views</strong>
+                  <span>Surface high-leverage actions with context leadership can review quickly.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Integration-Ready APIs</strong>
+                  <span>Extend planning workflows through REST endpoints and plugin paths.</span>
+                </div>
+                <div class="capability-item">
+                  <strong>Unified Product Stack</strong>
+                  <span>Connect HyperLocal and Devicer signals into one governed operating model.</span>
+                </div>
+              </div>
+            </div>
+            <ul class="pill-list">
+              <li>Digital twin modeling</li>
+              <li>Game-theory simulations</li>
+              <li>Strategy stress-testing</li>
+              <li>Decision support</li>
+            </ul>
+            <p class="pricing-snapshot">
+              Pricing snapshot: Pro at $89/mo (20 included seats), Enterprise at $799/mo
+              (50 seats), and Enterprise+ at $1,499/mo (200 seats), with annual billing
+              discount available. Built for operators moving from hindsight CRM to
+              simulation-backed planning.
+            </p>
+            <div class="product-actions">
+              <a href="/products/nashtwin" class="btn btn-primary btn-sm">Full Product Page</a>
+              <a href="https://nash.gatewaycorporate.org/" class="btn btn-accent btn-sm">Try NashTwin</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header flow-note">
+          <h2 class="section-title">Need Help Choosing?</h2>
+          <p class="text-lead">
+            Tell us your operating constraints and goals. We can scope the best fit,
+            combine products into a stack, or design a tailored deployment path.
+          </p>
+          <div class="hero-actions">
+            <a href="/#contact" class="btn btn-primary btn-md">Book Architecture Review</a>
+            <a href="/services" class="btn btn-secondary btn-md">View Service-Led Rollout</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  
+    <footer class="footer">
+      <div class="container">
+        <div class="grid grid-4 gap-lg mb-xl" style="text-align: left; padding-bottom: var(--spacing-md);">
+          <div>
+            <h3 class="heading-4 mb-md">Gateway Corporate</h3>
+            <p class="text-small">Premiere technology services for the St. Louis area and beyond. Guiding you towards unprecedented success.</p>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">Services</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/services#signals-intelligence" class="text-small footer-link">Signals Intelligence</a></li>
+              <li class="mb-xs"><a href="/services#ai-operations" class="text-small footer-link">AI Operations</a></li>
+              <li class="mb-xs"><a href="/services#simulated-governance" class="text-small footer-link">Digital Twins</a></li>
+              <li class="mb-xs"><a href="/services#strategic-advisory" class="text-small footer-link">Strategic Advisory</a></li>
+              <li class="mb-xs"><a href="/services#custom-platforms" class="text-small footer-link">Custom AI Platforms</a></li>
+              <li class="mb-xs"><a href="/services#ai-governance" class="text-small footer-link">AI Governance</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">Journal</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/blog" class="text-small footer-link">All articles</a></li>
+              <li class="mb-xs"><a href="/#projects" class="text-small footer-link">Project work</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">Company</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/#about" class="text-small footer-link">About</a></li>
+              <li class="mb-xs"><a href="/products" class="text-small footer-link">Products</a></li>
+              <li class="mb-xs"><a href="/#team" class="text-small footer-link">Team</a></li>
+              <li class="mb-xs"><a href="/careers" class="text-small footer-link">Careers</a></li>
+              <li class="mb-xs"><a href="/blog" class="text-small footer-link">Journal</a></li>
+              <li class="mb-xs"><a href="/#contact" class="text-small footer-link">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--spacing-md); text-align: center">
+          <p class="text-base">&copy; 2026 Gateway Corporate. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

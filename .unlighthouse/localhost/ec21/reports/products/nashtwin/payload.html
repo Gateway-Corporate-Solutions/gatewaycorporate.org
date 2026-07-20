@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/components.css">
+	<link rel="stylesheet" href="/enhancements.css">
+	<script src="/index.js" defer></script>
+	<link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+	<meta name="author" content="Gateway Corporate">
+	<meta name="keywords"
+		content="nashtwin, crm, digital twin, game theory, nash equilibrium, business simulation, operations optimization, gateway corporate">
+	<link rel="dns-prefetch" href="https://gatewaycorporate.org/">
+	<meta property="og:locale" content="en_US">
+
+	<title>NashTwin CRM | Gateway Corporate</title>
+	<meta name="title" content="NashTwin CRM | Gateway Corporate">
+	<meta name="description"
+		content="NashTwin creates a digital twin of your company and uses game theory algorithms to simulate operations and find the Nash equilibrium that makes your business optimal.">
+
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://gatewaycorporate.org/products/nashtwin">
+	<meta property="og:title" content="NashTwin CRM | Gateway Corporate">
+	<meta property="og:description"
+		content="Stop guessing. Start equilibrium. NashTwin mirrors your business and runs strategic simulations powered by game theory to find your optimal operating state.">
+	<meta property="og:image" content="https://gatewaycorporate.org/nashtwin.png">
+
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:url" content="https://gatewaycorporate.org/products/nashtwin">
+	<meta property="twitter:title" content="NashTwin CRM | Gateway Corporate">
+	<meta property="twitter:description"
+		content="Stop guessing. Start equilibrium. NashTwin mirrors your business and runs strategic simulations powered by game theory to find your optimal operating state.">
+	<meta property="twitter:image" content="https://gatewaycorporate.org/nashtwin.png">
+
+	<link rel="canonical" href="https://gatewaycorporate.org/products/nashtwin">
+
+	<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"NashTwin CRM","url":"https://gatewaycorporate.org/products/nashtwin","description":"NashTwin creates a digital twin of your company and uses game theory algorithms to simulate operations and find the Nash equilibrium that makes your business optimal.","applicationCategory":"BusinessApplication","operatingSystem":"Cloud","offers":{"@type":"Offer","seller":{"@type":"Organization","name":"Gateway Corporate","url":"https://gatewaycorporate.org"}}}</script>
+
+	<style>
+		.section-header {
+			text-align: center;
+			margin-bottom: 4rem;
+			max-width: 800px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.section-title {
+			margin-bottom: 1rem;
+		}
+
+		.text-lead {
+			font-size: 1.2rem;
+			line-height: 1.6;
+			color: var(--gray-600);
+		}
+
+		.card {
+			margin-bottom: 0;
+		}
+
+		.card-header {
+			margin-bottom: 1.5rem;
+		}
+
+		.card-body {
+			margin-bottom: 1.5rem;
+		}
+
+		.card-footer {
+			margin-top: auto;
+		}
+
+		.grid {
+			display: grid;
+			gap: 2rem;
+		}
+
+		.grid.gap-lg {
+			gap: 2rem;
+		}
+
+		.grid.gap-xl {
+			gap: 3rem;
+		}
+
+		.btn {
+			font-weight: 600;
+			transition: all 0.3s ease;
+		}
+
+		.btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		}
+
+		.hero-stats {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 2rem;
+			margin-top: 3rem;
+			max-width: 900px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.stat-item {
+			text-align: center;
+			padding: 1.5rem;
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 16px;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			-webkit-backdrop-filter: blur(10px);
+			backdrop-filter: blur(10px);
+		}
+
+		.stat-number {
+			font-size: 2.5rem;
+			font-weight: 800;
+			background: linear-gradient(135deg,
+					var(--secondary-light) 0%,
+					var(--accent) 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			display: block;
+			margin-bottom: 0.5rem;
+		}
+
+		.problem-grid {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: stretch;
+			gap: 2rem;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.problem-grid>.card,
+		.problem-grid>article.card {
+			align-self: stretch;
+			flex: 0 1 min(100%, 22.5rem);
+			height: auto;
+			max-width: 22.5rem;
+			width: 100%;
+		}
+
+		.problem-card .card-header,
+		.problem-card .card-title {
+			text-align: center;
+		}
+
+		.solution-steps {
+			display: grid;
+			gap: 2rem;
+			max-width: 1000px;
+			margin: 0 auto;
+		}
+
+		.step-card {
+			border-top: 4px solid transparent;
+		}
+
+		.step-card.map {
+			border-top-color: #60a5fa;
+		}
+
+		.step-card.simulate {
+			border-top-color: #a78bfa;
+		}
+
+		.step-card.optimize {
+			border-top-color: #34d399;
+		}
+
+		.step-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.35rem 0.8rem;
+			border-radius: 999px;
+			font-size: 0.8rem;
+			font-weight: 700;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			margin-bottom: 1rem;
+		}
+
+		.step-badge.step-1 {
+			background: rgba(96, 165, 250, 0.16);
+			color: #93c5fd;
+		}
+
+		.step-badge.step-2 {
+			background: rgba(167, 139, 250, 0.16);
+			color: #c4b5fd;
+		}
+
+		.step-badge.step-3 {
+			background: rgba(52, 211, 153, 0.16);
+			color: #6ee7b7;
+		}
+
+		.pricing-card {
+			transition: all 0.3s ease;
+			border: 2px solid rgba(255, 255, 255, 0.1);
+			background: linear-gradient(180deg, #202632 0%, #171b24 100%);
+		}
+
+		.pricing-card:hover {
+			transform: translateY(-8px);
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+			border-color: var(--secondary);
+		}
+
+		.pricing-card.featured {
+			border-color: rgba(167, 139, 250, 0.5);
+			box-shadow: 0 0 40px rgba(167, 139, 250, 0.1);
+		}
+
+		.pricing-card .card-header {
+			text-align: center;
+			padding-bottom: 1rem;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.pricing-card .card-title {
+			color: var(--gray-900);
+		}
+
+		.pricing-card .card-text {
+			color: var(--gray-800);
+		}
+
+		.pricing-card .card-footer {
+			padding-top: 1.5rem;
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.price-amount {
+			font-size: 2.8rem;
+			font-weight: 800;
+			background: linear-gradient(135deg, var(--secondary-light) 0%, var(--accent) 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			display: block;
+			margin: 0.75rem 0 0.25rem;
+		}
+
+		.price-period {
+			font-size: 0.95rem;
+			color: var(--gray-700);
+		}
+
+		.feature-list {
+			list-style: none;
+			padding: 0;
+			margin: 1.5rem 0;
+		}
+
+		.feature-list li {
+			padding: 0.5rem 0;
+			padding-left: 1.5rem;
+			position: relative;
+			font-size: 0.95rem;
+			color: var(--gray-800);
+			border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		}
+
+		.feature-list li:last-child {
+			border-bottom: none;
+		}
+
+		.feature-list li::before {
+			content: "✓";
+			position: absolute;
+			left: 0;
+			color: #34d399;
+			font-weight: 700;
+		}
+
+		.featured-badge {
+			display: inline-block;
+			padding: 0.25rem 0.75rem;
+			border-radius: 999px;
+			font-size: 0.75rem;
+			font-weight: 700;
+			letter-spacing: 0.06em;
+			text-transform: uppercase;
+			background: rgba(167, 139, 250, 0.2);
+			color: #c4b5fd;
+			margin-bottom: 0.75rem;
+		}
+
+		.cta-stack {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1rem;
+			justify-content: center;
+			margin-top: 2rem;
+		}
+
+		.cta-block {
+			max-width: 840px;
+			margin: 3rem auto 0;
+			text-align: center;
+			padding: 2rem;
+			border-radius: 24px;
+			background: linear-gradient(135deg, rgba(167, 139, 250, 0.12) 0%, rgba(52, 211, 153, 0.08) 100%);
+			border: 1px solid rgba(167, 139, 250, 0.2);
+		}
+
+		.cta-title-stack {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			gap: 1rem;
+		}
+
+		.cta-title-stack .section-title {
+			margin-bottom: 0;
+		}
+
+		.rotating-promo {
+			position: relative;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 15rem;
+			max-width: 100%;
+			height: 3.5rem;
+			padding: 0 1.5rem;
+			border-radius: 999px;
+			overflow: hidden;
+			background: linear-gradient(135deg, rgba(96, 165, 250, 0.18) 0%, rgba(167, 139, 250, 0.2) 50%, rgba(52, 211, 153, 0.16) 100%);
+			border: 1px solid rgba(255, 255, 255, 0.14);
+			box-shadow: 0 18px 35px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+		}
+
+		.rotating-promo::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.14) 50%, rgba(255, 255, 255, 0) 100%);
+			transform: translateX(-100%);
+			animation: promoSheen 4.5s ease-in-out infinite;
+		}
+
+		.rotating-promo-track {
+			position: relative;
+			width: 100%;
+			height: 100%;
+		}
+
+		.rotating-promo-item {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+			font-weight: 800;
+			letter-spacing: 0.14em;
+			text-transform: uppercase;
+			color: rgba(255, 255, 255, 0.96);
+			text-shadow: 0 0 20px rgba(96, 165, 250, 0.22);
+			opacity: 0;
+			transform: translateY(65%);
+			animation: promoRotate 9s ease-in-out infinite;
+		}
+
+		.rotating-promo-item:nth-child(2) {
+			animation-delay: 3s;
+		}
+
+		.rotating-promo-item:nth-child(3) {
+			animation-delay: 6s;
+		}
+
+		@keyframes promoRotate {
+			0%,
+			8% {
+				opacity: 0;
+				transform: translateY(65%);
+			}
+
+			14%,
+			28% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			34%,
+			100% {
+				opacity: 0;
+				transform: translateY(-65%);
+			}
+		}
+
+		@keyframes promoSheen {
+			0%,
+			55% {
+				transform: translateX(-100%);
+			}
+
+			75%,
+			100% {
+				transform: translateX(100%);
+			}
+		}
+
+		.micro-copy {
+			font-size: 0.9rem;
+			color: var(--gray-500);
+		}
+
+		.comparison-note {
+			color: #d6e0ea;
+			font-size: 0.95rem;
+			line-height: 1.6;
+			margin-top: 1rem;
+		}
+
+		.fit-shell {
+			max-width: 1100px;
+			margin: 0 auto;
+			padding: 1.15rem;
+			border: 1px solid rgba(148, 163, 184, 0.25);
+			border-radius: 20px;
+			background: linear-gradient(145deg, rgba(15, 23, 42, 0.58) 0%, rgba(30, 41, 59, 0.38) 100%);
+		}
+
+		.fit-grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.9rem;
+		}
+
+		.fit-card {
+			border: 1px solid rgba(148, 163, 184, 0.22);
+			border-radius: 14px;
+			padding: 1rem;
+			background: rgba(255, 255, 255, 0.02);
+		}
+
+		.fit-card h3 {
+			margin-bottom: 0.55rem;
+		}
+
+		.fit-list {
+			margin: 0;
+			padding-left: 1rem;
+			color: #cbd5e1;
+			line-height: 1.5;
+		}
+
+		.fit-proof {
+			margin-top: 0.95rem;
+			padding: 0.9rem;
+			border: 1px solid rgba(125, 211, 252, 0.32);
+			border-radius: 14px;
+			background: rgba(15, 23, 42, 0.4);
+			font-weight: 600;
+			color: #dbeafe;
+			text-align: center;
+		}
+
+		.fit-actions {
+			margin-top: 1.05rem;
+			display: flex;
+			justify-content: center;
+			gap: 0.8rem;
+			flex-wrap: wrap;
+		}
+
+		.intent-nav {
+			max-width: 1100px;
+			margin: 1.2rem auto 0;
+			padding: 1rem;
+			border-radius: 18px;
+			border: 1px solid rgba(148, 163, 184, 0.24);
+			background: rgba(15, 23, 42, 0.42);
+		}
+
+		.intent-nav-links {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.6rem;
+			justify-content: center;
+		}
+
+		.intent-chip {
+			display: inline-flex;
+			align-items: center;
+			padding: 0.45rem 0.75rem;
+			border-radius: 999px;
+			border: 1px solid rgba(148, 163, 184, 0.35);
+			color: #dbeafe;
+			text-decoration: none;
+			font-size: 0.88rem;
+			font-weight: 600;
+		}
+
+		.intent-chip:hover {
+			border-color: rgba(96, 165, 250, 0.55);
+			background: rgba(59, 130, 246, 0.18);
+		}
+
+		.intent-nav .btn {
+			margin-top: 0.85rem;
+		}
+
+		@media (max-width: 768px) {
+			.hero-stats {
+				grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			}
+
+			.fit-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.cta-title-stack {
+				flex-direction: column;
+			}
+
+			.rotating-promo {
+				width: 100%;
+				min-width: 0;
+				height: 3.25rem;
+				padding: 0 1rem;
+			}
+
+			.rotating-promo-item {
+				letter-spacing: 0.1em;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.rotating-promo::after,
+			.rotating-promo-item {
+				animation: none;
+			}
+
+			.rotating-promo-item {
+				opacity: 0;
+				transform: none;
+			}
+
+			.rotating-promo-item:first-child {
+				opacity: 1;
+			}
+		}
+	</style>
+<script>window.__GCX__ = {"enabled":true,"sessionId":"138710d681fd4197b064dc45","assignments":[{"experimentId":"homepage-layout-v1","variant":"control"},{"experimentId":"homepage-cta-v1","variant":"product-first"},{"experimentId":"product-devicer-layout-v1","variant":"comparison-first"},{"experimentId":"product-hyperlocal-layout-v1","variant":"control"},{"experimentId":"product-nashtwin-layout-v1","variant":"comparison-first"}],"emittedAt":"2026-07-20T04:58:17.306Z"};window.__GCX__.assignmentsHash = "W3siZXhwZXJpbWVudElkIjoiaG9tZXBhZ2UtbGF5b3V0LXYxIiwidmFyaWFudCI6ImNvbnRyb2wifSx7ImV4cGVyaW1lbnRJZCI6ImhvbWVwYWdlLWN0YS12MSIsInZhcmlhbnQiOiJwcm9kdWN0LWZpcnN0In0seyJleHBlcmltZW50SWQiOiJwcm9kdWN0LWRldmljZXItbGF5b3V0LXYxIiwidmFyaWFudCI6ImNvbXBhcmlzb24tZmlyc3QifSx7ImV4cGVyaW1lbnRJZCI6InByb2R1Y3QtaHlwZXJsb2NhbC1sYXlvdXQtdjEiLCJ2YXJpYW50IjoiY29udHJvbCJ9LHsiZXhwZXJpbWVudElkIjoicHJvZHVjdC1uYXNodHdpbi1sYXlvdXQtdjEiLCJ2YXJpYW50IjoiY29tcGFyaXNvbi1maXJzdCJ9XQ";</script>
+  </head>
+
+<body class="has-product-nav">
+	<nav class="navbar">
+		<div class="nav-content">
+			<a href="/" class="nav-brand">
+				<img src="/logo.png" alt="Gateway Corporate Logo" class="nav-logo">
+				Gateway Corporate
+			</a>
+			<div class="nav-indicator"></div>
+		</div>
+	</nav>
+	<nav class="product-navbar" aria-label="Product pages">
+		<div class="product-nav-content">
+			<span class="product-nav-label">Products</span>
+			<div class="product-nav-links">
+				<a href="/products/nashtwin" class="product-nav-link is-active" aria-current="page">NashTwin CRM</a>
+				<a href="/products/hyperlocal" class="product-nav-link">HyperLocal 2</a>
+				<a href="/products/devicer" class="product-nav-link">Devicer Intelligence Suite</a>
+			</div>
+		</div>
+	</nav>
+	<div class="scroll-progress"></div>
+
+	<button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
+		<div class="hamburger">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+	</button>
+
+	<div id="dropdown-menu" class="dropdown-menu">
+		<div class="menu-container">
+			<ul class="nav-list">
+				<li><a href="#problem" class="nav-link">Problem</a></li>
+				<li><a href="#twin" class="nav-link">How It Works</a></li>
+				<li><a href="#features" class="nav-link">Features</a></li>
+				<li><a href="#comparison" class="nav-link">Comparison</a></li>
+				<li><a href="#pricing" class="nav-link">Pricing</a></li>
+				<li><a href="#cta" class="nav-link">Get Started</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<main id="main-content">
+
+	<section class="hero">
+		<canvas id="network-graph" aria-hidden="true"></canvas>
+		<div class="hero-content">
+			<h1 class="hero-title">Stop Guessing. Start Equilibrium.</h1>
+			<p class="hero-subtitle">
+				The CRM that mirrors your business and finds the optimal path forward.
+			</p>
+			<p class="hero-text">
+				NashTwin builds a living digital twin of your company — your teams, clients, vendors, and workflows — and uses
+				game theory algorithms to simulate operational decisions before you make them. Find the Nash equilibrium for your
+				business. Stop optimizing by intuition.
+			</p>
+
+			<div class="hero-stats">
+				<div class="stat-item">
+					<span class="stat-number">♟️</span>
+					<span class="stat-label">Nash Equilibrium Engine</span>
+				</div>
+				<div class="stat-item">
+					<span class="stat-number">∞</span>
+					<span class="stat-label">Scenarios Simulated</span>
+				</div>
+				<div class="stat-item">
+					<span class="stat-number">Zero</span>
+					<span class="stat-label">Guesswork Required</span>
+				</div>
+			</div>
+
+			<div class="hero-buttons">
+				<a href="/#contact" class="btn btn-outline btn-lg">
+					Schedule Demo
+				</a>
+				<a href="https://developers.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer"
+					class="btn btn-primary btn-lg">
+					Developer Portal
+				</a>
+				<a href="https://nash.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer"
+					class="btn btn-accent btn-lg">
+					Launch NashTwin
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="section" style="padding-top: 0.5rem;">
+		<div class="intent-nav-links">
+			<a href="#problem" class="intent-chip">Cost of Inaction</a>
+			<a href="#twin" class="intent-chip">Simulation Workflow</a>
+			<a href="#features" class="intent-chip">Operator Features</a>
+			<a href="#pricing" class="intent-chip">Plan Selection</a>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="section-header">
+			<h2 class="section-title">Deployment Fit: Should NashTwin Lead?</h2>
+			<p class="text-lead">
+				Choose NashTwin first when your biggest cost is strategic uncertainty,
+				not just CRM data entry or dashboard reporting.
+			</p>
+		</div>
+		<div class="fit-shell">
+			<div class="fit-grid">
+				<article class="fit-card">
+					<h3 class="heading-4">Strong Fit Right Now</h3>
+					<ul class="fit-list">
+						<li>High-impact pricing, staffing, or process decisions are still intuition-led.</li>
+						<li>Your team needs scenario simulation before committing budget and execution bandwidth.</li>
+						<li>Leadership wants decision rationale that can be reviewed and defended.</li>
+					</ul>
+				</article>
+				<article class="fit-card">
+					<h3 class="heading-4">Integrate Other Products Next If</h3>
+					<ul class="fit-list">
+						<li>You also need trust signals and messaging workflows to feed the planning layer.</li>
+						<li>Cross-team execution quality depends on one shared operational model.</li>
+						<li>You want planning, communication, and fraud controls to converge in one stack.</li>
+					</ul>
+				</article>
+			</div>
+			<div class="fit-proof">Teams that model strategic choices before rollout usually reduce costly reversals in later implementation phases.</div>
+			<div class="fit-actions">
+				<a href="https://nash.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer" class="btn btn-accent btn-lg">Buy Now</a>
+				<a href="https://developers.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">Review API and Integrations</a>
+			</div>
+		</div>
+	</section>
+
+	<section id="problem" class="section">
+		<div class="section-header">
+			<h2 class="section-title">The Cost of Operating Without Visibility</h2>
+			<p class="text-lead">
+				Traditional CRMs record what happened. NashTwin tells you what should happen — and why.
+			</p>
+		</div>
+
+		<div class="problem-grid">
+			<div class="card problem-card card-centered">
+				<div class="card-header">
+					<div class="icon-circle icon-lg problem-icon">🤷</div>
+					<h3 class="card-title">Decisions Made on Intuition</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Most operational choices — pricing, staffing, vendor terms, process changes — are made without any way to
+						model outcomes before committing. A single bad call can compound across the whole business.
+					</p>
+				</div>
+			</div>
+
+			<div class="card problem-card card-centered">
+				<div class="card-header">
+					<div class="icon-circle icon-lg problem-icon">🔮</div>
+					<h3 class="card-title">No Simulation Layer</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Conventional CRMs capture data but cannot predict. They tell you what clients did, not what
+						strategy would have produced a better outcome across your entire operation.
+					</p>
+				</div>
+			</div>
+
+			<div class="card problem-card card-centered">
+				<div class="card-header">
+					<div class="icon-circle icon-lg problem-icon">🌀</div>
+					<h3 class="card-title">Complexity Grows Invisibly</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						As your team, client base, and vendor relationships grow, interdependencies multiply. The effects of
+						any one decision ripple through relationships you can no longer see clearly.
+					</p>
+				</div>
+			</div>
+
+			<div class="card problem-card card-centered">
+				<div class="card-header">
+					<div class="icon-circle icon-lg problem-icon">📉</div>
+					<h3 class="card-title">Inefficiencies Compound</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Small operational leaks — underpriced services, misaligned incentives, suboptimal workflows — go
+						unnoticed until they are critical. By then, the cost of correction is high.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="twin" class="section">
+		<div class="section-header">
+			<h2 class="section-title">How NashTwin Works</h2>
+			<p class="text-lead">
+				Three steps from your current operations to a verified optimal state.
+			</p>
+		</div>
+
+		<div class="solution-steps">
+			<div class="card step-card map">
+				<div class="card-header">
+					<div class="step-badge step-1">Step 1 — Map</div>
+					<h3 class="card-title">Build Your Digital Twin</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Connect your CRM data, org structure, workflows, client accounts, vendor relationships, and pricing
+						models. NashTwin ingests your operational reality and constructs a live, queryable digital twin of
+						your company. Import from existing tools or define your model from scratch.
+					</p>
+					<ul class="card-features">
+						<li>Import from existing CRM exports or connect via API</li>
+						<li>Map teams, roles, clients, vendors, and process flows</li>
+						<li>Define strategic players, payoff functions, and decision constraints</li>
+						<li>Your twin updates in real time as your business changes</li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="card step-card simulate">
+				<div class="card-header">
+					<div class="step-badge step-2">Step 2 — Simulate</div>
+					<h3 class="card-title">Run Strategic Scenarios</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Run thousands of what-if scenarios in seconds. Change a price, reallocate a team, restructure a vendor
+						contract, or test a new service offering — NashTwin simulates every downstream consequence across your
+						digital twin before you commit to anything in the real world.
+					</p>
+					<ul class="card-features">
+						<li>Multi-agent simulation across all modeled players and stakeholders</li>
+						<li>Scenario branching with side-by-side outcome comparison</li>
+						<li>Pareto frontier analysis to surface non-dominated strategies</li>
+						<li>Coalition analysis for partnership and team composition decisions</li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="card step-card optimize">
+				<div class="card-header">
+					<div class="step-badge step-3">Step 3 — Optimize</div>
+					<h3 class="card-title">Converge on Equilibrium</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						NashTwin&apos;s game theory engine solves for the Nash equilibrium of your business — the operating state
+						where no single player, team, or process can improve its outcome by changing strategy unilaterally.
+						That&apos;s not just good; it&apos;s provably stable.
+					</p>
+					<ul class="card-features">
+						<li>Nash Equilibrium solver for strategic stability across all players</li>
+						<li>Mechanism design tools for aligning incentives across teams and clients</li>
+						<li>Continuous re-optimization as new data flows into the twin</li>
+						<li>Plain-language rationale for every recommended decision</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="features" class="section" style="max-width: 1200px;">
+		<div class="section-header">
+			<h2 class="section-title">Built for Operators Who Think Strategically</h2>
+			<p class="text-lead">
+				Every feature in NashTwin ties back to one goal: giving you certainty before you act.
+			</p>
+		</div>
+
+		<div class="grid grid-auto-fit gap-lg card-grid">
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">🧬</div>
+				<div class="card-header">
+					<h3 class="card-title">Digital Business Twin</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						A live, structured model of your company — teams, clients, vendors, workflows, and constraints — that
+						reflects your actual operations and updates as your business evolves.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">⚙️</div>
+				<div class="card-header">
+					<h3 class="card-title">Game Theory Engine</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Nash equilibrium solvers, Pareto optimization, coalition formation analysis, and mechanism design tools —
+						the full algorithmic toolkit for finding stable, optimal strategies.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">📊</div>
+				<div class="card-header">
+					<h3 class="card-title">Scenario Simulator</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Model any operational change before you make it. Compare outcomes across scenarios, visualize downstream
+						effects, and eliminate surprises at decision time.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">🧭</div>
+				<div class="card-header">
+					<h3 class="card-title">Decision Intelligence Dashboard</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Visualize your equilibrium state, track how far your current operations deviate from optimal, and surface
+						the highest-leverage decisions available to you right now.
+					</p>
+				</div>
+			</div>
+
+			<div class="card card-primary card-centered">
+				<div class="icon-circle icon-lg icon-primary">🔌</div>
+				<div class="card-header">
+					<h3 class="card-title">Developer API</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Build custom workflows, embed NashTwin&apos;s optimization layer into your own tools, or automate
+						scenario runs via the full REST API. Documentation at the developer portal.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="comparison" class="section">
+		<div class="section-header">
+			<h2 class="section-title">How NashTwin fits</h2>
+			<p class="text-lead">
+				NashTwin is purpose-built around strategic simulation and decision optimization. Here is how that focus
+				compares to conventional CRM platforms.
+			</p>
+		</div>
+
+		<div class="comparison-table-wrap">
+			<table class="comparison-table">
+				<thead>
+					<tr>
+						<th class="col-feature">Capability</th>
+						<th class="col-hl">NashTwin</th>
+						<th class="col-other">Salesforce CRM</th>
+						<th class="col-other2">HubSpot CRM</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Living digital twin mirroring full business ops</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Built-in game-theory engine (Nash equilibrium)</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Real-time what-if scenario simulation</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Decision intelligence with equilibrium rationale</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Operator-owned strategic controls &amp; re-optimization</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Native governed SMS ops (HyperLocal 2)</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Flat-rate base pricing for small–mid teams</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+						<td class="check-other">✗</td>
+					</tr>
+					<tr>
+						<td>Affordable entry (under $100/mo base for teams)</td>
+						<td class="check-hl">✓</td>
+						<td class="check-other">✗</td>
+						<td class="check-neutral">✓</td>
+					</tr>
+					<tr>
+						<td>Broad multi-channel AI agents &amp; assistants</td>
+						<td class="check-other">✗</td>
+						<td class="check-neutral">✓</td>
+						<td class="check-neutral">✓</td>
+					</tr>
+					<tr>
+						<td>Core CRM (contacts, deals, pipeline, calendar)</td>
+						<td class="check-hl">✓</td>
+						<td class="check-neutral">✓</td>
+						<td class="check-neutral">✓</td>
+					</tr>
+					<tr>
+						<td>Developer API + plugin marketplace</td>
+						<td class="check-hl">✓</td>
+						<td class="check-neutral">✓</td>
+						<td class="check-neutral">✓</td>
+					</tr>
+					<tr>
+						<td>Enterprise security / SSO in higher tiers</td>
+						<td class="check-hl">✓</td>
+						<td class="check-neutral">✓</td>
+						<td class="check-neutral">✓</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<p class="comparison-note">
+			Salesforce CRM and HubSpot CRM feature sets reflect general availability as of April 2026.
+		</p>
+	</section>
+
+	<section id="pricing" class="section">
+		<div class="section-header">
+			<h2 class="section-title">Pricing</h2>
+			<p class="text-lead">
+				Current live pricing includes 20 seats on Pro with unlimited self-serve expansion, 50 seats on Enterprise with no self-serve extra seats, and 200 seats on Enterprise+ with unlimited self-serve expansion. Save 20% with annual billing.
+			</p>
+		</div>
+
+		<div class="grid grid-3 gap-lg card-grid" style="max-width: 1200px; margin: 0 auto; align-items: start;">
+			<div class="card card-centered pricing-card featured">
+				<div class="card-header">
+					<div class="featured-badge">Most Popular</div>
+					<div class="icon-circle icon-md icon-primary">♟️</div>
+					<h3 class="card-title">Pro</h3>
+					<p class="card-text">Full CRM, digital twin, optimization workflows, and plugin marketplace access for growing teams.</p>
+					<span class="price-amount">$89</span>
+					<span class="price-period">per month · 20 included seats · unlimited self-serve extra seats</span>
+				</div>
+				<div class="card-body">
+					<ul class="feature-list">
+						<li>Full CRM suite</li>
+						<li>Full digital twin</li>
+						<li>Full optimization workflows</li>
+						<li>Plugin marketplace access</li>
+						<li>Decision intelligence dashboard</li>
+						<li>REST API access</li>
+						<li>+$15 / user / mo for unlimited self-serve extra seats</li>
+						<li>Optional Devicer Pro and HyperLocal Pro add-ons</li>
+					</ul>
+				</div>
+				<div class="card-footer">
+					<a href="https://nash.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer"
+						class="btn btn-primary w-full btn-lg">
+						Start Pro Plan
+					</a>
+				</div>
+			</div>
+
+			<div class="card card-centered pricing-card">
+				<div class="card-header">
+					<div class="icon-circle icon-md icon-secondary">🏢</div>
+					<h3 class="card-title">Enterprise</h3>
+					<p class="card-text">Higher seat capacity, priority support, and enterprise-grade add-on options for scaling operators.</p>
+					<span class="price-amount">$799</span>
+					<span class="price-period">per month · 50 included seats · no self-serve extra seat packs</span>
+				</div>
+				<div class="card-body">
+					<ul class="feature-list">
+						<li>Everything in Pro</li>
+						<li>50 included seats</li>
+						<li>Priority support</li>
+						<li>SSO &amp; enterprise security controls</li>
+						<li>Devicer Enterprise supports multiple website origins</li>
+						<li>HyperLocal Enterprise unlocks unlimited agents and knowledge sources</li>
+					</ul>
+				</div>
+				<div class="card-footer">
+					<a href="https://nash.gatewaycorporate.org/" class="btn btn-accent w-full btn-lg">
+						Start Enterprise Plan
+					</a>
+				</div>
+			</div>
+
+			<div class="card card-centered pricing-card">
+				<div class="card-header">
+					<div class="icon-circle icon-md icon-primary">🌐</div>
+					<h3 class="card-title">Enterprise+</h3>
+					<p class="card-text">Dedicated infrastructure, SLA support, and custom plugin delivery for large teams with more complex operations.</p>
+					<span class="price-amount">$1,499</span>
+					<span class="price-period">per month minimum · 200 included seats · unlimited self-serve extra seats</span>
+				</div>
+				<div class="card-body">
+					<ul class="feature-list">
+						<li>Everything in Enterprise</li>
+						<li>200 included seats</li>
+						<li>+$15 / user / mo for unlimited self-serve extra seats</li>
+						<li>Dedicated multi-server infrastructure</li>
+						<li>SLA-backed uptime guarantee</li>
+						<li>Custom plugin development</li>
+						<li>White-glove onboarding &amp; twin setup</li>
+						<li>On-premise deployment option</li>
+					</ul>
+				</div>
+				<div class="card-footer">
+					<a href="/#contact" class="btn btn-secondary w-full btn-lg">
+						Talk to Sales
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<div style="max-width: 1200px; margin: 3rem auto 0;">
+			<div style="
+				padding: 1.75rem 2rem;
+				border-radius: 20px;
+				background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(96, 165, 250, 0.08) 100%);
+				border: 1px solid rgba(52, 211, 153, 0.2);
+				text-align: center;
+				margin-bottom: 2rem;
+			">
+				<p class="text-base" style="font-weight: 700; margin-bottom: 0.25rem;">🗓 Annual Billing — Save 20%</p>
+				<p class="card-text" style="margin: 0;">Switch to annual billing and save 20% across all plans and monthly subscriptions.</p>
+			</div>
+
+			<div class="grid grid-2 gap-lg">
+				<div style="
+					padding: 1.5rem;
+					border-radius: 16px;
+					background: rgba(255, 255, 255, 0.04);
+					border: 1px solid rgba(255, 255, 255, 0.1);
+				">
+					<p class="text-base" style="font-weight: 700; margin-bottom: 0.5rem;">🔌 Pro + Devicer Pro Bundle</p>
+					<p class="card-text" style="margin-bottom: 0.75rem;">Add device fingerprinting and fraud prevention to your Pro plan with one allowed website origin per tenant.</p>
+					<p class="text-base">
+						<strong>+$25 / mo</strong>
+						<span class="micro-copy" style="margin-left: 0.5rem;">vs. $49/mo standalone — 49% off</span>
+					</p>
+				</div>
+				<div style="
+					padding: 1.5rem;
+					border-radius: 16px;
+					background: rgba(255, 255, 255, 0.04);
+					border: 1px solid rgba(255, 255, 255, 0.1);
+				">
+					<p class="text-base" style="font-weight: 700; margin-bottom: 0.5rem;">🔌 Enterprise + Devicer Enterprise Bundle</p>
+					<p class="card-text" style="margin-bottom: 0.75rem;">Add Devicer Enterprise with premium plugins and support for multiple allowed website origins on Enterprise or Enterprise+.</p>
+					<p class="text-base">
+						<strong>+$150 / mo</strong>
+						<span class="micro-copy" style="margin-left: 0.5rem;">vs. $299/mo standalone — 50% off</span>
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="cta" class="section">
+		<div class="section-header">
+			<div class="cta-title-stack">
+				<h2 class="section-title">Your Next Best Move Is</h2>
+				<div class="rotating-promo">
+					<div class="rotating-promo-track" aria-hidden="true">
+						<span class="rotating-promo-item">Already Calculated</span>
+						<span class="rotating-promo-item">Winning</span>
+						<span class="rotating-promo-item">With Us</span>
+					</div>
+				</div>
+			</div>
+			<p class="text-lead">
+				NashTwin doesn&apos;t just show you what happened. It shows you what equilibrium looks like — and how to
+				get there. Stop guessing. Start equilibrium.
+			</p>
+		</div>
+
+		<div class="container" style="max-width: 1000px; margin: 0 auto;">
+			<div class="grid grid-2 gap-xl card-grid" style="justify-items: center;">
+				<div class="card card-primary card-centered" style="max-width: 420px; width: 100%;">
+					<div class="card-header">
+						<div class="icon-circle icon-lg icon-primary">🚀</div>
+						<h3 class="card-title">Try NashTwin</h3>
+					</div>
+					<div class="card-body">
+						<p class="card-text">
+							The NashTwin MVP is live. Start building your digital twin, run your first scenario, and see your
+							equilibrium state.
+						</p>
+						<div class="card-footer">
+							<a href="https://nash.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer"
+								class="btn btn-accent w-full btn-lg">
+								Launch NashTwin
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card card-primary card-centered" style="max-width: 420px; width: 100%;">
+					<div class="card-header">
+						<div class="icon-circle icon-lg icon-primary">🔌</div>
+						<h3 class="card-title">Developer Portal</h3>
+					</div>
+					<div class="card-body">
+						<p class="card-text">
+							Access the full NashTwin REST API reference, integration guides, and SDK documentation for
+							building on top of the optimization layer.
+						</p>
+						<div class="card-footer">
+							<a href="https://developers.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer"
+								class="btn btn-primary w-full btn-lg">
+								Open Developer Portal
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card card-accent card-centered" style="max-width: 420px; width: 100%;">
+					<div class="card-header">
+						<div class="icon-circle icon-lg icon-secondary">📧</div>
+						<h3 class="card-title">Talk to Sales</h3>
+					</div>
+					<div class="card-body">
+						<p class="card-text">
+							Interested in the Enterprise or Enterprise+ plan? Reach the Gateway Corporate team to discuss your
+							operational model, integration needs, and onboarding.
+						</p>
+						<div class="card-footer">
+							<a href="/#contact" class="btn btn-secondary w-full btn-lg">
+								Contact Sales
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card card-primary card-centered" style="max-width: 420px; width: 100%;">
+					<div class="card-header">
+						<div class="icon-circle icon-lg icon-primary">🏠</div>
+						<h3 class="card-title">Back to Gateway Corporate</h3>
+					</div>
+					<div class="card-body">
+						<p class="card-text">
+							Explore the rest of our portfolio — from device fingerprinting to AI concierge services —
+							and learn how we build technology for ambitious businesses.
+						</p>
+						<div class="card-footer">
+							<a href="/" class="btn btn-outline w-full btn-lg">
+								View All Projects
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="cta-block">
+				<h3 class="heading-3 mb-md">"Stop guessing. Start equilibrium."</h3>
+				<p class="text-base" style="margin-bottom: 1.5rem;">
+					NashTwin is the only CRM built on the premise that your business has an optimal state — and that
+					you can find it before you make your next move.
+				</p>
+				<div class="btn-group" style="justify-content: center;">
+					<a href="https://nash.gatewaycorporate.org/" target="_blank" rel="noopener noreferrer"
+						class="btn btn-primary btn-lg">
+						Launch NashTwin
+					</a>
+					<a href="/#contact" class="btn btn-secondary btn-lg">Book Strategy Mapping Session</a>
+				</div>
+				<p class="micro-copy" style="margin-top: 1rem;">
+					MVP available now at nash.gatewaycorporate.org
+				</p>
+			</div>
+		</div>
+	</section>
+	</main>
+
+
+    <footer class="footer">
+      <div class="container">
+        <div class="grid grid-4 gap-lg mb-xl" style="text-align: left; padding-bottom: var(--spacing-md);">
+          <div>
+            <h3 class="heading-4 mb-md">Gateway Corporate</h3>
+            <p class="text-small">Premiere technology services for the St. Louis area and beyond. Guiding you towards unprecedented success.</p>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">Services</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/services#signals-intelligence" class="text-small footer-link">Signals Intelligence</a></li>
+              <li class="mb-xs"><a href="/services#ai-operations" class="text-small footer-link">AI Operations</a></li>
+              <li class="mb-xs"><a href="/services#simulated-governance" class="text-small footer-link">Digital Twins</a></li>
+              <li class="mb-xs"><a href="/services#strategic-advisory" class="text-small footer-link">Strategic Advisory</a></li>
+              <li class="mb-xs"><a href="/services#custom-platforms" class="text-small footer-link">Custom AI Platforms</a></li>
+              <li class="mb-xs"><a href="/services#ai-governance" class="text-small footer-link">AI Governance</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">NashTwin</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/products/nashtwin#problem" class="text-small footer-link">Problem</a></li>
+              <li class="mb-xs"><a href="/products/nashtwin#twin" class="text-small footer-link">How It Works</a></li>
+              <li class="mb-xs"><a href="/products/nashtwin#features" class="text-small footer-link">Features</a></li>
+              <li class="mb-xs"><a href="/products/nashtwin#pricing" class="text-small footer-link">Pricing</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="heading-4 mb-md">Company</h3>
+            <ul style="list-style: none; padding: 0">
+              <li class="mb-xs"><a href="/#about" class="text-small footer-link">About</a></li>
+              <li class="mb-xs"><a href="/products" class="text-small footer-link">Products</a></li>
+              <li class="mb-xs"><a href="/#team" class="text-small footer-link">Team</a></li>
+              <li class="mb-xs"><a href="/careers" class="text-small footer-link">Careers</a></li>
+              <li class="mb-xs"><a href="/blog" class="text-small footer-link">Journal</a></li>
+              <li class="mb-xs"><a href="/#contact" class="text-small footer-link">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--spacing-md); text-align: center">
+          <p class="text-base">&copy; 2026 Gateway Corporate. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+
+</html>
