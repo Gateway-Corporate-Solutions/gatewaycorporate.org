@@ -64,6 +64,8 @@ Environment variables:
 - `EXPERIMENT_EVENTS_DIR` (optional): override event output directory.
 - `EXPERIMENTS_DISABLED_IDS` (optional): comma-separated experiment ids to force-disable.
 - `EXPERIMENTS_DISABLED_FILE` (optional): JSON file path for persistent disabled experiments.
+- `EXPERIMENTS_PRODUCTS_PAGE_ENABLED` (optional): `true/1` to enable product-page experiments, `false/0` to disable all product-page experiments.
+- `EXPERIMENTS_SERVICES_PAGE_ENABLED` (optional): `true/1` to enable services-page experiments, `false/0` to disable all services-page experiments.
 - `EXPERIMENTS_AUTO_DISABLE` (optional): `true/1` enables auto-disable writes from guardrail evaluation.
 - `EXPERIMENT_GUARDRAIL_DROP_THRESHOLD` (optional): relative conversion drop threshold (default `0.2`).
 - `EXPERIMENT_GUARDRAIL_MIN_EXPOSURES` (optional): minimum exposures before action (default `50`).

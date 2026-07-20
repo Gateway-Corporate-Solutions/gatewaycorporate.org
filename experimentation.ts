@@ -121,6 +121,17 @@ const experimentDefinitions: ExperimentDefinition[] = [
   },
 ];
 
+const PRODUCTS_PAGE_EXPERIMENT_IDS = new Set([
+  "product-devicer-layout-v1",
+  "product-hyperlocal-layout-v1",
+  "product-nashtwin-layout-v1",
+  "products-whitepaper-cta-v1",
+]);
+
+const SERVICES_PAGE_EXPERIMENT_IDS = new Set([
+  "services-whitepaper-cta-v1",
+]);
+
 function hashString(input: string): number {
   let hash = 2166136261;
   for (let index = 0; index < input.length; index++) {
@@ -222,6 +233,21 @@ function parseBooleanEnv(value: string | undefined): boolean | undefined {
   return undefined;
 }
 
+function isExperimentEnabledByPageToggles(experimentId: string): boolean {
+  const productsToggle = parseBooleanEnv(Deno.env.get("EXPERIMENTS_PRODUCTS_PAGE_ENABLED"));
+  const servicesToggle = parseBooleanEnv(Deno.env.get("EXPERIMENTS_SERVICES_PAGE_ENABLED"));
+
+  if (PRODUCTS_PAGE_EXPERIMENT_IDS.has(experimentId)) {
+    return productsToggle ?? true;
+  }
+
+  if (SERVICES_PAGE_EXPERIMENT_IDS.has(experimentId)) {
+    return servicesToggle ?? true;
+  }
+
+  return true;
+}
+
 function getDisabledExperimentsFilePath(): string {
   return Deno.env.get("EXPERIMENTS_DISABLED_FILE") || "./content/experiment-control/disabled-experiments.json";
 }
@@ -294,6 +320,7 @@ export function buildExperimentContext(request: ExperimentRequestContext, isProd
 
   const assignments = experimentDefinitions
     .filter((definition) => !isProduction || definition.enabledInProduction)
+    .filter((definition) => isExperimentEnabledByPageToggles(definition.id))
     .filter((definition) => !disabledExperimentIds.has(definition.id))
     .map((definition) => ({
       experimentId: definition.id,
