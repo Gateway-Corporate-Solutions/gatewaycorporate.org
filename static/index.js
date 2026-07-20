@@ -210,6 +210,15 @@ const SnatchFingerprint = {
     }
 
     this._agentReadyPromise = (async () => {
+      if (!window.snatch) {
+        try {
+          await loadExternalScript("/bundle.js");
+        } catch (error) {
+          console.warn("Unable to load snatch bundle:", error);
+          return null;
+        }
+      }
+
       const exported = window.snatch;
       const Snatch = (exported && exported.default) || exported;
 
@@ -1895,10 +1904,14 @@ function initializePage() {
     });
   };
 
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(startNetworkGraphs, { timeout: 1200 });
+  const scheduleNetworkGraphs = () => {
+    window.setTimeout(startNetworkGraphs, 3000);
+  };
+
+  if (document.readyState === "complete") {
+    scheduleNetworkGraphs();
   } else {
-    window.setTimeout(startNetworkGraphs, 150);
+    window.addEventListener("load", scheduleNetworkGraphs, { once: true });
   }
 
   const contactForm = document.getElementById("contact-form");

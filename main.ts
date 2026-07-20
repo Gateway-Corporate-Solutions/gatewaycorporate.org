@@ -1520,7 +1520,7 @@ app.use(async (context, next) => {
     ].join("; "));
 
     if (!isProduction) {
-        context.response.headers.set("Cache-Control", "no-store, max-age=0");
+        context.response.headers.set("Cache-Control", "public, max-age=0, must-revalidate");
         return;
     }
 
