@@ -1,3 +1,4 @@
 node_modules/
 .env.list
 .unlighthouse/
+experiment-events/*.jsonl
