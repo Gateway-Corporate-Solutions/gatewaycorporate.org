@@ -48,22 +48,6 @@ function removeCloudflareBeaconScripts() {
   }
 }
 
-function resolveDevicerSnippetKey() {
-  const fromMeta = document
-    .querySelector('meta[name="devicer-snippet-key"]')
-    ?.getAttribute("content")
-    ?.trim();
-
-  if (fromMeta) {
-    return fromMeta;
-  }
-
-  const fromBootstrap = window.__GCX__?.devicerSnippetKey;
-  return typeof fromBootstrap === "string" && fromBootstrap.trim()
-    ? fromBootstrap.trim()
-    : "";
-}
-
 function extractDeviceId(candidate) {
   if (!candidate) {
     return null;
@@ -131,14 +115,7 @@ const DevicerAnalytics = {
     }
 
     this._readyPromise = (async () => {
-      const devicerKey = resolveDevicerSnippetKey();
-      if (!devicerKey) {
-        return;
-      }
-
-      await loadExternalScript(
-        `https://nash.gatewaycorporate.org/api/devicer/snippet?key=${encodeURIComponent(devicerKey)}`,
-      );
+      await loadExternalScript("/api/devicer/snippet");
 
       const api = window.Devicer;
       if (!api) {

@@ -34,6 +34,14 @@ The homepage contact form delivers messages through Resend to `office@gatewaycor
 - Optional environment variable: `CONTACT_EMAIL_TO` to override the default inbox
 - If Twilio env vars remain configured, the contact flow will also send the existing SMS notification
 
+## Devicer snippet key
+
+The NashTwin Devicer snippet key is now backend-only and is never injected into page HTML.
+
+- Set `DEVICER_SNIPPET_KEY` in your environment (preferred).
+- `DEVICER_PUBLISHABLE_KEY` is also supported as a fallback alias.
+- The browser loads `/api/devicer/snippet`, and the server proxies the upstream snippet using the configured key.
+
 ## Shared footer
 
 The site footer is rendered from `footer.ts` for both blog pages and static HTML views.

@@ -65,6 +65,11 @@ const isProduction = Deno.env.get("DENO_ENV") === "production";
 const trustedProxyIps = parseTrustedProxyIps(Deno.env.get("FP_CICIS_TRUSTED_PROXIES"));
 const configuredOrigins = parseConfiguredOrigins(Deno.env.get("FP_CICIS_ALLOWED_ORIGINS"));
 const configuredPublicOrigin = Deno.env.get("FP_CICIS_PUBLIC_ORIGIN");
+const devicerSnippetKey = (
+    Deno.env.get("DEVICER_SNIPPET_KEY") ||
+    Deno.env.get("DEVICER_PUBLISHABLE_KEY") ||
+    ""
+).trim();
 const sessionStore = new SessionStore();
 const rateLimiter = new RateLimiter();
 
@@ -620,17 +625,11 @@ function injectExperimentBootstrap(html: string, request: Request): string {
         sessionHeader: request.headers.get("x-gcx-session"),
     }, isProduction);
 
-    const devicerSnippetKey = (Deno.env.get("DEVICER_LICENSE_KEY") || "").trim();
-    const devicerBootstrap = devicerSnippetKey
-        ? `<script>window.__GCX__ = window.__GCX__ || {}; window.__GCX__.devicerSnippetKey = ${JSON.stringify(devicerSnippetKey)};</script>`
-        : "";
-    const bootstrapScripts = `${scriptTag}${devicerBootstrap}`;
-
     if (html.includes("</head>")) {
-        return html.replace("</head>", `${bootstrapScripts}\n  </head>`);
+        return html.replace("</head>", `${scriptTag}\n  </head>`);
     }
 
-    return `${bootstrapScripts}${html}`;
+    return `${scriptTag}${html}`;
 }
 
 async function injectRuntimeBootstrapForHtml(context: {
@@ -1073,14 +1072,46 @@ router.get("/mesh.obj", (context) => {
         context.response.body = "Mesh not found";
     }
 });
+
+router.get("/api/devicer/snippet", async (context) => {
+    context.response.headers.set("Content-Type", "application/javascript; charset=utf-8");
+
+    if (!devicerSnippetKey) {
+        context.response.status = 200;
+        context.response.body = "/* Devicer snippet key not configured. */";
+        return;
+    }
+
+    try {
+        const upstream = await fetch(
+            `https://nash.gatewaycorporate.org/api/devicer/snippet?key=${encodeURIComponent(devicerSnippetKey)}`,
+        );
+
+        if (!upstream.ok) {
+            console.error("Devicer snippet proxy failed", upstream.status, upstream.statusText);
+            context.response.status = 200;
+            context.response.body = "/* Devicer snippet unavailable. */";
+            return;
+        }
+
+        context.response.status = 200;
+        context.response.body = await upstream.text();
+        context.response.headers.set("Cache-Control", "private, max-age=600");
+    } catch (error) {
+        console.error("Devicer snippet proxy request failed", error);
+        context.response.status = 200;
+        context.response.body = "/* Devicer snippet unavailable. */";
+    }
+});
+
 router.post('/contact', async (context) => {
   try {
     const form = await context.request.body.form();
     await handleUserRequest(form);
-    context.response.redirect('/?contact=success');
+        context.response.redirect('/?contact=success#contact');
   } catch (error) {
     console.error('Error processing request:', error);
-    context.response.redirect('/?contact=error');
+        context.response.redirect('/?contact=error#contact');
   }
 });
 
