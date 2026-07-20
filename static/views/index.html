@@ -191,8 +191,19 @@
         background: linear-gradient(180deg, rgba(30, 41, 59, 0.62) 0%, rgba(15, 23, 42, 0.78) 100%);
       }
 
-      .product-spotlight .card-title {
-        margin-bottom: 0.45rem;
+      .product-offerings-row {
+        --offerings-gap: var(--spacing-lg);
+        min-width: 400px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--offerings-gap);
+      }
+
+      .product-offerings-row > .product-spotlight {
+        flex: 0 1 calc((100% - (2 * var(--offerings-gap))) / 3);
+        max-width: calc((100% - (2 * var(--offerings-gap))) / 3);
       }
 
       .service-track-grid {
@@ -319,6 +330,15 @@
           grid-template-columns: 1fr;
         }
 
+        .product-offerings-row {
+          min-width: 0;
+        }
+
+        .product-offerings-row > .product-spotlight {
+          flex-basis: calc((100% - var(--offerings-gap)) / 2);
+          max-width: calc((100% - var(--offerings-gap)) / 2);
+        }
+
         .service-track-grid {
           grid-template-columns: 1fr;
         }
@@ -331,6 +351,13 @@
 
         .hero-stats .stat-panel {
           flex-basis: min(100%, 22rem);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .product-offerings-row > .product-spotlight {
+          flex-basis: 100%;
+          max-width: 100%;
         }
       }
     </style>
@@ -469,7 +496,7 @@
           <a href="/products" class="btn btn-primary btn-lg">Compare Products and Deployment Paths</a>
         </div>
 
-        <div class="grid grid-3 gap-lg card-grid">
+        <div class="grid grid-3 gap-lg product-offerings-row">
           <div class="product-spotlight">
             <div class="icon-circle icon-lg icon-primary">🔍</div>
             <h3 class="card-title">Devicer Intelligence Suite</h3>
