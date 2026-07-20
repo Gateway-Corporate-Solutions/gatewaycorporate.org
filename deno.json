@@ -1,7 +1,7 @@
 {
   "lock": false,
   "tasks": {
-    "start": "deno run --allow-read=./static,./content,./.env.list --allow-write=./content/experiment-events,./content/experiment-control --allow-net=0.0.0.0,127.0.0.1,localhost,api.resend.com,www.google.com,api.twilio.com --allow-env --env-file=.env.list main.ts"
+    "start": "deno run --allow-read=./static,./content,./data,./.env.list,$HOME/.cache/deno/plug --allow-write=./content/experiment-events,./content/experiment-control,./data --allow-net=0.0.0.0,127.0.0.1,localhost,api.resend.com,www.google.com,api.twilio.com,check.torproject.org,rdap.arin.net --allow-env --allow-ffi --env-file=.env.list main.ts"
   },
   "imports": {
     "oak": "jsr:@oak/oak",

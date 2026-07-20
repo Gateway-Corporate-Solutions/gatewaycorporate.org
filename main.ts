@@ -1,5 +1,12 @@
 import { Application, Router } from "oak";
 import {
+    bbasDevicer,
+    devicer,
+    ipDevicer,
+    peerDevicer,
+    tlsDevicer,
+} from "devicer-suite";
+import {
     getBlogPostBySlug,
     getBlogPosts,
     renderBlogIndexPage,
@@ -25,12 +32,251 @@ import {
     writeExperimentEvent,
 } from "./experimentation.ts";
 import { injectFooterIntoHtml, resolveFooterVariant } from "./footer.ts";
+import {
+    createBbasManagerSqliteAdapter,
+    createDevManagerSqliteAdapter,
+    createIpManagerSqliteAdapter,
+    createPeerManagerSqliteAdapter,
+    createTlsManagerSqliteAdapter,
+} from "./sqlite.ts";
+import { clusterFingerprints } from "./libs/clustering.ts";
+import {
+    applySecurityHeaders,
+    buildSessionCookieHeader,
+    injectSessionToken,
+    isExternalOriginSecure,
+    isOriginAllowed,
+    parseClientMessage,
+    parseConfiguredOrigins,
+    parseTrustedProxyIps,
+    RateLimiter,
+    resolveClientIp,
+    resolveExternalOrigin,
+    sanitizeUserId,
+    SESSION_COOKIE_NAME,
+    SessionStore,
+} from "./libs/security.ts";
 
 const router = new Router();
 const app = new Application();
 const port = parseInt(Deno.env.get("PORT") || "8000");
 const siteOrigin = "https://gatewaycorporate.org";
 const isProduction = Deno.env.get("DENO_ENV") === "production";
+const trustedProxyIps = parseTrustedProxyIps(Deno.env.get("FP_CICIS_TRUSTED_PROXIES"));
+const configuredOrigins = parseConfiguredOrigins(Deno.env.get("FP_CICIS_ALLOWED_ORIGINS"));
+const configuredPublicOrigin = Deno.env.get("FP_CICIS_PUBLIC_ORIGIN");
+const sessionStore = new SessionStore();
+const rateLimiter = new RateLimiter();
+
+type DevicerRuntime = {
+    adapters: {
+        device: ReturnType<typeof createDevManagerSqliteAdapter>;
+        ip: ReturnType<typeof createIpManagerSqliteAdapter>;
+        tls: ReturnType<typeof createTlsManagerSqliteAdapter>;
+        peer: ReturnType<typeof createPeerManagerSqliteAdapter>;
+        bbas: ReturnType<typeof createBbasManagerSqliteAdapter>;
+    };
+    confidenceThreshold: number;
+    deviceManager: devicer.DeviceManager;
+};
+
+type AnalyticsState = {
+    fingerprints: devicer.StoredFingerprint[];
+    clusters: devicer.StoredFingerprint[][];
+    uniques: devicer.StoredFingerprint[];
+};
+
+const analytics: AnalyticsState = {
+    fingerprints: [],
+    clusters: [],
+    uniques: [],
+};
+
+let analyticsRefreshTimer: number | undefined;
+let analyticsLastRefreshedAt = 0;
+let analyticsRefreshInFlight: Promise<void> | null = null;
+const fingerprintIngestStats = {
+    messagesReceived: 0,
+    identifySucceeded: 0,
+    identifyFailed: 0,
+    tlshComplexityFallbacks: 0,
+};
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : undefined;
+}
+
+function asStringArray(value: unknown): string[] {
+    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function isLoopbackHost(host: string | null): boolean {
+    if (!host) {
+        return false;
+    }
+
+    const normalized = host.trim().toLowerCase();
+    const withoutPort = normalized.startsWith("[")
+        ? normalized.slice(1, normalized.indexOf("]") > 0 ? normalized.indexOf("]") : undefined)
+        : normalized.split(":")[0];
+
+    return withoutPort === "localhost" || withoutPort === "127.0.0.1" || withoutPort === "::1";
+}
+
+function isTlsComplexityError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+        return false;
+    }
+
+    const message = error.message.toLowerCase();
+    return message.includes("input data hasn't enough complexity") ||
+        message.includes("not enough complexity") ||
+        message.includes("tlsh");
+}
+
+function buildAnalyticsMessage(state: AnalyticsState): string {
+    return JSON.stringify({
+        type: "analytics",
+        data: {
+            totalFingerprints: state.fingerprints.length,
+            uniqueFingerprints: state.uniques.length,
+            clusters: state.clusters.length,
+            averageClusterSize: state.clusters.length > 0
+                ? Math.floor((state.fingerprints.length - state.uniques.length) / state.clusters.length)
+                : 0,
+        },
+    });
+}
+
+function sendSocketJson(socket: WebSocket, payload: unknown): void {
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payload));
+    }
+}
+
+async function exists(path: string): Promise<boolean> {
+    try {
+        await Deno.stat(path);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function buildDevicerRuntime(): Promise<DevicerRuntime> {
+    const adapters = {
+        device: createDevManagerSqliteAdapter("./data/fp.db"),
+        ip: createIpManagerSqliteAdapter("./data/ip.db"),
+        tls: createTlsManagerSqliteAdapter("./data/tls.db"),
+        peer: createPeerManagerSqliteAdapter("./data/peer.db"),
+        bbas: createBbasManagerSqliteAdapter("./data/bbas.db"),
+    };
+
+    for (const adapter of Object.values(adapters)) {
+        await adapter.init();
+    }
+
+    const confidenceThreshold = 85;
+    const licenseKey = Deno.env.get("DEVICER_LICENSE_KEY");
+    const deviceManager = new devicer.DeviceManager(adapters.device, {
+        matchThreshold: confidenceThreshold,
+        candidateMinScore: 40,
+        logger: console,
+    });
+
+    try {
+        const geoPath = "./data/GeoLite2-City.mmdb";
+        const asnPath = "./data/GeoLite2-ASN.mmdb";
+        const ipManager = new ipDevicer.IpManager({
+            licenseKey,
+            maxmindPath: geoPath,
+            asnPath,
+            enableReputation: await exists(geoPath) && await exists(asnPath),
+            storage: adapters.ip,
+        });
+        deviceManager.use(ipManager);
+    } catch (error) {
+        console.warn("Failed to initialize ip-devicer plugin:", error);
+    }
+
+    try {
+        const tlsManager = new tlsDevicer.TlsManager({
+            licenseKey,
+            storage: adapters.tls,
+        });
+        deviceManager.use(tlsManager);
+    } catch (error) {
+        console.warn("Failed to initialize tls-devicer plugin:", error);
+    }
+
+    try {
+        const peerManager = new peerDevicer.PeerManager({
+            licenseKey,
+            storage: adapters.peer,
+        });
+        deviceManager.use(peerManager);
+    } catch (error) {
+        console.warn("Failed to initialize peer-devicer plugin:", error);
+    }
+
+    try {
+        const bbasManager = new bbasDevicer.BbasManager({
+            licenseKey,
+            storage: adapters.bbas,
+            enableBehavioralAnalysis: true,
+            enableCrossPlugin: true,
+        });
+        deviceManager.use(bbasManager);
+    } catch (error) {
+        console.warn("Failed to initialize bbas-devicer plugin:", error);
+    }
+
+    return {
+        adapters,
+        confidenceThreshold,
+        deviceManager,
+    };
+}
+
+async function refreshFingerprintAnalytics(state: DevicerRuntime): Promise<void> {
+    analytics.fingerprints = await state.adapters.device.getAllFingerprints();
+    [analytics.clusters, analytics.uniques] = await clusterFingerprints(
+        state.adapters.device,
+        1 - state.confidenceThreshold / 100,
+        2,
+    );
+    analyticsLastRefreshedAt = Date.now();
+}
+
+async function refreshFingerprintAnalyticsIfNeeded(
+    state: DevicerRuntime,
+    minIntervalMs = 0,
+): Promise<void> {
+    const now = Date.now();
+    if (minIntervalMs > 0 && now - analyticsLastRefreshedAt < minIntervalMs) {
+        return;
+    }
+
+    if (!analyticsRefreshInFlight) {
+        analyticsRefreshInFlight = refreshFingerprintAnalytics(state)
+            .catch((error) => {
+                console.error("Fingerprint analytics refresh failed", error);
+            })
+            .finally(() => {
+                analyticsRefreshInFlight = null;
+            });
+    }
+
+    await analyticsRefreshInFlight;
+}
+
+const devicerRuntime = await buildDevicerRuntime();
+await refreshFingerprintAnalytics(devicerRuntime);
+analyticsRefreshTimer = setInterval(() => {
+    void refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 30_000);
+}, 600_000);
 
 function escapeHtml(value: string): string {
         return value
@@ -54,6 +300,15 @@ function isExperimentAdminAuthorized(headers: Headers, url: string): boolean {
 }
 
 function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof generateGuardrailSummary>>): string {
+    const fingerprintSnapshot = {
+        totalFingerprints: analytics.fingerprints.length,
+        uniqueFingerprints: analytics.uniques.length,
+        clusters: analytics.clusters.length,
+        averageClusterSize: analytics.clusters.length > 0
+            ? Math.floor((analytics.fingerprints.length - analytics.uniques.length) / analytics.clusters.length)
+            : 0,
+    };
+
         const rows = summary.metrics
                 .map((metric) => {
                         const rate = `${(metric.conversionRate * 100).toFixed(2)}%`;
@@ -98,6 +353,30 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                 border-radius: 14px;
                 overflow: hidden;
             }
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 0.75rem;
+                margin: 0 0 1rem;
+            }
+            .stat {
+                background: #111827;
+                border: 1px solid #334155;
+                border-radius: 12px;
+                padding: 0.8rem 0.9rem;
+            }
+            .stat-label {
+                font-size: 0.72rem;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+            .stat-value {
+                margin-top: 0.25rem;
+                font-size: 1.15rem;
+                color: #e2e8f0;
+                font-weight: 700;
+            }
             table {
                 width: 100%;
                 border-collapse: collapse;
@@ -122,6 +401,24 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
     <body>
         <h1>Experiment Guardrails</h1>
         <p>Generated at ${escapeHtml(summary.generatedAt)} for lookback ${summary.lookbackDays} day(s).</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Fingerprint Rows</div>
+                <div class="stat-value">${fingerprintSnapshot.totalFingerprints}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Unique Fingerprints</div>
+                <div class="stat-value">${fingerprintSnapshot.uniqueFingerprints}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Fingerprint Clusters</div>
+                <div class="stat-value">${fingerprintSnapshot.clusters}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Avg Cluster Size</div>
+                <div class="stat-value">${fingerprintSnapshot.averageClusterSize}</div>
+            </div>
+        </div>
         <div class="panel">
             <table>
                 <thead>
@@ -160,6 +457,31 @@ function injectExperimentBootstrap(html: string, request: Request): string {
     }
 
     return `${bootstrapScripts}${html}`;
+}
+
+async function injectRuntimeBootstrapForHtml(context: {
+    request: { headers: Headers; url: URL };
+    cookies: { get(name: string): Promise<string | undefined> };
+    response: { headers: Headers };
+}, html: string): Promise<string> {
+    const externalOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
+    const secureCookie = isExternalOriginSecure(externalOrigin);
+    const sessionId = await context.cookies.get(SESSION_COOKIE_NAME);
+    let session = sessionStore.getSession(sessionId);
+
+    if (!session) {
+        session = sessionStore.createSession();
+    }
+
+    context.response.headers.append(
+        "set-cookie",
+        buildSessionCookieHeader(SESSION_COOKIE_NAME, session.id, secureCookie, 600),
+    );
+
+    return injectExperimentBootstrap(
+        injectSessionToken(html, session.token),
+        new Request(context.request.url.toString(), { headers: context.request.headers }),
+    );
 }
 
 function listStaticFileSlugs(directoryPath: string, extension: string): Set<string> {
@@ -241,8 +563,11 @@ function renderSitemapUrl({ loc, lastmod, priority, changefreq }: SitemapEntry):
 }
 
 async function renderHomePage(
-    context: { response: { body: unknown; headers: Headers } },
-    requestHeaders: Headers,
+    context: {
+        request: { headers: Headers; url: URL };
+        cookies: { get(name: string): Promise<string | undefined> };
+        response: { body: unknown; headers: Headers };
+    },
 ) {
     const homepageTemplate = await Deno.readTextFile("./static/views/index.html");
     const blogPosts = await getBlogPosts();
@@ -255,10 +580,7 @@ async function renderHomePage(
         resolveFooterVariant("index"),
     );
 
-    context.response.body = injectExperimentBootstrap(
-        rendered,
-        new Request("http://localhost/", { headers: requestHeaders }),
-    );
+    context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 }
 
@@ -340,22 +662,19 @@ ${parts}
 });
 
 router.get("/", async (context) => {
-    await renderHomePage(context, context.request.headers);
+    await renderHomePage(context);
 });
 router.get("/index.html", async (context) => {
-    await renderHomePage(context, context.request.headers);
+    await renderHomePage(context);
 });
-router.get("/services", (context) => {
+router.get("/services", async (context) => {
     try {
         const servicesHtml = Deno.readTextFileSync("./static/views/services.html");
         const rendered = injectFooterIntoHtml(
             servicesHtml,
             resolveFooterVariant("index"),
         );
-        context.response.body = injectExperimentBootstrap(
-            rendered,
-            new Request("http://localhost/services", { headers: context.request.headers }),
-        );
+        context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
         context.response.headers.set("Content-Type", "text/html; charset=utf-8");
     } catch (error) {
         console.error(`Error reading services view file: ${error}`);
@@ -363,17 +682,14 @@ router.get("/services", (context) => {
         context.response.body = "Services page not found";
     }
 });
-router.get("/products", (context) => {
+router.get("/products", async (context) => {
     try {
         const productsHtml = Deno.readTextFileSync("./static/views/products.html");
         const rendered = injectFooterIntoHtml(
             productsHtml,
             resolveFooterVariant("index"),
         );
-        context.response.body = injectExperimentBootstrap(
-            rendered,
-            new Request("http://localhost/products", { headers: context.request.headers }),
-        );
+        context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
         context.response.headers.set("Content-Type", "text/html; charset=utf-8");
     } catch (error) {
         console.error(`Error reading products view file: ${error}`);
@@ -383,7 +699,7 @@ router.get("/products", (context) => {
 });
 router.get("/blog", async (context) => {
     const blogPosts = await getBlogPosts();
-    context.response.body = renderBlogIndexPage(blogPosts);
+    context.response.body = await injectRuntimeBootstrapForHtml(context, renderBlogIndexPage(blogPosts));
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 });
 router.get("/blog/:slug", async (context) => {
@@ -406,18 +722,18 @@ router.get("/blog/:slug", async (context) => {
         return;
     }
 
-    context.response.body = renderBlogPostPage(post, blogPosts);
+    context.response.body = await injectRuntimeBootstrapForHtml(context, renderBlogPostPage(post, blogPosts));
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 });
 router.get("/careers", async (context) => {
     const jobs = await getJobPostings();
-    context.response.body = renderCareersIndexPage(jobs);
+    context.response.body = await injectRuntimeBootstrapForHtml(context, renderCareersIndexPage(jobs));
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 });
 router.get("/careers/success", async (context) => {
     const slug = context.request.url.searchParams.get("job") || "";
     const job = slug ? await getJobPostingBySlug(slug) : undefined;
-    context.response.body = renderCareersSuccessPage(job);
+    context.response.body = await injectRuntimeBootstrapForHtml(context, renderCareersSuccessPage(job));
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 });
 router.get("/careers/:slug", async (context) => {
@@ -440,7 +756,7 @@ router.get("/careers/:slug", async (context) => {
         return;
     }
 
-    context.response.body = renderJobPostingPage(job, jobs);
+    context.response.body = await injectRuntimeBootstrapForHtml(context, renderJobPostingPage(job, jobs));
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 });
 router.post("/careers/:slug/apply", async (context) => {
@@ -490,21 +806,21 @@ router.post("/careers/:slug/apply", async (context) => {
         }
 
         context.response.status = result.status;
-        context.response.body = renderJobPostingPage(job, jobs, {
+        context.response.body = await injectRuntimeBootstrapForHtml(context, renderJobPostingPage(job, jobs, {
             errorMessage: result.message,
             values: result.values,
-        });
+        }));
         context.response.headers.set("Content-Type", "text/html; charset=utf-8");
     } catch (error) {
         console.error("Error processing application:", error);
         context.response.status = 500;
-        context.response.body = renderJobPostingPage(job, jobs, {
+        context.response.body = await injectRuntimeBootstrapForHtml(context, renderJobPostingPage(job, jobs, {
             errorMessage: "We could not process your application. Please try again shortly or email office@gatewaycorporate.org directly.",
-        });
+        }));
         context.response.headers.set("Content-Type", "text/html; charset=utf-8");
     }
 });
-router.get("/products/:view", (context) => {
+router.get("/products/:view", async (context) => {
     const view = context.params.view;
     if (view) {
         if (!allowedProductViews.has(view)) {
@@ -519,12 +835,7 @@ router.get("/products/:view", (context) => {
                 viewHtml,
                 resolveFooterVariant(view),
             );
-            context.response.body = injectExperimentBootstrap(
-                rendered,
-                new Request(`http://localhost/products/${encodeURIComponent(view)}`, {
-                    headers: context.request.headers,
-                }),
-            );
+            context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
             context.response.headers.set("Content-Type", "text/html; charset=utf-8");
         } catch (error) {
             console.error(`Error reading view file: ${error}`);
@@ -579,6 +890,254 @@ router.post('/contact', async (context) => {
   }
 });
 
+router.get("/wss", async (context) => {
+    if (!context.isUpgradable) {
+        context.response.status = 426;
+        context.response.body = "Upgrade Required";
+        return;
+    }
+
+    const requestOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
+    const originHeader = context.request.headers.get("origin");
+    const isLocalDevOrigin = isLoopbackHost(context.request.headers.get("host")) || isLoopbackHost(context.request.url.host);
+
+    if (!isLocalDevOrigin && !isOriginAllowed(originHeader, requestOrigin, configuredOrigins)) {
+        context.response.status = 403;
+        context.response.body = "Origin not allowed.";
+        return;
+    }
+
+    const sessionId = await context.cookies.get(SESSION_COOKIE_NAME);
+    const websocketToken = context.request.url.searchParams.get("token");
+    if (!sessionStore.validateSession(sessionId, websocketToken)) {
+        context.response.status = 403;
+        context.response.body = "Invalid websocket session.";
+        return;
+    }
+
+    const requestHeaders = Object.fromEntries(context.request.headers.entries());
+    const realIp = resolveClientIp(
+        context.request.ip,
+        context.request.headers.get("X-Real-IP"),
+        trustedProxyIps,
+    );
+
+    if (!rateLimiter.tryOpenConnection(realIp)) {
+        context.response.status = 429;
+        context.response.body = "Too many websocket connections.";
+        return;
+    }
+
+    let tlsProfile: unknown;
+    try {
+        tlsProfile = tlsDevicer.buildTlsProfile(requestHeaders);
+    } catch (error) {
+        if (isTlsComplexityError(error)) {
+            console.warn("Skipping TLS profile for low-complexity input:", error instanceof Error ? error.message : error);
+            tlsProfile = undefined;
+        } else {
+            throw error;
+        }
+    }
+    const socket = await context.upgrade();
+    let socketAnalyticsTimer: number | undefined;
+
+    const cleanupSocket = () => {
+        if (socketAnalyticsTimer !== undefined) {
+            clearInterval(socketAnalyticsTimer);
+            socketAnalyticsTimer = undefined;
+        }
+        rateLimiter.releaseConnection(realIp);
+    };
+
+    socket.onopen = () => {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(buildAnalyticsMessage(analytics));
+        }
+
+        socketAnalyticsTimer = setInterval(() => {
+            if (socket.readyState !== WebSocket.OPEN) {
+                cleanupSocket();
+                return;
+            }
+            socket.send(buildAnalyticsMessage(analytics));
+        }, 60_000);
+    };
+
+    socket.onclose = cleanupSocket;
+    socket.onerror = () => {
+        cleanupSocket();
+    };
+
+    socket.onmessage = async (event) => {
+        fingerprintIngestStats.messagesReceived += 1;
+
+        if (!rateLimiter.allowMessage(realIp)) {
+            sendSocketJson(socket, {
+                type: "error",
+                data: "Too many websocket messages. Please retry later.",
+            });
+            socket.close(1008, "Rate limit exceeded");
+            cleanupSocket();
+            return;
+        }
+
+        const parsedMessage = parseClientMessage(event.data);
+        if (!parsedMessage.ok) {
+            sendSocketJson(socket, {
+                type: "error",
+                data: parsedMessage.clientMessage,
+            });
+            socket.close(parsedMessage.closeCode, parsedMessage.clientMessage);
+            cleanupSocket();
+            return;
+        }
+
+        try {
+            const fingerprintData = parsedMessage.value.data;
+            const hash = devicer.getHash(JSON.stringify(fingerprintData));
+            const fingerprintCandidates = await devicerRuntime.adapters.device.findCandidates(fingerprintData, 50, 50);
+            const exactMatchFound = fingerprintCandidates.some((fp: devicer.DeviceMatch) => fp.confidence >= 100);
+            const closestMatch = Math.max(0, ...fingerprintCandidates.map((fp: devicer.DeviceMatch) => fp.confidence));
+            const userId = sanitizeUserId(requestHeaders["x-user-id"]) ?? undefined;
+
+            let identifyResult: Record<string, unknown>;
+            try {
+                identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
+                    ip: realIp,
+                    userId,
+                    tlsProfile,
+                    headers: requestHeaders,
+                }) as unknown as Record<string, unknown>;
+            } catch (error) {
+                if (!isTlsComplexityError(error)) {
+                    throw error;
+                }
+
+                console.warn("Retrying identify without TLS profile due to TLSH complexity error:", error instanceof Error ? error.message : error);
+                try {
+                    identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
+                        ip: realIp,
+                        userId,
+                        headers: requestHeaders,
+                    }) as unknown as Record<string, unknown>;
+                } catch (retryError) {
+                    if (!isTlsComplexityError(retryError)) {
+                        throw retryError;
+                    }
+
+                    fingerprintIngestStats.tlshComplexityFallbacks += 1;
+                    const fallbackDeviceId = `fallback-${hash.slice(0, 16)}`;
+
+                    // Preserve accumulation even when TLSH-dependent enrichment is not usable.
+                    await devicerRuntime.adapters.device.save({
+                        id: crypto.randomUUID(),
+                        deviceId: fallbackDeviceId,
+                        fingerprint: fingerprintData,
+                        timestamp: new Date(),
+                    });
+
+                    identifyResult = {
+                        deviceId: fallbackDeviceId,
+                        isNewDevice: true,
+                    };
+                }
+            }
+
+            const tlsConsistency = asRecord(identifyResult.tlsConsistency);
+            const peerReputation = asRecord(identifyResult.peerReputation);
+            const bbasEnrichment = asRecord(identifyResult.bbasEnrichment);
+            const enrichmentInfo = asRecord(identifyResult.enrichmentInfo);
+            const enrichmentDetails = asRecord(enrichmentInfo?.details);
+            const ipDetails = asRecord(enrichmentDetails?.ip);
+            const agentInfo = asRecord(ipDetails?.agentInfo);
+            const uaClassification = asRecord(bbasEnrichment?.uaClassification);
+            const peerConfidenceBoost = typeof identifyResult.peerConfidenceBoost === "number" ? identifyResult.peerConfidenceBoost : null;
+            const bbasDecision = typeof identifyResult.bbasDecision === "string" ? identifyResult.bbasDecision : null;
+            const country = typeof ipDetails?.country === "string" ? ipDetails.country : null;
+
+            sendSocketJson(socket, {
+                type: "fingerprint",
+                data: {
+                    hash,
+                    exactMatchFound,
+                    closestMatch: closestMatch || 0,
+                    deviceId: typeof identifyResult.deviceId === "string" ? identifyResult.deviceId : null,
+                    isNewDevice: identifyResult.isNewDevice === true,
+                    ip: {
+                        riskScore: typeof ipDetails?.riskScore === "number" ? ipDetails.riskScore : null,
+                        isProxy: ipDetails?.isProxy === true,
+                        isVpn: ipDetails?.isVpn === true,
+                        isTor: ipDetails?.isTor === true,
+                        isHosting: ipDetails?.isHosting === true,
+                        isAiAgent: agentInfo?.isAiAgent === true,
+                        aiAgentProvider: typeof agentInfo?.aiAgentProvider === "string" ? agentInfo.aiAgentProvider : null,
+                        country,
+                    },
+                    tls: tlsConsistency ? {
+                        consistencyScore: typeof tlsConsistency.consistencyScore === "number" ? tlsConsistency.consistencyScore : null,
+                        ja4Match: typeof tlsConsistency.ja4Match === "boolean" ? tlsConsistency.ja4Match : null,
+                        factors: asStringArray(tlsConsistency.factors),
+                    } : null,
+                    peer: peerReputation ? {
+                        peerCount: typeof peerReputation.peerCount === "number" ? peerReputation.peerCount : 0,
+                        taintScore: typeof peerReputation.taintScore === "number" ? peerReputation.taintScore : null,
+                        trustScore: typeof peerReputation.trustScore === "number" ? peerReputation.trustScore : null,
+                        confidenceBoost: peerConfidenceBoost,
+                        factors: asStringArray(peerReputation.factors),
+                    } : null,
+                    bot: bbasEnrichment ? {
+                        botScore: typeof bbasEnrichment.botScore === "number" ? bbasEnrichment.botScore : null,
+                        decision: bbasDecision,
+                        isHeadless: uaClassification?.isHeadless === true,
+                        isBot: uaClassification?.isBot === true,
+                        isCrawler: uaClassification?.isCrawler === true,
+                        behavioralHumanScore: typeof asRecord(bbasEnrichment.behavioralSignals)?.humanScore === "number"
+                            ? asRecord(bbasEnrichment.behavioralSignals)?.humanScore
+                            : null,
+                        factors: asStringArray(bbasEnrichment.botFactors),
+                    } : null,
+                },
+            });
+
+            if (["IN", "BD", "NG", "RO", "RU", "IR", "CN", "KP"].includes(country as string)) {
+                sendSocketJson(socket, {
+                    type: "blacklistAlert",
+                    data: {
+                        hash,
+                        country,
+                    },
+                });
+            }
+
+            if (bbasDecision === "block" || bbasDecision === "challenge") {
+                sendSocketJson(socket, {
+                    type: "botAlert",
+                    data: {
+                        hash,
+                        decision: bbasDecision,
+                        botScore: typeof bbasEnrichment?.botScore === "number" ? bbasEnrichment.botScore : null,
+                        factors: asStringArray(bbasEnrichment?.botFactors),
+                    },
+                });
+            }
+
+            fingerprintIngestStats.identifySucceeded += 1;
+
+            // Keep admin analytics snapshot close to real time without
+            // recomputing for every single websocket payload.
+            void refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 2_500);
+        } catch (error) {
+            fingerprintIngestStats.identifyFailed += 1;
+            console.error("Error processing websocket payload:", error);
+            sendSocketJson(socket, {
+                type: "error",
+                data: "Unable to process fingerprint payload.",
+            });
+        }
+    };
+});
+
 router.post("/events/experiment", async (context) => {
     try {
         const payload = await context.request.body.json();
@@ -626,6 +1185,64 @@ router.get("/experiments/guardrails", async (context) => {
     }
 });
 
+router.get("/experiments/fingerprint-analytics", async (context) => {
+    try {
+        if (!isExperimentAdminAuthorized(context.request.headers, context.request.url.toString())) {
+            context.response.status = 401;
+            context.response.body = { ok: false, error: "Unauthorized" };
+            context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+            return;
+        }
+
+        await refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 0);
+
+        context.response.status = 200;
+        context.response.body = {
+            ok: true,
+            generatedAt: new Date().toISOString(),
+            analyticsLastRefreshedAt: new Date(analyticsLastRefreshedAt).toISOString(),
+            ingest: { ...fingerprintIngestStats },
+            metrics: {
+                totalFingerprints: analytics.fingerprints.length,
+                uniqueFingerprints: analytics.uniques.length,
+                clusters: analytics.clusters.length,
+                averageClusterSize: analytics.clusters.length > 0
+                    ? Math.floor((analytics.fingerprints.length - analytics.uniques.length) / analytics.clusters.length)
+                    : 0,
+            },
+        };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    } catch (error) {
+        console.error("Failed to return fingerprint analytics", error);
+        context.response.status = 500;
+        context.response.body = { ok: false, error: "Fingerprint analytics unavailable" };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    }
+});
+
+router.get("/experiments/debug-origin", (context) => {
+    if (!isExperimentAdminAuthorized(context.request.headers, context.request.url.toString())) {
+        context.response.status = 401;
+        context.response.body = { ok: false, error: "Unauthorized" };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+        return;
+    }
+
+    const externalOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
+    context.response.status = 200;
+    context.response.body = {
+        ok: true,
+        configuredPublicOrigin,
+        requestUrl: context.request.url.toString(),
+        hostHeader: context.request.headers.get("host"),
+        xForwardedProto: context.request.headers.get("x-forwarded-proto"),
+        xForwardedHost: context.request.headers.get("x-forwarded-host"),
+        resolvedOrigin: externalOrigin.toString(),
+        secure: isExternalOriginSecure(externalOrigin),
+    };
+    context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+});
+
 router.get("/experiments/dashboard", async (context) => {
     try {
         if (!isExperimentAdminAuthorized(context.request.headers, context.request.url.toString())) {
@@ -634,6 +1251,8 @@ router.get("/experiments/dashboard", async (context) => {
             context.response.headers.set("Content-Type", "text/plain; charset=utf-8");
             return;
         }
+
+        await refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 0);
 
         const daysParam = context.request.url.searchParams.get("days");
         const days = daysParam ? Math.max(1, Number(daysParam)) : 7;
@@ -679,11 +1298,10 @@ router.post("/experiments/guardrails/evaluate", async (context) => {
 });
 
 app.use(async (context, next) => {
-    context.response.headers.set("X-Content-Type-Options", "nosniff");
-    context.response.headers.set("X-Frame-Options", "DENY");
-    context.response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-    context.response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-    context.response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    const externalOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
+    await next();
+
+    applySecurityHeaders(context.response.headers, isExternalOriginSecure(externalOrigin));
     context.response.headers.set("Content-Security-Policy", [
         "default-src 'self'",
         "script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://nash.gatewaycorporate.org",
@@ -696,8 +1314,6 @@ app.use(async (context, next) => {
         "base-uri 'self'",
         "form-action 'self'",
     ].join("; "));
-
-    await next();
 
     if (!isProduction) {
         context.response.headers.set("Cache-Control", "no-store, max-age=0");

@@ -264,7 +264,7 @@ export function buildExperimentContext(request: ExperimentRequestContext, isProd
   if (!enabled) {
     return {
       assignments: [],
-      scriptTag: '<script>window.__GCX__ = { enabled: false, assignments: [] };</script>',
+      scriptTag: '<script>window.__GCX__ = Object.assign({}, window.__GCX__ || {}, { enabled: false, assignments: [] });</script>',
     };
   }
 
@@ -290,7 +290,7 @@ export function buildExperimentContext(request: ExperimentRequestContext, isProd
 
   const scriptTag = [
     "<script>",
-    `window.__GCX__ = ${JSON.stringify(payload)};`,
+    `window.__GCX__ = Object.assign({}, window.__GCX__ || {}, ${JSON.stringify(payload)});`,
     "window.__GCX__.assignmentsHash = \"" + encoded + "\";",
     "</script>",
   ].join("");

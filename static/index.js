@@ -88,6 +88,39 @@ function extractDeviceId(candidate) {
   return null;
 }
 
+function buildWebSocketUrl(locationObject, token) {
+  const scheme = locationObject.protocol === "https:" ? "wss:" : "ws:";
+  return `${scheme}//${locationObject.host}/wss?token=${encodeURIComponent(token)}`;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function collectFingerprintPayload(agent) {
+  if (!agent) {
+    return null;
+  }
+
+  if (typeof agent.capture === "function") {
+    return agent.capture({
+      minBehavioralDurationMs: 1500,
+      maxBehavioralWaitMs: 6000,
+      pollIntervalMs: 100,
+      requireInteraction: true,
+    });
+  }
+
+  await agent.ready;
+  await sleep(1500);
+
+  if (agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
+    agent.dataset.behavioralMetrics = agent._behavioral.computeBehavioralMetrics();
+  }
+
+  return agent.dataset;
+}
+
 const DevicerAnalytics = {
   _readyPromise: null,
   _deviceId: null,
@@ -159,6 +192,230 @@ const DevicerAnalytics = {
       name,
       emails: [{ address: email, isPrimary: true }],
     });
+  },
+};
+
+const SnatchFingerprint = {
+  _agent: null,
+  _agentReadyPromise: null,
+  _capturePromise: null,
+
+  async ensureAgent() {
+    if (this._agent) {
+      return this._agent;
+    }
+
+    if (this._agentReadyPromise) {
+      return this._agentReadyPromise;
+    }
+
+    this._agentReadyPromise = (async () => {
+      const exported = window.snatch;
+      const Snatch = (exported && exported.default) || exported;
+
+      if (typeof Snatch !== "function") {
+        return null;
+      }
+
+      try {
+        const agent = new Snatch();
+        this._agent = agent;
+        return agent;
+      } catch (error) {
+        console.warn("Unable to initialize snatch collector:", error);
+        return null;
+      }
+    })();
+
+    return this._agentReadyPromise;
+  },
+
+  async capture() {
+    if (!this._capturePromise) {
+      this._capturePromise = (async () => {
+        const agent = await this.ensureAgent();
+        if (!agent) {
+          return null;
+        }
+
+        try {
+          return await collectFingerprintPayload(agent);
+        } catch (error) {
+          console.warn("Snatch capture failed:", error);
+          return null;
+        }
+      })().finally(() => {
+        this._capturePromise = null;
+      });
+    }
+
+    return this._capturePromise;
+  },
+};
+
+const RiskTelemetrySocket = {
+  socket: null,
+  connectTimer: null,
+  heartbeatTimer: null,
+  reconnectAttempts: 0,
+  initialized: false,
+
+  getToken() {
+    const token = window.__GCX__?.websocketToken;
+    return typeof token === "string" && token.trim() ? token.trim() : "";
+  },
+
+  getWebSocketUrl() {
+    const token = this.getToken();
+    if (!token) {
+      return "";
+    }
+
+    return buildWebSocketUrl(window.location, token);
+  },
+
+  async buildFingerprintPayload() {
+    const payload = {
+      page: window.location.pathname,
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+      platform: navigator.platform,
+      hardwareConcurrency: navigator.hardwareConcurrency,
+      deviceMemory: navigator.deviceMemory,
+      screen: {
+        width: window.screen?.width ?? null,
+        height: window.screen?.height ?? null,
+        pixelRatio: window.devicePixelRatio || 1,
+      },
+    };
+
+    const snatchData = await SnatchFingerprint.capture();
+    return snatchData && typeof snatchData === "object"
+      ? { ...payload, ...snatchData }
+      : payload;
+  },
+
+  clearTimers() {
+    if (this.connectTimer) {
+      clearTimeout(this.connectTimer);
+      this.connectTimer = null;
+    }
+
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+  },
+
+  scheduleReconnect() {
+    this.clearTimers();
+    const delay = Math.min(30_000, 1_000 * 2 ** Math.min(this.reconnectAttempts, 5));
+    this.reconnectAttempts += 1;
+    this.connectTimer = setTimeout(() => {
+      this.connect();
+    }, delay);
+  },
+
+  async sendFingerprintSnapshot() {
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    const data = await this.buildFingerprintPayload();
+    this.socket.send(JSON.stringify({
+      type: "data",
+      data,
+    }));
+  },
+
+  async handleOpen() {
+    this.reconnectAttempts = 0;
+    await this.sendFingerprintSnapshot();
+
+    this.heartbeatTimer = setInterval(() => {
+      this.sendFingerprintSnapshot().catch((error) => {
+        console.error("Risk telemetry heartbeat failed:", error);
+      });
+    }, 120_000);
+  },
+
+  handleMessage(event) {
+    if (typeof event.data !== "string") {
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(event.data);
+      window.__GCX__ = window.__GCX__ || {};
+
+      if (payload && typeof payload === "object" && payload.type === "fingerprint") {
+        window.__GCX__.riskTelemetry = payload.data;
+      } else if (payload && typeof payload === "object" && payload.type === "analytics") {
+        window.__GCX__.riskAnalytics = payload.data;
+      }
+
+      window.dispatchEvent(new CustomEvent("gcx:risk-telemetry", { detail: payload }));
+    } catch (error) {
+      console.error("Risk telemetry message parsing failed:", error);
+    }
+  },
+
+  connect() {
+    if (!hasAnalyticsConsent()) {
+      return;
+    }
+
+    const socketUrl = this.getWebSocketUrl();
+    if (!socketUrl) {
+      return;
+    }
+
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+
+    try {
+      const socket = new WebSocket(socketUrl);
+      this.socket = socket;
+
+      socket.addEventListener("open", () => {
+        this.handleOpen().catch((error) => {
+          console.error("Risk telemetry socket open handling failed:", error);
+        });
+      });
+
+      socket.addEventListener("message", (event) => {
+        this.handleMessage(event);
+      });
+
+      socket.addEventListener("error", () => {
+        this.scheduleReconnect();
+      });
+
+      socket.addEventListener("close", () => {
+        this.scheduleReconnect();
+      });
+    } catch (error) {
+      console.error("Risk telemetry socket connection failed:", error);
+      this.scheduleReconnect();
+    }
+  },
+
+  initialize() {
+    if (this.initialized) {
+      this.connect();
+      return;
+    }
+
+    this.initialized = true;
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        this.connect();
+      }
+    });
+
+    this.connect();
   },
 };
 
@@ -1525,6 +1782,7 @@ function renderAnalyticsConsentBanner() {
         console.error("Devicer analytics setup failed:", error);
       }
 
+      RiskTelemetrySocket.initialize();
       ExperimentTelemetry.initialize();
       return;
     }
@@ -1655,6 +1913,7 @@ function initializePage() {
     DevicerAnalytics.ensureReady().catch((error) => {
       console.error("Devicer analytics setup failed:", error);
     });
+    RiskTelemetrySocket.initialize();
   }
 
   ExperimentTelemetry.initialize();

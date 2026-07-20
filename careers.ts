@@ -419,6 +419,7 @@ function renderPageShell(options: {
     <meta name="twitter:image" content="${escapeHtml(options.imageUrl)}">${recaptchaScript}${jsonLdScript}${robotsMeta}
     <link rel="stylesheet" href="/components.css">
     <link rel="stylesheet" href="/enhancements.css">
+    <script src="/bundle.js" defer></script>
     <script src="/index.js" defer></script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
   </head>
