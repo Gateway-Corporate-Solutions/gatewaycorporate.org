@@ -364,9 +364,14 @@ function isBuyClickEvent(event: ExperimentEvent): boolean {
 
   const label = typeof metadata.label === "string" ? metadata.label.toLowerCase() : "";
   const target = typeof metadata.target === "string" ? metadata.target.toLowerCase() : "";
+  const isAccentButton = metadata.isAccentButton === true;
+  const classList = Array.isArray(metadata.classList)
+    ? metadata.classList.filter((entry): entry is string => typeof entry === "string")
+    : [];
+  const hasAccentClass = classList.some((entry) => entry.toLowerCase() === "btn-accent");
   const combined = `${label} ${target}`;
 
-  return combined.includes("buy") || combined.includes("checkout") || combined.includes("polar.sh");
+  return isAccentButton || hasAccentClass || combined.includes("buy") || combined.includes("checkout") || combined.includes("polar.sh");
 }
 
 function normalizePath(path: string): string {

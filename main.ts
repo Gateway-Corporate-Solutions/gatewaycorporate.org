@@ -891,6 +891,7 @@ router.post('/contact', async (context) => {
 });
 
 router.get("/wss", async (context) => {
+    try {
     if (!context.isUpgradable) {
         context.response.status = 426;
         context.response.body = "Upgrade Required";
@@ -936,7 +937,8 @@ router.get("/wss", async (context) => {
             console.warn("Skipping TLS profile for low-complexity input:", error instanceof Error ? error.message : error);
             tlsProfile = undefined;
         } else {
-            throw error;
+            console.warn("Skipping TLS profile due to parsing error:", error instanceof Error ? error.message : error);
+            tlsProfile = undefined;
         }
     }
     const socket = await context.upgrade();
@@ -1136,6 +1138,15 @@ router.get("/wss", async (context) => {
             });
         }
     };
+    } catch (error) {
+        console.error("Websocket upgrade handler failed:", error);
+        if (!context.response.status || context.response.status < 400) {
+            context.response.status = 503;
+        }
+        if (!context.response.body) {
+            context.response.body = "Websocket unavailable";
+        }
+    }
 });
 
 router.post("/events/experiment", async (context) => {

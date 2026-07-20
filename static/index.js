@@ -503,9 +503,13 @@ const ExperimentTelemetry = {
         button.addEventListener("click", () => {
           const label = button.textContent?.trim() || "";
           const target = button.getAttribute("href") || button.getAttribute("id") || "";
+          const classList = Array.from(button.classList || []);
+          const isAccentButton = classList.includes("btn-accent");
           this.emit("cta_click", {
             label,
             target,
+            classList,
+            isAccentButton,
           });
         });
       });
