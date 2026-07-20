@@ -1032,13 +1032,12 @@ class NetworkGraph {
     this.resize(true);
     this.buildNodes();
 
+    this.bindEvents();
+    this.drawFrame();
+
     if (this.isStatic) {
-      this.drawFrame();
       return;
     }
-
-    this.bindEvents();
-    this.rebuildNodes();
 
     if (this.reducedMotion) {
       this.drawFrame();
@@ -1051,6 +1050,20 @@ class NetworkGraph {
       }, { threshold: 0.08 });
       observer.observe(canvas);
       this.start();
+    }
+
+    const loadMeshWhenIdle = () => {
+      if (this.meshModel || this.meshLoadAttempted || this.meshLoading) {
+        return;
+      }
+
+      this.loadMeshModel();
+    };
+
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(loadMeshWhenIdle, { timeout: 1500 });
+    } else {
+      window.setTimeout(loadMeshWhenIdle, 600);
     }
   }
 
@@ -1079,7 +1092,7 @@ class NetworkGraph {
       if (changed) {
         this.rebuildNodes();
       }
-      if (this.reducedMotion || wasRunning) {
+      if (this.reducedMotion || this.isStatic || wasRunning) {
         this.drawFrame();
       }
       if (wasRunning && !this.reducedMotion) {
@@ -1123,7 +1136,7 @@ class NetworkGraph {
     this.pointer.y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
     this.pointer.active = true;
 
-    if (this.reducedMotion) {
+    if (this.reducedMotion || this.isStatic) {
       this.drawFrame();
     }
   }
@@ -1171,7 +1184,7 @@ class NetworkGraph {
       this.buildMeshTargets();
       this.meshLoaded = this.meshTargets.length > 0;
 
-      if (this.reducedMotion || this.running) {
+      if (this.reducedMotion || this.isStatic || this.running) {
         this.drawFrame();
       }
     } catch (error) {
@@ -1337,6 +1350,12 @@ class NetworkGraph {
   }
 
   rebuildNodes() {
+    if (this.isStatic) {
+      this.disableMeshModel();
+      this.buildNodes();
+      return;
+    }
+
     if (!this.shouldUseMeshModel()) {
       this.disableMeshModel();
       this.buildNodes();
@@ -1345,7 +1364,6 @@ class NetworkGraph {
 
     if (!this.meshModel) {
       this.buildNodes();
-      this.loadMeshModel();
       return;
     }
 
@@ -1904,14 +1922,10 @@ function initializePage() {
     });
   };
 
-  const scheduleNetworkGraphs = () => {
-    window.setTimeout(startNetworkGraphs, 3000);
-  };
-
   if (document.readyState === "complete") {
-    scheduleNetworkGraphs();
+    startNetworkGraphs();
   } else {
-    window.addEventListener("load", scheduleNetworkGraphs, { once: true });
+    document.addEventListener("DOMContentLoaded", startNetworkGraphs, { once: true });
   }
 
   const contactForm = document.getElementById("contact-form");
