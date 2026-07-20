@@ -312,7 +312,7 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
         const rows = summary.metrics
                 .map((metric) => {
                         const rate = `${(metric.conversionRate * 100).toFixed(2)}%`;
-                        return `<tr>
+                return `<tr data-experiment="${escapeHtml(metric.experimentId)}" data-variant="${escapeHtml(metric.variant)}">
     <td>${escapeHtml(metric.experimentId)}</td>
     <td>${escapeHtml(metric.variant)}</td>
     <td>${metric.totalVisits}</td>
@@ -352,6 +352,37 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                 border: 1px solid #334155;
                 border-radius: 14px;
                 overflow: hidden;
+            }
+            .controls {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 0.75rem;
+                margin: 0 0 1rem;
+            }
+            .control {
+                display: flex;
+                flex-direction: column;
+                gap: 0.35rem;
+            }
+            .control label {
+                font-size: 0.72rem;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+            .control select {
+                appearance: none;
+                border: 1px solid #334155;
+                border-radius: 10px;
+                background: #0b1220;
+                color: #e2e8f0;
+                padding: 0.55rem 0.65rem;
+                font-size: 0.92rem;
+            }
+            .table-empty {
+                color: #94a3b8;
+                text-align: center;
+                padding: 1rem;
             }
             .stats {
                 display: grid;
@@ -419,6 +450,35 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                 <div class="stat-value">${fingerprintSnapshot.averageClusterSize}</div>
             </div>
         </div>
+        <div class="controls">
+            <div class="control">
+                <label for="sort-by">Sort By</label>
+                <select id="sort-by">
+                    <option value="conversion_desc">Conversion Rate (High to Low)</option>
+                    <option value="conversion_asc">Conversion Rate (Low to High)</option>
+                    <option value="visits_desc">Total Visits (High to Low)</option>
+                    <option value="visits_asc">Total Visits (Low to High)</option>
+                    <option value="contacts_desc">Contact Submits (High to Low)</option>
+                    <option value="contacts_asc">Contact Submits (Low to High)</option>
+                    <option value="clicks_desc">Clickthroughs (High to Low)</option>
+                    <option value="clicks_asc">Clickthroughs (Low to High)</option>
+                    <option value="experiment_asc">Experiment (A-Z)</option>
+                    <option value="experiment_desc">Experiment (Z-A)</option>
+                </select>
+            </div>
+            <div class="control">
+                <label for="filter-experiment">Filter Experiment</label>
+                <select id="filter-experiment">
+                    <option value="all">All Experiments</option>
+                </select>
+            </div>
+            <div class="control">
+                <label for="filter-variant">Filter Variant</label>
+                <select id="filter-variant">
+                    <option value="all">All Variants</option>
+                </select>
+            </div>
+        </div>
         <div class="panel">
             <table>
                 <thead>
@@ -431,11 +491,125 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
                         <th>Conversion Rate</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="guardrails-rows">
                     ${content}
                 </tbody>
             </table>
         </div>
+        <script>
+            (function () {
+                const tableBody = document.getElementById("guardrails-rows");
+                const sortBy = document.getElementById("sort-by");
+                const filterExperiment = document.getElementById("filter-experiment");
+                const filterVariant = document.getElementById("filter-variant");
+
+                if (!tableBody || !sortBy || !filterExperiment || !filterVariant) {
+                    return;
+                }
+
+                const originalRows = Array.from(tableBody.querySelectorAll("tr"));
+                const emptyState = document.createElement("tr");
+                emptyState.innerHTML = '<td class="table-empty" colspan="6">No rows match the selected filters.</td>';
+
+                function toNumber(value) {
+                    const parsed = Number(String(value).replace(/[^0-9.-]/g, ""));
+                    return Number.isFinite(parsed) ? parsed : 0;
+                }
+
+                function readCells(row) {
+                    const cells = row.querySelectorAll("td");
+                    return {
+                        experiment: (cells[0]?.textContent || "").trim(),
+                        variant: (cells[1]?.textContent || "").trim(),
+                        visits: toNumber(cells[2]?.textContent || "0"),
+                        contacts: toNumber(cells[3]?.textContent || "0"),
+                        clicks: toNumber(cells[4]?.textContent || "0"),
+                        conversion: toNumber(cells[5]?.textContent || "0"),
+                    };
+                }
+
+                function unique(values) {
+                    return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+                }
+
+                function fillSelect(select, label, values) {
+                    select.innerHTML = "";
+                    const allOption = document.createElement("option");
+                    allOption.value = "all";
+                    allOption.textContent = label;
+                    select.appendChild(allOption);
+
+                    for (const value of values) {
+                        const option = document.createElement("option");
+                        option.value = value;
+                        option.textContent = value;
+                        select.appendChild(option);
+                    }
+                }
+
+                fillSelect(
+                    filterExperiment,
+                    "All Experiments",
+                    unique(originalRows.map((row) => readCells(row).experiment).filter(Boolean)),
+                );
+                fillSelect(
+                    filterVariant,
+                    "All Variants",
+                    unique(originalRows.map((row) => readCells(row).variant).filter(Boolean)),
+                );
+
+                function applyControls() {
+                    const selectedExperiment = filterExperiment.value;
+                    const selectedVariant = filterVariant.value;
+                    const sortMode = sortBy.value;
+
+                    const filtered = originalRows.filter((row) => {
+                        const cells = readCells(row);
+                        if (selectedExperiment !== "all" && cells.experiment !== selectedExperiment) {
+                            return false;
+                        }
+                        if (selectedVariant !== "all" && cells.variant !== selectedVariant) {
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    filtered.sort((left, right) => {
+                        const a = readCells(left);
+                        const b = readCells(right);
+                        switch (sortMode) {
+                            case "conversion_asc": return a.conversion - b.conversion;
+                            case "conversion_desc": return b.conversion - a.conversion;
+                            case "visits_asc": return a.visits - b.visits;
+                            case "visits_desc": return b.visits - a.visits;
+                            case "contacts_asc": return a.contacts - b.contacts;
+                            case "contacts_desc": return b.contacts - a.contacts;
+                            case "clicks_asc": return a.clicks - b.clicks;
+                            case "clicks_desc": return b.clicks - a.clicks;
+                            case "experiment_desc": return b.experiment.localeCompare(a.experiment);
+                            case "experiment_asc":
+                            default:
+                                return a.experiment.localeCompare(b.experiment);
+                        }
+                    });
+
+                    tableBody.innerHTML = "";
+                    if (filtered.length === 0) {
+                        tableBody.appendChild(emptyState);
+                        return;
+                    }
+
+                    for (const row of filtered) {
+                        tableBody.appendChild(row);
+                    }
+                }
+
+                sortBy.addEventListener("change", applyControls);
+                filterExperiment.addEventListener("change", applyControls);
+                filterVariant.addEventListener("change", applyControls);
+                applyControls();
+            })();
+        </script>
     </body>
 </html>`;
 }
