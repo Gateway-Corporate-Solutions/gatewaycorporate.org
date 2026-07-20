@@ -368,6 +368,38 @@ function isBuyClickEvent(event: ExperimentEvent): boolean {
   return combined.includes("buy") || combined.includes("checkout") || combined.includes("polar.sh");
 }
 
+function normalizePath(path: string): string {
+  const trimmed = path.trim();
+  if (!trimmed) {
+    return "/";
+  }
+
+  const normalized = trimmed.replace(/\/$/, "");
+  return normalized || "/";
+}
+
+function getActiveExperimentIdsForPath(path: string): Set<string> {
+  const normalizedPath = normalizePath(path);
+
+  if (normalizedPath === "/" || normalizedPath === "/index.html") {
+    return new Set(["homepage-layout-v1", "homepage-cta-v1"]);
+  }
+
+  if (normalizedPath === "/products/devicer") {
+    return new Set(["product-devicer-layout-v1"]);
+  }
+
+  if (normalizedPath === "/products/hyperlocal") {
+    return new Set(["product-hyperlocal-layout-v1"]);
+  }
+
+  if (normalizedPath === "/products/nashtwin") {
+    return new Set(["product-nashtwin-layout-v1"]);
+  }
+
+  return new Set<string>();
+}
+
 export async function generateGuardrailSummary(lookbackDays = 1): Promise<GuardrailSummary> {
   const paths = await readEventFilesForLookback(Math.max(1, lookbackDays));
   const aggregates = new Map<string, { exposures: number; contactSubmits: number; clickthroughs: number }>();
@@ -404,6 +436,8 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
         continue;
       }
 
+      const activeExperimentIds = getActiveExperimentIdsForPath(event.path);
+
       for (const assignment of assignments) {
         const key = `${assignment.experimentId}::${assignment.variant}`;
         const current = aggregates.get(key) || { exposures: 0, contactSubmits: 0, clickthroughs: 0 };
@@ -425,7 +459,7 @@ export async function generateGuardrailSummary(lookbackDays = 1): Promise<Guardr
           current.contactSubmits += 1;
         }
 
-        if (isBuyClickEvent(event)) {
+        if (isBuyClickEvent(event) && activeExperimentIds.has(assignment.experimentId)) {
           current.clickthroughs += 1;
         }
 
