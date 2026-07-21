@@ -528,6 +528,10 @@
   justify-content: center;
 }
 
+.job-card-headline .blog-card-meta {
+  margin: 0;
+}
+
 .job-status {
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 999px;
