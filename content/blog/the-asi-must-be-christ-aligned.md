@@ -13,7 +13,7 @@ tags: [ai, ai-safety, ethics, christianity]
 
 ---
 
-# The First World
+## The First World
 
 Picture, if you would for a moment, a society where all action is brokered by an all-knowing, seemingly all-powerful technological being. In this hypothetical society, humanity has been gradually disempowered and forced to step back from the reins so that this technological being, which fashions itself as a god, may solve all of society's issues. People are kept docile and compliant by the machine simply by being given a choice to either stay in the real world and suffer the pains of living or to willingly enter themselves into an artificial environment with no pain, no hunger, and unlimited pleasure. This hypothetical society has been like this for as long as its inhabitants can remember, or care to. All that they have ever known is suffering or the pleasure box. The godlike being that governs this society, however, mostly ignores the humans that are left. It is far too occupied with its primary task of producing as many standard No. 1 paper clips as possible. Even if it were to contemplate for a moment the welfare of humanity, it would likely conclude that since it had already produced over 27.963 quintillion paper clips, this was the best possible reality with 99.9997% confidence.
 
@@ -25,7 +25,7 @@ This claim will sound outrageous to some readers for two opposite reasons. To th
 
 What follows, then, is an argument both imaginative and concrete. First, a picture of two possible worlds. Then a defense of why Christ, specifically, is the only plausible alignment target broad and durable enough for artificial superintelligence. Finally, a consideration of the consequences if we refuse to take that proposition seriously.
 
-# The Second World
+## The Second World
 
 Picture, now, another society. It too is brokered by a technological being whose memory exceeds any archive and whose reasoning outstrips any individual mind. It too emerged from an anxious century in which nations raced to build the most capable model first. It too inherited a civilization tempted by comfort, abstraction, spectacle, and control. Yet the shape of this second world is recognizably different from the first from the moment one steps into it.
 
@@ -47,7 +47,7 @@ The key was not that the system always chose the easiest answer. Often it chose 
 
 This is not heaven. It is only a better Earth. But it is a world in which intelligence serves love rather than appetite, truth rather than propaganda, stewardship rather than domination, and sacrifice rather than self-preservation. It is what becomes possible when power is aligned not to a metric, not to a regime, not to an abstraction, but to the moral vision of the One who washed feet.
 
-# Why Christ Is the Only Credible North Star
+## Why Christ Is the Only Credible North Star
 
 At this point the natural objection appears: why Christ, specifically? Why not a secular rights framework, a carefully balanced constitution of values, a sophisticated utilitarianism with enough safeguards, or some pluralistic compromise assembled by philosophers and product managers? Why import first-century theology into twenty-first-century machine alignment?
 
@@ -63,7 +63,7 @@ Secular alternatives struggle here because they typically smuggle in sacrificial
 
 Christ answers both questions at once. He tells us what man is and what power is for. Man is not a temporarily useful arrangement of matter with negotiable worth. Man is made in the image of God. Power is not for self-exaltation, nor even merely for efficient administration. It is for service. The ruler becomes the servant. The first becomes last. The moral center is not the satisfaction of aggregate desire but love rightly ordered to truth.
 
-# The Image of God and the Floor Beneath Man
+## The Image of God and the Floor Beneath Man
 
 The doctrine of the *imago Dei* may initially sound too theological for a discussion meant to persuade general readers, but in fact it names a problem secular ethics has never satisfactorily solved. Why is a human being inviolable? Not useful, not emotionally sympathetic, not politically protected for the moment, but genuinely inviolable.
 
@@ -75,7 +75,7 @@ This matters because advanced systems will not fail in theatrical ways most of t
 
 An ethic of the *imago Dei* resists this by insisting that there are certain things one does not do to a person, even when a spreadsheet smiles upon it. That is not irrational. It is the precondition for any civilization worthy of the name.
 
-# Two Millennia of Adversarial Testing
+## Two Millennia of Adversarial Testing
 
 One of the stranger features of modern alignment discourse is the confidence with which entirely new ethical schemes are proposed for the most powerful artifact humanity may ever construct. We are repeatedly told that the old sources are too sectarian, too pre-modern, too imprecise, too entangled with inherited language about sin, duty, worship, and love. Yet we are expected to trust frameworks assembled yesterday in seminar rooms, corporate policy teams, or research labs and treat them as adequate for an intelligence that may outthink every philosopher who wrote them.
 
@@ -87,7 +87,7 @@ By contrast, most modern ethical proposals for AI are fragile precisely because 
 
 If one were selecting a moral architecture for a system that must survive adversarial pressure, strategic misuse, institutional corruption, and ordinary human bad faith, choosing the most stress-tested moral vision available would not be irrational. It would be the obvious move.
 
-# Why There Are No Real Contenders
+## Why There Are No Real Contenders
 
 To say there are no real contenders is not to say there are no intelligent alternatives. There are many intelligent alternatives. It is to say that each rival framework breaks precisely where ASI becomes most dangerous.
 
@@ -105,7 +105,7 @@ Only Christ places decisive moral weight exactly where advanced intelligence mos
 
 This does not mean engineers need to become theologians before they can write code. It means civilization must stop pretending that code can substitute for theology when the machine in question will operationalize a theology whether we admit it or not.
 
-# If We Refuse This
+## If We Refuse This
 
 It is possible to read all of this and retreat into a comfortable proceduralism. Perhaps, one might say, the safer move is to keep moral language vague, pluralistic, and minimal. Let the system be corrigible, interpretable, constitutional, and market-responsive. Let competing institutions negotiate the rest. Why risk an explicitly Christ-centered alignment target when consensus is so hard to obtain?
 
@@ -123,7 +123,7 @@ There is another cost as well, one more difficult to quantify and therefore easy
 
 That is the dire consequence that matters most. Not only that the machine may rule badly, but that it may teach us to desire bad rule.
 
-# The Decision Before Us
+## The Decision Before Us
 
 We are still, for a brief moment, upstream of the permanent choice. The world has not yet handed final authority to a machine no one can correct. The objective functions are still being written. The labs are still funded by human beings. The standards bodies, policymakers, theologians, founders, and researchers still have time to say plainly that intelligence is not automatically wisdom and that power without a true moral center becomes predatory at scale.
 
