@@ -1197,6 +1197,7 @@ class NetworkGraph {
     this.lastHeight = 0;
     this.resizeTimer = null;
     this.time = 0;
+    this.lastFrameTime = null;
     this.trackingBlend = 0;
     this.smoothedLook = { x: 0, y: 0 };
     this.currentPose = { x: 0, y: 0, lookX: 0, lookY: 0 };
@@ -1318,6 +1319,19 @@ class NetworkGraph {
 
   lerp(start, end, amount) {
     return start + (end - start) * amount;
+  }
+
+  getFrameScale(deltaMs) {
+    return Math.max(0, deltaMs / (1000 / 60));
+  }
+
+  getDeltaLerp(amount, deltaMs) {
+    const clampedAmount = this.clamp(amount, 0, 1);
+    if (clampedAmount === 0 || clampedAmount === 1) {
+      return clampedAmount;
+    }
+
+    return 1 - Math.pow(1 - clampedAmount, this.getFrameScale(deltaMs));
   }
 
   clamp(value, min, max) {
@@ -1673,7 +1687,7 @@ class NetworkGraph {
     ).slice(0, count);
   }
 
-  updatePose() {
+  updatePose(deltaMs) {
     const idleX = Math.sin(this.time * 0.0014) * 0.22;
     const idleY = Math.cos(this.time * 0.0011) * 0.12;
 
@@ -1684,12 +1698,16 @@ class NetworkGraph {
       ? this.clamp((this.pointer.y - this.lastHeight * 0.45) / (this.lastHeight * 0.45), -1, 1)
       : 0;
 
-    const lookLerp = this.pointer.active ? 0.16 : 0.08;
+    const lookLerp = this.getDeltaLerp(this.pointer.active ? 0.16 : 0.08, deltaMs);
     this.smoothedLook.x = this.lerp(this.smoothedLook.x, targetLookX, lookLerp);
     this.smoothedLook.y = this.lerp(this.smoothedLook.y, targetLookY, lookLerp);
 
     const trackingTarget = this.pointer.active ? 1 : 0;
-    this.trackingBlend = this.lerp(this.trackingBlend, trackingTarget, 0.08);
+    this.trackingBlend = this.lerp(
+      this.trackingBlend,
+      trackingTarget,
+      this.getDeltaLerp(0.08, deltaMs),
+    );
 
     const trackingSwayX = Math.sin(this.time * 0.0026 + 0.6) * 0.06;
     const trackingSwayY = Math.cos(this.time * 0.0022 + 1.2) * 0.045;
@@ -1706,9 +1724,10 @@ class NetworkGraph {
     return this.currentPose;
   }
 
-  update() {
-    this.time += 16;
-    const pose = this.updatePose();
+  update(deltaMs) {
+    const frameScale = this.getFrameScale(deltaMs);
+    this.time += deltaMs;
+    const pose = this.updatePose(deltaMs);
 
     if (!this.meshLoaded || !this.meshTargets.length) {
       const width = this.lastWidth;
@@ -1717,8 +1736,8 @@ class NetworkGraph {
       const restartSpeed = 0.26;
 
       for (const node of this.nodes) {
-        node.x += node.vx;
-        node.y += node.vy;
+        node.x += node.vx * frameScale;
+        node.y += node.vy * frameScale;
 
         if (node.x < 0 || node.x > width) {
           node.vx *= -1;
@@ -1730,8 +1749,9 @@ class NetworkGraph {
           node.y = this.clamp(node.y, 0, height);
         }
 
-        node.vx *= 0.985;
-        node.vy *= 0.985;
+        const damping = Math.pow(0.985, frameScale);
+        node.vx *= damping;
+        node.vy *= damping;
 
         const speed = Math.hypot(node.vx, node.vy);
         if (speed < minSpeed) {
@@ -1745,7 +1765,7 @@ class NetworkGraph {
     }
 
     if (this.transitionActive && this.meshBlend < 1) {
-      this.meshBlend = Math.min(1, this.meshBlend + 0.018);
+      this.meshBlend = Math.min(1, this.meshBlend + 0.018 * frameScale);
       if (this.meshBlend === 1) {
         this.transitionActive = false;
       }
@@ -1890,17 +1910,21 @@ class NetworkGraph {
 
   stop() {
     this.running = false;
+    this.lastFrameTime = null;
     if (this.rafId) {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
   }
 
-  tick() {
+  tick(timestamp = performance.now()) {
     if (!this.running) return;
-    this.update();
+    const rawDeltaMs = this.lastFrameTime === null ? 1000 / 60 : timestamp - this.lastFrameTime;
+    const deltaMs = this.clamp(rawDeltaMs, 1000 / 120, 1000 / 20);
+    this.lastFrameTime = timestamp;
+    this.update(deltaMs);
     this.drawFrame();
-    this.rafId = requestAnimationFrame(() => this.tick());
+    this.rafId = requestAnimationFrame((nextTimestamp) => this.tick(nextTimestamp));
   }
 }
 
