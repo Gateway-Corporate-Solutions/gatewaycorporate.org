@@ -7,8 +7,6 @@ excerpt: Gateway Corporate exists to make intelligence practical, accessible, an
 tags: [mission, intelligence, strategy, software]
 ---
 
-# Mission Statement
-
 Gateway Corporate has undergone a complete redesign over the past several months, but the visual refresh is only a reflection of a much larger change. As our products have matured, we've found that describing them individually no longer explains what we're actually building. HyperLocal, NashTwin, Devicer Intelligence, and the rest of our platform are not isolated applications. They are different expressions of the same philosophy.
 
 ## We exist to provide the highest quality intelligence software available.
