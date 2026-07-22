@@ -1297,7 +1297,11 @@ body.exp-homepage-layout-proof-first #about {
 
 /* Experiment: homepage-cta-v1 */
 body.exp-homepage-cta-consultation-first .hero-buttons .btn:nth-child(1) {
-  box-shadow: 0 14px 32px rgba(16, 185, 129, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 10px rgba(255, 255, 255, 0.18),
+    0 0 22px rgba(255, 255, 255, 0.16),
+    0 0 38px rgba(255, 255, 255, 0.12);
 }
 
 body.exp-homepage-cta-product-first .hero-buttons .btn:nth-child(1) {
