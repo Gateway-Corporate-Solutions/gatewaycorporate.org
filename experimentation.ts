@@ -90,6 +90,12 @@ const experimentDefinitions: ExperimentDefinition[] = [
     enabledInProduction: false,
   },
   {
+    id: "homepage-product-lead-v1",
+    variants: ["devicer-lead", "hyperlocal-lead", "nashtwin-lead"],
+    weights: [0.34, 0.33, 0.33],
+    enabledInProduction: false,
+  },
+  {
     id: "product-devicer-layout-v1",
     variants: ["control", "pricing-first", "comparison-first"],
     weights: [0.5, 0.25, 0.25],
@@ -126,6 +132,12 @@ const PRODUCTS_PAGE_EXPERIMENT_IDS = new Set([
   "product-hyperlocal-layout-v1",
   "product-nashtwin-layout-v1",
   "products-whitepaper-cta-v1",
+]);
+
+const HOMEPAGE_EXPERIMENT_IDS = new Set([
+  "homepage-layout-v1",
+  "homepage-cta-v1",
+  "homepage-product-lead-v1",
 ]);
 
 const SERVICES_PAGE_EXPERIMENT_IDS = new Set([
@@ -234,8 +246,13 @@ function parseBooleanEnv(value: string | undefined): boolean | undefined {
 }
 
 function isExperimentEnabledByPageToggles(experimentId: string): boolean {
+  const homepageToggle = parseBooleanEnv(Deno.env.get("EXPERIMENTS_HOMEPAGE_ENABLED"));
   const productsToggle = parseBooleanEnv(Deno.env.get("EXPERIMENTS_PRODUCTS_PAGE_ENABLED"));
   const servicesToggle = parseBooleanEnv(Deno.env.get("EXPERIMENTS_SERVICES_PAGE_ENABLED"));
+
+  if (HOMEPAGE_EXPERIMENT_IDS.has(experimentId)) {
+    return homepageToggle ?? true;
+  }
 
   if (PRODUCTS_PAGE_EXPERIMENT_IDS.has(experimentId)) {
     return productsToggle ?? true;

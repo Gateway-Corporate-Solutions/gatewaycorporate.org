@@ -670,11 +670,14 @@ function renderGuardrailsDashboardHtml(summary: Awaited<ReturnType<typeof genera
 </html>`;
 }
 
-function injectExperimentBootstrap(html: string, request: Request): string {
-    const { scriptTag } = buildExperimentContext({
-        cookieHeader: request.headers.get("cookie"),
-        sessionHeader: request.headers.get("x-gcx-session"),
+function buildRequestExperimentContext(headers: Headers): ReturnType<typeof buildExperimentContext> {
+    return buildExperimentContext({
+        cookieHeader: headers.get("cookie"),
+        sessionHeader: headers.get("x-gcx-session"),
     }, isProduction);
+}
+
+function injectExperimentBootstrap(html: string, scriptTag: string): string {
 
     if (html.includes("</head>")) {
         return html.replace("</head>", `${scriptTag}\n  </head>`);
@@ -687,7 +690,7 @@ async function injectRuntimeBootstrapForHtml(context: {
     request: { headers: Headers; url: URL };
     cookies: { get(name: string): Promise<string | undefined> };
     response: { headers: Headers };
-}, html: string): Promise<string> {
+}, html: string, experimentContext?: ReturnType<typeof buildExperimentContext>): Promise<string> {
     const externalOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
     const secureCookie = isExternalOriginSecure(externalOrigin);
     const sessionId = await context.cookies.get(SESSION_COOKIE_NAME);
@@ -702,10 +705,208 @@ async function injectRuntimeBootstrapForHtml(context: {
         buildSessionCookieHeader(SESSION_COOKIE_NAME, session.id, secureCookie, 600),
     );
 
-    return injectExperimentBootstrap(
-        injectSessionToken(html, session.token),
-        new Request(context.request.url.toString(), { headers: context.request.headers }),
-    );
+        const resolvedExperimentContext = experimentContext ?? buildRequestExperimentContext(context.request.headers);
+
+        return injectExperimentBootstrap(
+                injectSessionToken(html, session.token),
+                resolvedExperimentContext.scriptTag,
+        );
+}
+
+type HomepageProductId = "devicer" | "hyperlocal" | "nashtwin";
+
+const HOMEPAGE_PRODUCT_LEAD_EXPERIMENT_ID = "homepage-product-lead-v1";
+const HOMEPAGE_PRODUCT_LEAD_OVERRIDE_ENV = "EXPERIMENTS_HOMEPAGE_LEAD_PRODUCT";
+const HOMEPAGE_PRODUCT_ORDER: HomepageProductId[] = ["devicer", "hyperlocal", "nashtwin"];
+
+function parseHomepageProductId(value: string | undefined): HomepageProductId | undefined {
+        if (!value) {
+                return undefined;
+        }
+
+        const normalized = value.trim().toLowerCase();
+        if (normalized === "devicer" || normalized === "hyperlocal" || normalized === "nashtwin") {
+                return normalized;
+        }
+
+        return undefined;
+}
+
+function resolveHomepageLeadProduct(assignments: { experimentId: string; variant: string }[]): HomepageProductId {
+        const override = parseHomepageProductId(Deno.env.get(HOMEPAGE_PRODUCT_LEAD_OVERRIDE_ENV));
+        if (override) {
+                return override;
+        }
+
+        const leadExperiment = assignments.find((assignment) => assignment.experimentId === HOMEPAGE_PRODUCT_LEAD_EXPERIMENT_ID);
+        if (!leadExperiment) {
+                return "devicer";
+        }
+
+        switch (leadExperiment.variant) {
+                case "hyperlocal-lead":
+                        return "hyperlocal";
+                case "nashtwin-lead":
+                        return "nashtwin";
+                case "devicer-lead":
+                default:
+                        return "devicer";
+        }
+}
+
+function renderHomepageProductCard(productId: HomepageProductId): string {
+        if (productId === "devicer") {
+                return `<article class="product-spotlight">
+                        <div class="icon-circle icon-lg icon-primary">🔍</div>
+                        <h3 class="card-title">Devicer Intelligence Suite</h3>
+                        <p class="card-text product-summary">Server-side identity confidence for teams that need fraud resistance, explainability, and measurable signal quality at scale. Devicer combines high-entropy telemetry sources into a scoring layer your operators can actually trust under pressure.</p>
+                        <p class="card-text product-lead-blurb">Devicer helps teams separate routine traffic from genuinely risky behavior faster, reduces time spent on blind manual review, and creates a common confidence language across product, risk, and support. Instead of treating fingerprinting as a black box, your team gets a transparent decision surface with enough context to automate safely and escalate only what deserves human judgment.</p>
+                        <p class="card-text product-lead-blurb">Teams can deploy this confidence layer across onboarding, authentication, and transaction review while maintaining auditability for every decision path, from automated approvals to analyst escalations.</p>
+                        <div class="product-meta">
+                            <span class="flair-tag flair-intelligence">Device Fingerprinting</span>
+                            <span class="flair-tag flair-security">KYC + Risk</span>
+                            <span class="flair-tag flair-scoring">Bot Defense</span>
+                        </div>
+                        <div class="product-graphic">
+                            <div class="graphic-panel">
+                                <p class="graphic-title">Signal Layers</p>
+                                <ul class="signal-stack">
+                                    <li><strong>Device</strong><span>Browser + OS entropy</span></li>
+                                    <li><strong>TLS</strong><span>Handshake consistency</span></li>
+                                    <li><strong>IP + ASN</strong><span>Network reputation</span></li>
+                                    <li><strong>Peer Graph</strong><span>Cluster trust scoring</span></li>
+                                </ul>
+                            </div>
+                            <div class="graphic-panel">
+                                <p class="graphic-title">Outcome Map</p>
+                                <div class="benefit-bars">
+                                    <div class="benefit-bar" style="--bar-width: 86%;"><span>Faster risk triage</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 80%;"><span>Lower false positives</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 74%;"><span>Higher analyst trust</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-proof-grid">
+                            <div class="proof-item">
+                                <span class="proof-label">Best For</span>
+                                <p class="proof-text">Identity-sensitive onboarding and transaction decisioning.</p>
+                            </div>
+                            <div class="proof-item">
+                                <span class="proof-label">Core Benefit</span>
+                                <p class="proof-text">Confidence scores with enough depth for human review and automation.</p>
+                            </div>
+                        </div>
+                        <div class="btn-group mt-md product-actions">
+                            <a href="/products/devicer" class="btn btn-primary btn-sm">View Technical Overview</a>
+                            <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
+                        </div>
+                    </article>`;
+        }
+
+        if (productId === "hyperlocal") {
+                return `<article class="product-spotlight">
+                        <div class="icon-circle icon-lg icon-secondary">💬</div>
+                        <h3 class="card-title">HyperLocal 2</h3>
+                        <p class="card-text product-summary">CRM-native SMS automation with governed AI actions, route controls, and operator-owned context to keep outcomes stable under real volume. HyperLocal 2 is designed for revenue and support teams that need speed without losing process control.</p>
+                        <p class="card-text product-lead-blurb">HyperLocal 2 moves teams from fragmented conversation handling to a unified runtime where AI accelerates execution but policies keep actions constrained. Operators gain faster response loops, managers gain traceability, and leadership gains confidence that automation quality will hold during campaign spikes, handoff-heavy workflows, and compliance-sensitive conversations.</p>
+                        <p class="card-text product-lead-blurb">The platform keeps permissions, routing logic, and fallback controls explicit so teams can scale campaign throughput without sacrificing message quality, compliance posture, or operator oversight.</p>
+                        <div class="product-meta">
+                            <span class="flair-tag flair-automation">AI Operations</span>
+                            <span class="flair-tag flair-governance">Audit Trails</span>
+                            <span class="flair-tag flair-integration">CRM Integrations</span>
+                        </div>
+                        <div class="product-graphic">
+                            <div class="graphic-panel">
+                                <p class="graphic-title">Execution Chain</p>
+                                <ul class="signal-stack">
+                                    <li><strong>Intent</strong><span>Message context parsing</span></li>
+                                    <li><strong>Policy</strong><span>Permissioned action filters</span></li>
+                                    <li><strong>Dispatch</strong><span>Channel + route controls</span></li>
+                                    <li><strong>Fallback</strong><span>Operator handoff safety</span></li>
+                                </ul>
+                            </div>
+                            <div class="graphic-panel">
+                                <p class="graphic-title">Benefit Ramp</p>
+                                <div class="benefit-bars">
+                                    <div class="benefit-bar" style="--bar-width: 88%;"><span>Faster response cycles</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 77%;"><span>Audit-safe automation</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 72%;"><span>Higher operator throughput</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-proof-grid">
+                            <div class="proof-item">
+                                <span class="proof-label">Best For</span>
+                                <p class="proof-text">Sales and support teams running high-tempo SMS operations.</p>
+                            </div>
+                            <div class="proof-item">
+                                <span class="proof-label">Core Benefit</span>
+                                <p class="proof-text">Automation speed without surrendering control or compliance posture.</p>
+                            </div>
+                        </div>
+                        <div class="btn-group mt-md product-actions">
+                            <a href="/products/hyperlocal" class="btn btn-primary btn-sm">View Technical Overview</a>
+                            <a href="/papers/HyperLocal-2.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
+                        </div>
+                    </article>`;
+        }
+
+        return `<article class="product-spotlight">
+                        <div class="icon-circle icon-lg icon-primary">♟️</div>
+                        <h3 class="card-title">NashTwin CRM</h3>
+                        <p class="card-text product-summary">Decision intelligence platform for leadership teams modeling scenarios, tradeoffs, and strategy execution before capital and reputation are committed. NashTwin turns strategic uncertainty into structured simulations your team can reason about collaboratively.</p>
+                        <p class="card-text product-lead-blurb">NashTwin lets leadership teams test strategic paths against constraints, incentives, and second-order effects before making irreversible moves. Instead of debating assumptions in abstract terms, teams can compare outcomes in a shared model, expose hidden risk earlier, and align execution plans around scenarios that survive both operational reality and competitive response.</p>
+                        <p class="card-text product-lead-blurb">Cross-functional stakeholders can evaluate the same simulated scenarios with shared assumptions, reducing planning drift and helping teams commit resources to strategies that remain resilient as conditions change.</p>
+                        <div class="product-meta">
+                            <span class="flair-tag flair-governance">Game Theory</span>
+                            <span class="flair-tag flair-operations">Digital Twin</span>
+                            <span class="flair-tag flair-scoring">Executive Intelligence</span>
+                        </div>
+                        <div class="product-graphic">
+                            <div class="graphic-panel">
+                                <p class="graphic-title">Simulation Stack</p>
+                                <ul class="signal-stack">
+                                    <li><strong>Model</strong><span>Actors, constraints, incentives</span></li>
+                                    <li><strong>Branch</strong><span>Competing scenarios</span></li>
+                                    <li><strong>Score</strong><span>Payoff + risk gradients</span></li>
+                                    <li><strong>Decide</strong><span>Execution playbook output</span></li>
+                                </ul>
+                            </div>
+                            <div class="graphic-panel">
+                                <p class="graphic-title">Decision Gains</p>
+                                <div class="benefit-bars">
+                                    <div class="benefit-bar" style="--bar-width: 84%;"><span>Higher planning confidence</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 79%;"><span>Fewer blind-side outcomes</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 73%;"><span>Clearer cross-team alignment</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-proof-grid">
+                            <div class="proof-item">
+                                <span class="proof-label">Best For</span>
+                                <p class="proof-text">Executive teams navigating non-trivial strategic decisions.</p>
+                            </div>
+                            <div class="proof-item">
+                                <span class="proof-label">Core Benefit</span>
+                                <p class="proof-text">Simulated clarity before irreversible moves and resource spend.</p>
+                            </div>
+                        </div>
+                        <div class="btn-group mt-md product-actions">
+                            <a href="/products/nashtwin" class="btn btn-primary btn-sm">View Technical Overview</a>
+                            <a href="https://nash.gatewaycorporate.org/" class="btn btn-accent btn-sm">Try NashTwin</a>
+                        </div>
+                    </article>`;
+}
+
+function renderHomepageProductCards(leadProduct: HomepageProductId): string {
+        const orderedProducts = [
+                leadProduct,
+                ...HOMEPAGE_PRODUCT_ORDER.filter((productId) => productId !== leadProduct),
+        ];
+
+        return `<div class="grid gap-lg product-offerings-row" data-lead-product="${leadProduct}">
+            ${orderedProducts.map((productId) => renderHomepageProductCard(productId)).join("\n")}
+        </div>`;
 }
 
 function listStaticFileSlugs(directoryPath: string, extension: string): Set<string> {
@@ -799,16 +1000,21 @@ async function renderHomePage(
 ) {
     const homepageTemplate = await Deno.readTextFile("./static/views/index.html");
     const blogPosts = await getBlogPosts();
+    const experimentContext = buildRequestExperimentContext(context.request.headers);
+    const leadProduct = resolveHomepageLeadProduct(experimentContext.assignments);
 
     const rendered = injectFooterIntoHtml(
         homepageTemplate.replace(
+            "{{PRODUCT_CARDS}}",
+            renderHomepageProductCards(leadProduct),
+        ).replace(
             "{{BLOG_SECTION}}",
             renderHomepageBlogSection(blogPosts),
         ),
         resolveFooterVariant("index"),
     );
 
-    context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
+    context.response.body = await injectRuntimeBootstrapForHtml(context, rendered, experimentContext);
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 }
 

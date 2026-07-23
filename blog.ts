@@ -609,7 +609,7 @@ export function renderHomepageBlogSection(posts: BlogPost[]): string {
   const featuredPosts = posts.slice(0, 3);
 
   return `
-    <section id="blog" class="section">
+    <section id="blog" class="section blog-home-shell">
       <div class="section-header">
         <p class="eyebrow">Gateway Corporate Journal</p>
         <h2 class="section-title">What we are seeing, shipping, and learning</h2>

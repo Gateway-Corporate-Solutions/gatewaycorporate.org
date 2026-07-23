@@ -185,25 +185,270 @@
       }
 
       .product-spotlight {
+        position: relative;
+        overflow: hidden;
         border: 1px solid rgba(148, 163, 184, 0.2);
         border-radius: 20px;
-        padding: 1.1rem;
+        padding: 1.2rem;
         background: linear-gradient(180deg, rgba(30, 41, 59, 0.62) 0%, rgba(15, 23, 42, 0.78) 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .product-spotlight::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, rgba(96, 165, 250, 0.9) 0%, rgba(56, 189, 248, 0.85) 50%, rgba(30, 64, 175, 0.95) 100%);
+        opacity: 0.9;
+      }
+
+      .product-summary {
+        margin: 0;
+      }
+
+      .product-lead-blurb {
+        margin: 0.2rem 0 0;
+        color: #cfe1ff;
+        font-size: 0.98rem;
+        line-height: 1.65;
+      }
+
+      .product-graphic {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.65rem;
+      }
+
+      .graphic-panel {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 14px;
+        padding: 0.75rem;
+        background: rgba(15, 23, 42, 0.35);
+      }
+
+      .graphic-title {
+        margin: 0 0 0.55rem;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #93c5fd;
+      }
+
+      .signal-stack {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        margin: 0;
+        padding: 0;
+      }
+
+      .signal-stack li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.83rem;
+        color: #dbeafe;
+      }
+
+      .signal-stack li strong {
+        color: #f8fafc;
+      }
+
+      .benefit-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.42rem;
+      }
+
+      .benefit-bar {
+        --bar-width: 70%;
+        position: relative;
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 10px;
+        padding: 0.35rem 0.5rem;
+        overflow: hidden;
+        font-size: 0.78rem;
+        color: #dbeafe;
+        background: rgba(15, 23, 42, 0.42);
+      }
+
+      .benefit-bar::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: var(--bar-width);
+        background: linear-gradient(90deg, rgba(59, 130, 246, 0.34) 0%, rgba(56, 189, 248, 0.2) 100%);
+      }
+
+      .benefit-bar span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .product-proof-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.55rem;
+      }
+
+      .proof-item {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 12px;
+        padding: 0.65rem;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .proof-label {
+        display: block;
+        margin-bottom: 0.22rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #93c5fd;
+      }
+
+      .proof-text {
+        margin: 0;
+        font-size: 0.86rem;
+        line-height: 1.45;
+      }
+
+      .product-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .product-meta .flair-tag {
+        font-size: 0.74rem;
+      }
+
+      .product-actions {
+        margin-top: auto;
+      }
+
+      .product-spotlight .icon-circle {
+        border-radius: 30%;
+        border: 1px solid rgba(147, 197, 253, 0.35);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 10px 20px rgba(2, 6, 23, 0.28);
       }
 
       .product-offerings-row {
         --offerings-gap: var(--spacing-lg);
         min-width: 400px;
         margin: 0 auto;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+        grid-template-areas:
+          "product-lead product-top"
+          "product-lead product-bottom";
+        align-items: start;
         gap: var(--offerings-gap);
       }
 
       .product-offerings-row > .product-spotlight {
-        flex: 0 1 calc((100% - (2 * var(--offerings-gap))) / 3);
-        max-width: calc((100% - (2 * var(--offerings-gap))) / 3);
+        height: 100%;
+        max-width: none;
+      }
+
+      .product-offerings-row > .product-spotlight:nth-child(1) {
+        grid-area: product-lead;
+        padding: 1.35rem;
+        border-color: rgba(125, 211, 252, 0.35);
+        background: linear-gradient(165deg, rgba(37, 99, 235, 0.24) 0%, rgba(30, 41, 59, 0.7) 38%, rgba(15, 23, 42, 0.82) 100%);
+      }
+
+      .product-offerings-row > .product-spotlight:nth-child(1) .card-title {
+        font-size: clamp(1.35rem, 2.1vw, 1.75rem);
+      }
+
+      .product-offerings-row > .product-spotlight:not(:first-child) {
+        padding: 1rem;
+      }
+
+      .product-offerings-row > .product-spotlight:not(:first-child) .card-title {
+        font-size: clamp(1.08rem, 1.45vw, 1.3rem);
+      }
+
+      .product-offerings-row > .product-spotlight:not(:first-child) .product-summary {
+        display: block;
+      }
+
+      .product-offerings-row > .product-spotlight:not(:first-child) .product-lead-blurb {
+        display: none;
+      }
+
+      .product-offerings-row > .product-spotlight:not(:first-child) .product-proof-grid {
+        display: none;
+      }
+
+      .product-offerings-row > .product-spotlight:not(:first-child) .graphic-panel {
+        padding: 0.62rem;
+      }
+
+      .product-offerings-row > .product-spotlight:not(:first-child) .signal-stack li:last-child,
+      .product-offerings-row > .product-spotlight:not(:first-child) .benefit-bar:nth-child(3) {
+        display: none;
+      }
+
+      .product-offerings-row > .product-spotlight:not(:first-child) .product-graphic {
+        display: none;
+      }
+
+      .product-offerings-row > .product-spotlight:nth-child(2) {
+        grid-area: product-top;
+      }
+
+      .product-offerings-row > .product-spotlight:nth-child(3) {
+        grid-area: product-bottom;
+      }
+
+      .product-offerings-row > .product-spotlight:nth-child(2) .product-graphic,
+      .product-offerings-row > .product-spotlight:nth-child(3) .product-graphic {
+        grid-template-columns: 1fr;
+      }
+
+      .blog-home-shell .blog-grid {
+        justify-content: stretch;
+        justify-items: stretch;
+        align-items: start;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        grid-template-areas:
+          "blog-top blog-lead"
+          "blog-bottom blog-lead";
+        row-gap: calc(var(--spacing-lg) * 0.95);
+      }
+
+      .blog-home-shell .blog-grid > .card,
+      .blog-home-shell .blog-grid > article.card {
+        justify-self: stretch;
+        max-width: none;
+        width: 100%;
+      }
+
+      .blog-home-shell .blog-grid > :nth-child(1) {
+        grid-area: blog-top;
+      }
+
+      .blog-home-shell .blog-grid > :nth-child(2) {
+        grid-area: blog-lead;
+        border-color: rgba(125, 211, 252, 0.35);
+        background: linear-gradient(165deg, rgba(37, 99, 235, 0.22) 0%, rgba(30, 41, 59, 0.72) 36%, rgba(15, 23, 42, 0.84) 100%);
+      }
+
+      .blog-home-shell .blog-grid > :nth-child(3) {
+        grid-area: blog-bottom;
       }
 
       .service-track-grid {
@@ -332,11 +577,46 @@
 
         .product-offerings-row {
           min-width: 0;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-areas:
+            "product-lead product-lead"
+            "product-top product-bottom";
         }
 
-        .product-offerings-row > .product-spotlight {
-          flex-basis: calc((100% - var(--offerings-gap)) / 2);
-          max-width: calc((100% - var(--offerings-gap)) / 2);
+        .product-offerings-row > .product-spotlight:nth-child(1) {
+          grid-area: product-lead;
+        }
+
+        .product-offerings-row > .product-spotlight:nth-child(2) {
+          grid-area: product-top;
+        }
+
+        .product-offerings-row > .product-spotlight:nth-child(3) {
+          grid-area: product-bottom;
+        }
+
+        .product-offerings-row > .product-spotlight:nth-child(2) .product-graphic,
+        .product-offerings-row > .product-spotlight:nth-child(3) .product-graphic {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .blog-home-shell .blog-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-areas:
+            "blog-lead blog-lead"
+            "blog-top blog-bottom";
+        }
+
+        .blog-home-shell .blog-grid > :nth-child(1) {
+          grid-area: blog-top;
+        }
+
+        .blog-home-shell .blog-grid > :nth-child(2) {
+          grid-area: blog-lead;
+        }
+
+        .blog-home-shell .blog-grid > :nth-child(3) {
+          grid-area: blog-bottom;
         }
 
         .service-track-grid {
@@ -355,9 +635,39 @@
       }
 
       @media (max-width: 640px) {
-        .product-offerings-row > .product-spotlight {
-          flex-basis: 100%;
-          max-width: 100%;
+        .product-offerings-row {
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "product-lead"
+            "product-top"
+            "product-bottom";
+        }
+
+        .product-offerings-row > .product-spotlight:nth-child(1),
+        .product-offerings-row > .product-spotlight:nth-child(2),
+        .product-offerings-row > .product-spotlight:nth-child(3) {
+          grid-column: auto;
+          grid-row: auto;
+        }
+
+        .product-graphic,
+        .product-proof-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .blog-home-shell .blog-grid {
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "blog-lead"
+            "blog-top"
+            "blog-bottom";
+        }
+
+        .blog-home-shell .blog-grid > :nth-child(1),
+        .blog-home-shell .blog-grid > :nth-child(2),
+        .blog-home-shell .blog-grid > :nth-child(3) {
+          grid-column: auto;
+          grid-row: auto;
         }
       }
     </style>
@@ -497,61 +807,7 @@
           <a href="/products" class="btn btn-primary btn-lg">Compare Products and Deployment Paths</a>
         </div>
 
-        <div class="grid grid-3 gap-lg product-offerings-row">
-          <div class="product-spotlight">
-            <div class="icon-circle icon-lg icon-primary">🔍</div>
-            <h3 class="card-title">Devicer Intelligence Suite</h3>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-              <span class="flair-tag flair-intelligence">Device Fingerprinting</span>
-              <span class="flair-tag flair-security">KYC</span>
-              <span class="flair-tag flair-scoring">Security</span>
-            </div>
-            <p class="card-text">
-              Server-side identity confidence engine with premium modules for
-              IP intelligence, TLS consistency, bot defense, and peer graph risk.
-            </p>
-            <div class="btn-group mt-md">
-              <a href="/products/devicer" class="btn btn-primary btn-sm">View Technical Overview</a>
-              <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
-            </div>
-          </div>
-
-          <div class="product-spotlight">
-            <div class="icon-circle icon-lg icon-secondary">💬</div>
-            <h3 class="card-title">HyperLocal 2</h3>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-              <span class="flair-tag flair-automation">AI Operations</span>
-              <span class="flair-tag flair-governance">CRM-First</span>
-              <span class="flair-tag flair-integration">SMS Automation</span>
-            </div>
-            <p class="card-text">
-              CRM-native SMS operations runtime with route controls,
-              permissioned actions, operator-owned knowledge, and audit-safe fallbacks.
-            </p>
-            <div class="btn-group mt-md">
-              <a href="/products/hyperlocal" class="btn btn-primary btn-sm">View Technical Overview</a>
-              <a href="/papers/HyperLocal-2.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
-            </div>
-          </div>
-
-          <div class="product-spotlight">
-            <div class="icon-circle icon-lg icon-primary">♟️</div>
-            <h3 class="card-title">NashTwin CRM</h3>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-              <span class="flair-tag flair-governance">Strategic Simulation</span>
-              <span class="flair-tag flair-operations">Digital Twin</span>
-              <span class="flair-tag flair-scoring">CRM</span>
-            </div>
-            <p class="card-text">
-              Digital twin platform for simulation-backed strategy,
-              game-theory optimization, and decision intelligence at leadership level.
-            </p>
-            <div class="btn-group mt-md">
-              <a href="/products/nashtwin" class="btn btn-primary btn-sm">View Technical Overview</a>
-              <a href="https://nash.gatewaycorporate.org/" class="btn btn-accent btn-sm">Try NashTwin</a>
-            </div>
-          </div>
-        </div>
+        {{PRODUCT_CARDS}}
       </section>
 
       <section class="section">
