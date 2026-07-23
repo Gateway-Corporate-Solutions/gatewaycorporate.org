@@ -419,38 +419,6 @@
         grid-template-columns: 1fr;
       }
 
-      .blog-home-shell .blog-grid {
-        justify-content: stretch;
-        justify-items: stretch;
-        align-items: start;
-        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-        grid-template-areas:
-          "blog-top blog-lead"
-          "blog-bottom blog-lead";
-        row-gap: calc(var(--spacing-lg) * 0.95);
-      }
-
-      .blog-home-shell .blog-grid > .card,
-      .blog-home-shell .blog-grid > article.card {
-        justify-self: stretch;
-        max-width: none;
-        width: 100%;
-      }
-
-      .blog-home-shell .blog-grid > :nth-child(1) {
-        grid-area: blog-top;
-      }
-
-      .blog-home-shell .blog-grid > :nth-child(2) {
-        grid-area: blog-lead;
-        border-color: rgba(125, 211, 252, 0.35);
-        background: linear-gradient(165deg, rgba(37, 99, 235, 0.22) 0%, rgba(30, 41, 59, 0.72) 36%, rgba(15, 23, 42, 0.84) 100%);
-      }
-
-      .blog-home-shell .blog-grid > :nth-child(3) {
-        grid-area: blog-bottom;
-      }
-
       .service-track-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -600,25 +568,6 @@
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .blog-home-shell .blog-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          grid-template-areas:
-            "blog-lead blog-lead"
-            "blog-top blog-bottom";
-        }
-
-        .blog-home-shell .blog-grid > :nth-child(1) {
-          grid-area: blog-top;
-        }
-
-        .blog-home-shell .blog-grid > :nth-child(2) {
-          grid-area: blog-lead;
-        }
-
-        .blog-home-shell .blog-grid > :nth-child(3) {
-          grid-area: blog-bottom;
-        }
-
         .service-track-grid {
           grid-template-columns: 1fr;
         }
@@ -655,20 +604,6 @@
           grid-template-columns: 1fr;
         }
 
-        .blog-home-shell .blog-grid {
-          grid-template-columns: 1fr;
-          grid-template-areas:
-            "blog-lead"
-            "blog-top"
-            "blog-bottom";
-        }
-
-        .blog-home-shell .blog-grid > :nth-child(1),
-        .blog-home-shell .blog-grid > :nth-child(2),
-        .blog-home-shell .blog-grid > :nth-child(3) {
-          grid-column: auto;
-          grid-row: auto;
-        }
       }
     </style>
   </head>
