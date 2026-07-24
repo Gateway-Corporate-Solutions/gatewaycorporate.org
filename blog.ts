@@ -48,6 +48,13 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;");
 }
 
+function processYamlEscapes(value: string): string {
+  return value
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'")
+    .replace(/\\\\/g, "\\");
+}
+
 function stripHtml(value: string): string {
   return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -575,10 +582,10 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     const fileUrl = new URL(entry.name, BLOG_DIR);
     const raw = await Deno.readTextFile(fileUrl);
     const { metadata, body } = parseFrontMatter(raw);
-    const title = metadata.title?.trim() || entry.name.replace(/\.md$/, "");
+    const title = processYamlEscapes(metadata.title?.trim() || entry.name.replace(/\.md$/, ""));
     const slug = slugify(metadata.slug?.trim() || title);
     const date = metadata.date?.trim() || new Date().toISOString().slice(0, 10);
-    const excerpt = buildExcerpt(body, metadata.excerpt);
+    const excerpt = buildExcerpt(body, metadata.excerpt ? processYamlEscapes(metadata.excerpt) : undefined);
     const author = metadata.author?.trim() || "Gateway Corporate Team";
     const tags = metadata.tags || [];
     const html = await optimizeBlogImages(sanitizeRenderedHtml(marked.parse(body) as string));
