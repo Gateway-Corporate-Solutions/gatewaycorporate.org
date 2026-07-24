@@ -1,7 +1,7 @@
 ---
 title: "\"We're the Good Guys\""
 slug: were-the-good-guys
-date: 2026-07-23
+date: 2026-07-24
 author: Sam Roux
 excerpt: Palantir is intentionally vague with their messaging, so it's not a wonder why they're so misunderstood. Flock is bold-faced authoritarianism.
 tags: [opinion, surveillance, security, technology]
