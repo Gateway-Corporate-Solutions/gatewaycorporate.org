@@ -2126,7 +2126,7 @@ body {
 }
 
 .flair-operations::before {
-  content: "🔄";
+  content: "👯";
 }
 
 .flair-operations:hover {

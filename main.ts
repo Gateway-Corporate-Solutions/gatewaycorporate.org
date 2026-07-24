@@ -759,14 +759,14 @@ function renderHomepageProductCard(productId: HomepageProductId): string {
                 return `<article class="product-spotlight">
                         <div class="icon-circle icon-lg icon-primary">🔍</div>
                         <h3 class="card-title">Devicer Intelligence Suite</h3>
+                        <div class="product-meta">
+                            <span class="flair-tag flair-intelligence">Device Fingerprinting</span>
+                            <span class="flair-tag flair-security">KYC & Risk Analysis</span>
+                            <span class="flair-tag flair-scoring">Bot Blocking & Anti-Fraud</span>
+                        </div>
                         <p class="card-text product-summary">Server-side identity confidence for teams that need fraud resistance, explainability, and measurable signal quality at scale. Devicer combines high-entropy telemetry sources into a scoring layer your operators can actually trust under pressure.</p>
                         <p class="card-text product-lead-blurb">Devicer helps teams separate routine traffic from genuinely risky behavior faster, reduces time spent on blind manual review, and creates a common confidence language across product, risk, and support. Instead of treating fingerprinting as a black box, your team gets a transparent decision surface with enough context to automate safely and escalate only what deserves human judgment.</p>
                         <p class="card-text product-lead-blurb">Teams can deploy this confidence layer across onboarding, authentication, and transaction review while maintaining auditability for every decision path, from automated approvals to analyst escalations.</p>
-                        <div class="product-meta">
-                            <span class="flair-tag flair-intelligence">Device Fingerprinting</span>
-                            <span class="flair-tag flair-security">KYC + Risk</span>
-                            <span class="flair-tag flair-scoring">Bot Defense</span>
-                        </div>
                         <div class="product-graphic">
                             <div class="graphic-panel">
                                 <p class="graphic-title">Signal Layers</p>
@@ -807,14 +807,14 @@ function renderHomepageProductCard(productId: HomepageProductId): string {
                 return `<article class="product-spotlight">
                         <div class="icon-circle icon-lg icon-secondary">💬</div>
                         <h3 class="card-title">HyperLocal 2</h3>
+                        <div class="product-meta">
+                            <span class="flair-tag flair-automation">AI Operations</span>
+                            <span class="flair-tag flair-governance">CRM-First</span>
+                            <span class="flair-tag flair-integration">SMS Automation</span>
+                        </div>
                         <p class="card-text product-summary">CRM-native SMS automation with governed AI actions, route controls, and operator-owned context to keep outcomes stable under real volume. HyperLocal 2 is designed for revenue and support teams that need speed without losing process control.</p>
                         <p class="card-text product-lead-blurb">HyperLocal 2 moves teams from fragmented conversation handling to a unified runtime where AI accelerates execution but policies keep actions constrained. Operators gain faster response loops, managers gain traceability, and leadership gains confidence that automation quality will hold during campaign spikes, handoff-heavy workflows, and compliance-sensitive conversations.</p>
                         <p class="card-text product-lead-blurb">The platform keeps permissions, routing logic, and fallback controls explicit so teams can scale campaign throughput without sacrificing message quality, compliance posture, or operator oversight.</p>
-                        <div class="product-meta">
-                            <span class="flair-tag flair-automation">AI Operations</span>
-                            <span class="flair-tag flair-governance">Audit Trails</span>
-                            <span class="flair-tag flair-integration">CRM Integrations</span>
-                        </div>
                         <div class="product-graphic">
                             <div class="graphic-panel">
                                 <p class="graphic-title">Execution Chain</p>
@@ -854,14 +854,14 @@ function renderHomepageProductCard(productId: HomepageProductId): string {
         return `<article class="product-spotlight">
                         <div class="icon-circle icon-lg icon-primary">♟️</div>
                         <h3 class="card-title">NashTwin CRM</h3>
+                        <div class="product-meta">
+                            <span class="flair-tag flair-operations">Digital Twin</span>
+                            <span class="flair-tag flair-governance">Strategic Simulation</span>
+                            <span class="flair-tag flair-scoring">Executive Intelligence</span>
+                        </div>
                         <p class="card-text product-summary">Decision intelligence platform for leadership teams modeling scenarios, tradeoffs, and strategy execution before capital and reputation are committed. NashTwin turns strategic uncertainty into structured simulations your team can reason about collaboratively.</p>
                         <p class="card-text product-lead-blurb">NashTwin lets leadership teams test strategic paths against constraints, incentives, and second-order effects before making irreversible moves. Instead of debating assumptions in abstract terms, teams can compare outcomes in a shared model, expose hidden risk earlier, and align execution plans around scenarios that survive both operational reality and competitive response.</p>
                         <p class="card-text product-lead-blurb">Cross-functional stakeholders can evaluate the same simulated scenarios with shared assumptions, reducing planning drift and helping teams commit resources to strategies that remain resilient as conditions change.</p>
-                        <div class="product-meta">
-                            <span class="flair-tag flair-governance">Game Theory</span>
-                            <span class="flair-tag flair-operations">Digital Twin</span>
-                            <span class="flair-tag flair-scoring">Executive Intelligence</span>
-                        </div>
                         <div class="product-graphic">
                             <div class="graphic-panel">
                                 <p class="graphic-title">Simulation Stack</p>
