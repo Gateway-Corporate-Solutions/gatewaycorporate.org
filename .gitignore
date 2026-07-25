@@ -3,3 +3,4 @@ node_modules/
 .unlighthouse/
 data/*.db
 content/experiment-events/*.jsonl
+content/forum/*.json

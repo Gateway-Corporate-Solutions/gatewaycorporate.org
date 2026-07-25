@@ -22,6 +22,17 @@ import {
     renderCareersSuccessPage,
     renderJobPostingPage,
 } from "./careers.ts";
+import {
+    createForumReply,
+    createForumThread,
+    FORUM_BOARDS,
+    getForumBoardBySlug,
+    parseForumPageParam,
+    renderForumBoardNotFoundPage,
+    renderForumBoardPage,
+    renderForumIndexPage,
+    renderForumThreadPage,
+} from "./forum.ts";
 import { submitJobApplication } from "./applications.ts";
 import { handleUserRequest } from "./contact.ts";
 import {
@@ -97,7 +108,7 @@ const analytics: AnalyticsState = {
     uniques: [],
 };
 
-let analyticsRefreshTimer: number | undefined;
+let analyticsRefreshTimer: ReturnType<typeof setInterval> | undefined;
 let analyticsLastRefreshedAt = 0;
 let analyticsRefreshInFlight: Promise<void> | null = null;
 const fingerprintIngestStats = {
@@ -1067,6 +1078,16 @@ router.get("/sitemap.xml", async (context) => {
                         priority: 0.8,
                 },
             {
+                loc: `${siteOrigin}/forum`,
+                lastmod: today,
+                priority: 0.8,
+            },
+            ...FORUM_BOARDS.map((board) => ({
+                loc: `${siteOrigin}/forum/${encodeURIComponent(board.slug)}`,
+                lastmod: today,
+                priority: 0.6,
+            } satisfies SitemapEntry)),
+            {
                 loc: `${siteOrigin}/products`,
                 lastmod: await getSitemapLastModified("./static/views/products.html", today),
                 priority: 0.9,
@@ -1119,6 +1140,8 @@ router.get("/seo/sitemap-health", async (context) => {
             "/faq",
             "/blog",
             "/careers",
+            "/forum",
+            ...FORUM_BOARDS.map((board) => `/forum/${board.slug}`),
             "/products",
             ...[...allowedProductViews].map((slug) => `/products/${slug}`),
             ...[...allowedPapers].map((slug) => `/papers/${slug}.pdf`),
@@ -1132,6 +1155,8 @@ router.get("/seo/sitemap-health", async (context) => {
             "/faq",
             "/blog",
             "/careers",
+            "/forum",
+            ...FORUM_BOARDS.map((board) => `/forum/${board.slug}`),
             "/products",
             ...[...allowedProductViews].map((slug) => `/products/${slug}`),
             ...[...allowedPapers].map((slug) => `/papers/${slug}.pdf`),
@@ -1145,6 +1170,8 @@ router.get("/seo/sitemap-health", async (context) => {
             { path: "/", date: await getSitemapLastModified("./static/views/index.html", now.toISOString().slice(0, 10)) },
             { path: "/services", date: await getSitemapLastModified("./static/views/services.html", now.toISOString().slice(0, 10)) },
             { path: "/faq", date: await getSitemapLastModified("./static/views/faq.html", now.toISOString().slice(0, 10)) },
+            { path: "/forum", date: now.toISOString().slice(0, 10) },
+            ...FORUM_BOARDS.map((board) => ({ path: `/forum/${board.slug}`, date: now.toISOString().slice(0, 10) })),
             { path: "/products", date: await getSitemapLastModified("./static/views/products.html", now.toISOString().slice(0, 10)) },
             ...blogPosts.map((post) => ({ path: `/blog/${post.slug}`, date: post.date })),
             ...jobs.filter((job) => job.status === "open").map((job) => ({ path: `/careers/${job.slug}`, date: job.date })),
@@ -1238,6 +1265,141 @@ router.get("/faq", async (context) => {
         context.response.body = "FAQ page not found";
     }
 });
+router.get("/forum", async (context) => {
+    context.response.body = await injectRuntimeBootstrapForHtml(context, await renderForumIndexPage());
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.get("/forum/:board", async (context) => {
+    const boardSlug = context.params.board;
+    if (!boardSlug) {
+        context.response.status = 404;
+        context.response.body = await injectRuntimeBootstrapForHtml(context, renderForumBoardNotFoundPage(""));
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    const board = getForumBoardBySlug(boardSlug);
+    if (!board) {
+        context.response.status = 404;
+        context.response.body = await injectRuntimeBootstrapForHtml(context, renderForumBoardNotFoundPage(boardSlug));
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    const page = parseForumPageParam(context.request.url.searchParams.get("page"));
+    const errorMessage = context.request.url.searchParams.get("error") || undefined;
+
+    context.response.body = await injectRuntimeBootstrapForHtml(
+        context,
+        await renderForumBoardPage({ board, page, errorMessage }),
+    );
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.post("/forum/:board/thread", async (context) => {
+    const boardSlug = context.params.board;
+    if (!boardSlug) {
+        context.response.status = 404;
+        context.response.body = "Board not found";
+        return;
+    }
+
+    const board = getForumBoardBySlug(boardSlug);
+    if (!board) {
+        context.response.status = 404;
+        context.response.body = "Board not found";
+        return;
+    }
+
+    const form = await context.request.body.form();
+    const title = String(form.get("title") || "");
+    const body = String(form.get("body") || "");
+    const author = String(form.get("author") || "");
+
+    const result = await createForumThread({
+        boardSlug,
+        title,
+        body,
+        author,
+    });
+
+    if (!result.ok) {
+        context.response.redirect(`/forum/${encodeURIComponent(boardSlug)}?error=${encodeURIComponent(result.error)}`);
+        return;
+    }
+
+    context.response.redirect(`/forum/${encodeURIComponent(boardSlug)}/thread/${encodeURIComponent(result.thread.id)}`);
+});
+router.get("/forum/:board/thread/:threadId", async (context) => {
+    const boardSlug = context.params.board;
+    const threadId = context.params.threadId;
+
+    if (!boardSlug || !threadId) {
+        context.response.status = 404;
+        context.response.body = "Thread not found";
+        return;
+    }
+
+    const board = getForumBoardBySlug(boardSlug);
+    if (!board) {
+        context.response.status = 404;
+        context.response.body = await injectRuntimeBootstrapForHtml(context, renderForumBoardNotFoundPage(boardSlug));
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        return;
+    }
+
+    const errorMessage = context.request.url.searchParams.get("error") || undefined;
+    context.response.body = await injectRuntimeBootstrapForHtml(
+        context,
+        await renderForumThreadPage({ board, threadId, errorMessage }),
+    );
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.post("/forum/:board/thread/:threadId/reply", async (context) => {
+    const boardSlug = context.params.board;
+    const threadId = context.params.threadId;
+
+    if (!boardSlug || !threadId) {
+        context.response.status = 404;
+        context.response.body = "Thread not found";
+        return;
+    }
+
+    const board = getForumBoardBySlug(boardSlug);
+    if (!board) {
+        context.response.status = 404;
+        context.response.body = "Board not found";
+        return;
+    }
+
+    const form = await context.request.body.form();
+    const body = String(form.get("body") || "");
+    const author = String(form.get("author") || "");
+
+    const result = await createForumReply({
+        boardSlug,
+        threadId,
+        body,
+        author,
+    });
+
+    if (!result.ok) {
+        context.response.redirect(
+            `/forum/${encodeURIComponent(boardSlug)}/thread/${encodeURIComponent(threadId)}?error=${encodeURIComponent(result.error)}`,
+        );
+        return;
+    }
+
+    context.response.redirect(`/forum/${encodeURIComponent(boardSlug)}/thread/${encodeURIComponent(threadId)}`);
+});
+for (const board of FORUM_BOARDS) {
+    const target = `/forum/${board.slug}`;
+    router.get(`/${board.slug}`, (context) => {
+        context.response.redirect(target);
+    });
+    router.get(`/${board.slug}/`, (context) => {
+        context.response.redirect(target);
+    });
+}
 router.get("/blog", async (context) => {
     const blogPosts = await getBlogPosts();
     context.response.body = await injectRuntimeBootstrapForHtml(context, renderBlogIndexPage(blogPosts));
@@ -1515,7 +1677,7 @@ router.get("/wss", async (context) => {
         }
     }
     const socket = await context.upgrade();
-    let socketAnalyticsTimer: number | undefined;
+    let socketAnalyticsTimer: ReturnType<typeof setInterval> | undefined;
 
     const cleanupSocket = () => {
         if (socketAnalyticsTimer !== undefined) {

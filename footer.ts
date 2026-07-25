@@ -32,6 +32,7 @@ const companyColumn: FooterColumn = {
     { label: "Team", href: "/#team" },
     { label: "Careers", href: "/careers" },
     { label: "FAQ", href: "/faq" },
+    { label: "Forum", href: "/forum" },
     { label: "Journal", href: "/blog" },
     { label: "Contact", href: "/#contact" },
   ],
