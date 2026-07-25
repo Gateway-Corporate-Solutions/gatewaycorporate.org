@@ -179,6 +179,7 @@ function sortThreadsByActivity(threads: ForumThread[]): ForumThread[] {
 function sanitizeMultiline(value: string, maxLength: number): string {
   const normalized = value
     .replace(/<[^>]*>/g, "")
+    // deno-lint-ignore no-control-regex
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
     .replaceAll("\r\n", "\n")
     .replaceAll("\r", "\n")
@@ -510,6 +511,7 @@ async function writeForumModerationState(state: ForumModerationState): Promise<v
   }, null, 2));
 }
 
+// deno-lint-ignore require-await
 export async function getForumModerationState(): Promise<ForumModerationState> {
   return readForumModerationState();
 }

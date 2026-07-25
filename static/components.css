@@ -911,7 +911,7 @@ body {
 }
 
 .testimonial::before {
-  content: """;
+  content: "";
   position: absolute;
   top: -12px;
   left: 16px;

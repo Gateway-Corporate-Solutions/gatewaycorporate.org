@@ -181,6 +181,7 @@ const analytics: AnalyticsState = {
     uniques: [],
 };
 
+// deno-lint-ignore no-unused-vars prefer-const
 let analyticsRefreshTimer: ReturnType<typeof setInterval> | undefined;
 let analyticsLastRefreshedAt = 0;
 let analyticsRefreshInFlight: Promise<void> | null = null;
