@@ -1,5 +1,5 @@
 ---
-title: "Dr. Laperdrix, Please Read My Paper"
+title: "\"Dr. Laperdrix, Please Read My Paper\""
 slug: dr-laperdrix-please-read-my-paper
 date: 2026-07-24
 author: Sam Roux
