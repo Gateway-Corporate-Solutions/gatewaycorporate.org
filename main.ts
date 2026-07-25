@@ -2053,6 +2053,10 @@ router.get("/mesh.obj", (context) => {
     try {
         context.response.body = Deno.readFileSync("./static/mesh.obj");
         context.response.headers.set("Content-Type", "text/plain; charset=utf-8");
+        context.response.headers.set(
+            "Cache-Control",
+            isProduction ? "public, max-age=31536000, immutable" : "public, max-age=3600",
+        );
     } catch (error) {
         console.error(`Error reading mesh file: ${error}`);
         context.response.status = 404;
