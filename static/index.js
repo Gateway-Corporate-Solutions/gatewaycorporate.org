@@ -1361,7 +1361,7 @@ class NetworkGraph {
     this.meshBlend = 0;
 
     try {
-      const response = await fetch("/mesh.obj");
+      const response = await fetch("/mesh.obj", { cache: "force-cache" });
       if (!response.ok) return;
 
       const loadedModel = this.parseMeshModel(await response.text());
