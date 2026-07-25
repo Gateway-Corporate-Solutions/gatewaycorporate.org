@@ -57,6 +57,72 @@
   box-shadow: 0 1px 3px rgba(100, 116, 139, 0.3);
 }
 
+/* Inline term definitions for domain-specific vocabulary */
+.term-hint {
+  --term-hint-color: #c4af93;
+  position: relative;
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--term-hint-color);
+  font: inherit;
+  font-weight: 600;
+  line-height: inherit;
+  cursor: pointer;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: rgba(196, 175, 147, 0.6);
+  transition: color 0.2s ease;
+}
+
+.term-hint:hover,
+.term-hint:focus-visible,
+.term-hint[data-open="true"] {
+  color: #d7c5ae;
+  outline: none;
+  text-decoration-color: rgba(215, 197, 174, 0.85);
+}
+
+.term-hint-popover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1200;
+  width: min(34ch, calc(100vw - 1rem));
+  max-width: 34ch;
+  padding: 0.62rem 0.72rem;
+  border-radius: 10px;
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: rgba(15, 23, 42, 0.97);
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: left;
+  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.term-hint-popover[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .term-hint-popover {
+    width: min(32ch, calc(100vw - 1rem));
+    max-width: calc(100vw - 1rem);
+  }
+}
+
 :root {
   --primary-navbar-height: calc(
     var(--nav-logo-size) + (var(--navbar-padding-y) * 2)

@@ -2119,6 +2119,212 @@ function setupAnchorNavigation() {
   });
 }
 
+function setupTermHints() {
+  const termHints = Array.from(document.querySelectorAll(".term-hint"));
+  if (!termHints.length) {
+    return;
+  }
+
+  let popover = document.querySelector(".term-hint-popover");
+  if (!(popover instanceof HTMLElement)) {
+    popover = document.createElement("div");
+    popover.className = "term-hint-popover";
+    popover.setAttribute("role", "tooltip");
+    popover.setAttribute("aria-hidden", "true");
+    document.body.appendChild(popover);
+  }
+
+  let activeHint = null;
+  let lastPointerX = 0;
+  let lastPointerY = 0;
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+  const renderPopover = (hint, pointerX, pointerY) => {
+    if (!(hint instanceof HTMLElement) || !(popover instanceof HTMLElement)) {
+      return;
+    }
+
+    const definition = hint.getAttribute("data-definition") || "";
+    popover.textContent = definition;
+
+    const gap = 12;
+    const margin = 8;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const rect = hint.getBoundingClientRect();
+    const fallbackX = rect.left + rect.width * 0.7;
+    const fallbackY = rect.top + rect.height * 0.55;
+
+    const anchorX = Number.isFinite(pointerX) ? pointerX : fallbackX;
+    const anchorY = Number.isFinite(pointerY) ? pointerY : fallbackY;
+
+    popover.style.top = "0px";
+    popover.style.left = "0px";
+    popover.dataset.open = "true";
+    popover.setAttribute("aria-hidden", "false");
+
+    const popRect = popover.getBoundingClientRect();
+    let left = anchorX + gap;
+    let top = anchorY - popRect.height - gap;
+
+    if (left + popRect.width > viewportWidth - margin) {
+      left = anchorX - popRect.width - gap;
+    }
+
+    if (left < margin) {
+      left = margin;
+    }
+
+    if (top < margin) {
+      top = anchorY + gap;
+    }
+
+    if (top + popRect.height > viewportHeight - margin) {
+      top = viewportHeight - popRect.height - margin;
+    }
+
+    top = clamp(top, margin, viewportHeight - popRect.height - margin);
+    left = clamp(left, margin, viewportWidth - popRect.width - margin);
+
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+  };
+
+  const hidePopover = () => {
+    if (!(popover instanceof HTMLElement)) {
+      return;
+    }
+
+    popover.dataset.open = "false";
+    popover.setAttribute("aria-hidden", "true");
+  };
+
+  const closeAllTermHints = (except = null) => {
+    termHints.forEach((hint) => {
+      if (hint === except) {
+        return;
+      }
+
+      hint.dataset.open = "false";
+      hint.setAttribute("aria-expanded", "false");
+    });
+
+    if (!except) {
+      activeHint = null;
+      hidePopover();
+    }
+  };
+
+  termHints.forEach((hint) => {
+    if (!(hint instanceof HTMLElement)) {
+      return;
+    }
+
+    hint.dataset.open = "false";
+    hint.setAttribute("aria-expanded", "false");
+
+    if (!hint.hasAttribute("type") && hint.tagName === "BUTTON") {
+      hint.setAttribute("type", "button");
+    }
+
+    if (!hint.hasAttribute("aria-label")) {
+      const term = hint.textContent?.trim() || "term";
+      const definition = hint.getAttribute("data-definition") || "Definition";
+      hint.setAttribute("aria-label", `${term}. ${definition}`);
+    }
+
+    const showForCurrentGeometry = () => {
+      const anchorX = lastPointerX || (hint.getBoundingClientRect().left + hint.getBoundingClientRect().width * 0.7);
+      const anchorY = lastPointerY || (hint.getBoundingClientRect().top + hint.getBoundingClientRect().height * 0.55);
+      renderPopover(hint, anchorX, anchorY);
+    };
+
+    hint.addEventListener("pointerenter", (event) => {
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      activeHint = hint;
+      renderPopover(hint, event.clientX, event.clientY);
+    });
+
+    hint.addEventListener("pointermove", (event) => {
+      if (activeHint !== hint || hint.dataset.open === "true") {
+        return;
+      }
+
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      renderPopover(hint, event.clientX, event.clientY);
+    });
+
+    hint.addEventListener("pointerleave", () => {
+      if (hint.dataset.open === "true") {
+        return;
+      }
+
+      activeHint = null;
+      hidePopover();
+    });
+
+    hint.addEventListener("focus", () => {
+      activeHint = hint;
+      showForCurrentGeometry();
+    });
+
+    hint.addEventListener("blur", () => {
+      if (hint.dataset.open === "true") {
+        return;
+      }
+
+      activeHint = null;
+      hidePopover();
+    });
+
+    hint.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const shouldOpen = hint.dataset.open !== "true";
+      closeAllTermHints(shouldOpen ? hint : null);
+      hint.dataset.open = shouldOpen ? "true" : "false";
+      hint.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+
+      if (shouldOpen) {
+        activeHint = hint;
+        renderPopover(hint, lastPointerX, lastPointerY);
+      } else {
+        activeHint = null;
+        hidePopover();
+      }
+    });
+  });
+
+  window.addEventListener("resize", () => {
+    if (activeHint instanceof HTMLElement) {
+      renderPopover(activeHint, lastPointerX, lastPointerY);
+    }
+  });
+
+  window.addEventListener("scroll", () => {
+    if (activeHint instanceof HTMLElement) {
+      renderPopover(activeHint, lastPointerX, lastPointerY);
+    }
+  }, { passive: true });
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest(".term-hint")) {
+      closeAllTermHints();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    closeAllTermHints();
+  });
+}
+
 function initializePage() {
   removeCloudflareBeaconScripts();
 
@@ -2143,6 +2349,7 @@ function initializePage() {
   }
 
   setupAnchorNavigation();
+  setupTermHints();
   setupFunnelInstrumentation();
   setupDeferredContactAssets();
   renderContactStatusBanner();
