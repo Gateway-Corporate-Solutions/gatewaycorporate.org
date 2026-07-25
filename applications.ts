@@ -18,6 +18,10 @@ export interface ApplicationSubmissionResult {
   values?: Partial<JobApplicationValues>;
 }
 
+interface ApplicationSubmissionOptions {
+  bypassCaptcha?: boolean;
+}
+
 interface ParsedApplication {
   values: JobApplicationValues;
   recaptchaToken: string;
@@ -72,6 +76,7 @@ class ResendMailProvider implements MailProvider {
 export async function submitJobApplication(
   job: JobPosting,
   form: FormData,
+  options?: ApplicationSubmissionOptions,
 ): Promise<ApplicationSubmissionResult> {
   if (job.status.toLowerCase() !== "open") {
     return {
@@ -81,7 +86,7 @@ export async function submitJobApplication(
     };
   }
 
-  const parsed = await parseApplication(job, form);
+  const parsed = await parseApplication(job, form, options);
   if ("error" in parsed) {
     return {
       ok: false,
@@ -92,7 +97,7 @@ export async function submitJobApplication(
   }
 
   try {
-    await verifyRecaptcha(parsed.recaptchaToken);
+    await verifyRecaptcha(parsed.recaptchaToken, options);
   } catch (error) {
     return {
       ok: false,
@@ -144,6 +149,7 @@ function createMailProvider(): MailProvider {
 async function parseApplication(
   job: JobPosting,
   form: FormData,
+  options?: ApplicationSubmissionOptions,
 ): Promise<ParsedApplication | { error: string; status: number; values: Partial<JobApplicationValues> }> {
   const values: JobApplicationValues = {
     name: sanitizeText(form.get("name"), 120),
@@ -180,7 +186,7 @@ async function parseApplication(
   }
 
   const recaptchaToken = sanitizeText(form.get("g-recaptcha-response"), 4000);
-  if (!recaptchaToken) {
+  if (!recaptchaToken && !options?.bypassCaptcha) {
     return {
       error: "Please complete the reCAPTCHA check before submitting.",
       status: 400,
@@ -235,7 +241,11 @@ async function parseApplication(
   };
 }
 
-async function verifyRecaptcha(token: string): Promise<void> {
+async function verifyRecaptcha(token: string, options?: ApplicationSubmissionOptions): Promise<void> {
+  if (options?.bypassCaptcha) {
+    return;
+  }
+
   const recaptchaSecret = Deno.env.get("RECAPTCHA_SECRET_KEY") || "";
   if (!recaptchaSecret) {
     throw new Error("reCAPTCHA is not configured on the server.");

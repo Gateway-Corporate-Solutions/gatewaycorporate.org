@@ -23,15 +23,23 @@ import {
     renderJobPostingPage,
 } from "./careers.ts";
 import {
+    addForumBannedWord,
+    banForumIdentity,
     createForumReply,
     createForumThread,
+    evaluateForumSubmission,
     FORUM_BOARDS,
+    getForumModerationQueue,
+    getForumModerationState,
     getForumBoardBySlug,
     parseForumPageParam,
+    removeForumBannedWord,
+    removeForumPost,
     renderForumBoardNotFoundPage,
     renderForumBoardPage,
     renderForumIndexPage,
     renderForumThreadPage,
+    verifyForumRecaptcha,
 } from "./forum.ts";
 import { submitJobApplication } from "./applications.ts";
 import { handleUserRequest } from "./contact.ts";
@@ -83,6 +91,71 @@ const devicerSnippetKey = (
 ).trim();
 const sessionStore = new SessionStore();
 const rateLimiter = new RateLimiter();
+const FORUM_MOD_COOKIE_NAME = "forum_mod_session";
+const FORUM_MOD_SESSION_TTL_SECONDS = 60 * 60 * 12;
+const moderatorSessions = new Map<string, number>();
+
+function getForumModeratorPassword(): string {
+    return (
+        Deno.env.get("FORUM_MOD_PASSWORD") ||
+        Deno.env.get("MODERATOR_PASSWORD") ||
+        ""
+    ).trim();
+}
+
+function isForumModerationEnabled(): boolean {
+    return getForumModeratorPassword().length > 0;
+}
+
+function pruneModeratorSessions(): void {
+    const now = Date.now();
+    for (const [token, expiresAt] of moderatorSessions.entries()) {
+        if (expiresAt <= now) {
+            moderatorSessions.delete(token);
+        }
+    }
+}
+
+function createModeratorSession(): string {
+    pruneModeratorSessions();
+    const token = crypto.randomUUID();
+    moderatorSessions.set(token, Date.now() + FORUM_MOD_SESSION_TTL_SECONDS * 1000);
+    return token;
+}
+
+function isModeratorSessionValid(token: string | undefined): boolean {
+    if (!token) {
+        return false;
+    }
+
+    pruneModeratorSessions();
+    const expiresAt = moderatorSessions.get(token);
+    if (!expiresAt || expiresAt <= Date.now()) {
+        moderatorSessions.delete(token);
+        return false;
+    }
+
+    return true;
+}
+
+function clearModeratorSession(token: string | undefined): void {
+    if (!token) {
+        return;
+    }
+
+    moderatorSessions.delete(token);
+}
+
+function toHex(bytes: Uint8Array): string {
+    return [...bytes].map((value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+async function buildForumAuthorFingerprint(headers: Headers, clientIp: string): Promise<string> {
+    const userAgent = headers.get("user-agent") || "";
+    const source = `${clientIp}|${userAgent.trim().toLowerCase()}`;
+    const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(source));
+    return toHex(new Uint8Array(hash));
+}
 
 type DevicerRuntime = {
     adapters: {
@@ -139,6 +212,11 @@ function isLoopbackHost(host: string | null): boolean {
         : normalized.split(":")[0];
 
     return withoutPort === "localhost" || withoutPort === "127.0.0.1" || withoutPort === "::1";
+}
+
+function isLocalhostRequest(url: URL, headers: Headers): boolean {
+    const hostHeader = headers.get("host");
+    return isLoopbackHost(hostHeader) || isLoopbackHost(url.host) || isLoopbackHost(url.hostname);
 }
 
 function isTlsComplexityError(error: unknown): boolean {
@@ -1029,6 +1107,177 @@ async function renderHomePage(
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 }
 
+function renderForumModeratorLoginPage(errorMessage?: string): string {
+        const errorMarkup = errorMessage
+                ? `<p style="color:#fecaca;background:rgba(127,29,29,.35);border:1px solid rgba(248,113,113,.55);border-radius:10px;padding:.6rem .75rem;margin:0 0 1rem;">${escapeHtml(errorMessage)}</p>`
+                : "";
+
+        return `<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Forum Moderator Login</title>
+        <link rel="stylesheet" href="/components.css">
+        <link rel="stylesheet" href="/enhancements.css">
+        <script src="/bundle.js" defer></script>
+        <script src="/index.js" defer></script>
+        <style>
+            body { background:#0f172a; color:#e2e8f0; font-family: ui-sans-serif, system-ui, sans-serif; }
+            .wrap { max-width: 720px; margin: 6rem auto; padding: 1rem; }
+            .panel { border:1px solid rgba(148,163,184,.35); border-radius: 14px; background: rgba(15,23,42,.92); padding:1rem; }
+            .field { display:grid; gap:.4rem; margin:0 0 .9rem; }
+            input { background:#020617; color:#e2e8f0; border:1px solid rgba(148,163,184,.45); border-radius:10px; padding:.6rem; }
+        </style>
+    </head>
+    <body>
+        <main class="wrap">
+            <section class="panel">
+                <h1 style="margin:0 0 .4rem;">Forum Moderator Login</h1>
+                <p style="margin:0 0 1rem;color:#cbd5e1;">Sign in to access moderation tools.</p>
+                ${errorMarkup}
+                <form method="post" action="/forum/mod/login">
+                    <div class="field">
+                        <label for="mod-password">Moderator password</label>
+                        <input id="mod-password" name="password" type="password" autocomplete="current-password" required>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Sign in</button>
+                </form>
+            </section>
+        </main>
+    </body>
+</html>`;
+}
+
+async function renderForumModeratorDashboardPage(options?: { message?: string; error?: string }): Promise<string> {
+        const moderationState = await getForumModerationState();
+        const queue = await getForumModerationQueue(160);
+
+        const messageMarkup = options?.message
+                ? `<p style="color:#dcfce7;background:rgba(22,101,52,.3);border:1px solid rgba(34,197,94,.45);border-radius:10px;padding:.6rem .75rem;">${escapeHtml(options.message)}</p>`
+                : "";
+        const errorMarkup = options?.error
+                ? `<p style="color:#fecaca;background:rgba(127,29,29,.35);border:1px solid rgba(248,113,113,.55);border-radius:10px;padding:.6rem .75rem;">${escapeHtml(options.error)}</p>`
+                : "";
+
+        const bannedWordsMarkup = moderationState.bannedWords.length
+                ? moderationState.bannedWords.map((word) => `<li style="margin:.2rem 0;">${escapeHtml(word)}</li>`).join("")
+                : "<li>No banned words configured.</li>";
+        const bannedAuthorsMarkup = moderationState.bannedAuthors.length
+                ? moderationState.bannedAuthors.map((author) => `<li style="margin:.2rem 0;">${escapeHtml(author)}</li>`).join("")
+                : "<li>No banned authors.</li>";
+
+        const rows = queue.length
+                ? queue.map((entry) => {
+                        const permalink = `/forum/${encodeURIComponent(entry.boardSlug)}/thread/${encodeURIComponent(entry.threadId)}#p${entry.postNumber}`;
+                        return `<tr>
+                            <td>${escapeHtml(entry.boardSlug)}</td>
+                            <td><a href="${permalink}">No.${entry.postNumber}</a></td>
+                            <td>${escapeHtml(entry.author)}</td>
+                            <td>${escapeHtml(entry.createdAt)}</td>
+                            <td>${escapeHtml(entry.preview)}</td>
+                            <td><code style="font-size:.73rem;">${escapeHtml(entry.authorFingerprint || "")}</code></td>
+                        </tr>`;
+                }).join("\n")
+                : `<tr><td colspan="6">No posts available.</td></tr>`;
+
+        return `<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Forum Moderation Dashboard</title>
+        <link rel="stylesheet" href="/components.css">
+        <link rel="stylesheet" href="/enhancements.css">
+        <script src="/bundle.js" defer></script>
+        <script src="/index.js" defer></script>
+        <style>
+            body { background:#0f172a; color:#e2e8f0; font-family: ui-sans-serif, system-ui, sans-serif; margin:0; }
+            .wrap { max-width: 1200px; margin: 2rem auto 3rem; padding: 0 1rem; display:grid; gap:1rem; }
+            .panel { border:1px solid rgba(148,163,184,.35); border-radius: 14px; background: rgba(15,23,42,.92); padding:1rem; }
+            .grid { display:grid; gap:.7rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+            .field { display:grid; gap:.35rem; }
+            input { background:#020617; color:#e2e8f0; border:1px solid rgba(148,163,184,.45); border-radius:10px; padding:.55rem; }
+            table { width:100%; border-collapse: collapse; }
+            th, td { border-bottom:1px solid rgba(148,163,184,.25); padding:.5rem; text-align:left; font-size:.9rem; }
+            th { color:#bfdbfe; }
+            ul { margin:.4rem 0 0; padding-left:1.1rem; }
+            a { color:#93c5fd; }
+        </style>
+    </head>
+    <body>
+        <main class="wrap">
+            <section class="panel">
+                <h1 style="margin:0 0 .5rem;">Forum Moderation</h1>
+                <p style="margin:0 0 .7rem;color:#cbd5e1;">Manage post removals, bans, and automoderation dictionary.</p>
+                ${messageMarkup}
+                ${errorMarkup}
+            </section>
+
+            <section class="panel grid">
+                <form method="post" action="/forum/mod/remove" class="field">
+                    <h2 style="margin:0;">Remove Post</h2>
+                    <input name="boardSlug" placeholder="board slug (e.g. risk)" required>
+                    <input name="threadId" placeholder="thread id" required>
+                    <input name="replyId" placeholder="reply id (leave empty to remove entire thread)">
+                    <button class="btn btn-primary" type="submit">Remove</button>
+                </form>
+
+                <form method="post" action="/forum/mod/ban" class="field">
+                    <h2 style="margin:0;">Ban User</h2>
+                    <input name="author" placeholder="author name (optional)">
+                    <input name="fingerprint" placeholder="author fingerprint (optional)">
+                    <button class="btn btn-primary" type="submit">Ban</button>
+                </form>
+
+                <form method="post" action="/forum/mod/words/add" class="field">
+                    <h2 style="margin:0;">Add Banned Word</h2>
+                    <input name="word" placeholder="word or phrase" required>
+                    <button class="btn btn-primary" type="submit">Add</button>
+                </form>
+
+                <form method="post" action="/forum/mod/words/remove" class="field">
+                    <h2 style="margin:0;">Remove Banned Word</h2>
+                    <input name="word" placeholder="word or phrase" required>
+                    <button class="btn btn-secondary" type="submit">Remove</button>
+                </form>
+            </section>
+
+            <section class="panel grid">
+                <div>
+                    <h3 style="margin:0 0 .45rem;">Banned Words</h3>
+                    <ul>${bannedWordsMarkup}</ul>
+                </div>
+                <div>
+                    <h3 style="margin:0 0 .45rem;">Banned Authors</h3>
+                    <ul>${bannedAuthorsMarkup}</ul>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 style="margin:0 0 .6rem;">Recent Posts</h2>
+                <div style="overflow:auto;">
+                    <table>
+                        <thead>
+                            <tr><th>Board</th><th>Post</th><th>Author</th><th>Created</th><th>Preview</th><th>Fingerprint</th></tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <form method="post" action="/forum/mod/logout">
+                    <button class="btn btn-secondary" type="submit">Sign out</button>
+                </form>
+            </section>
+        </main>
+    </body>
+</html>`;
+}
+
 router.get("/sitemap.xml", async (context) => {
     const [blogPosts, jobs] = await Promise.all([getBlogPosts(), getJobPostings()]);
         const today = formatSitemapDate(new Date());
@@ -1269,6 +1518,156 @@ router.get("/forum", async (context) => {
     context.response.body = await injectRuntimeBootstrapForHtml(context, await renderForumIndexPage());
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 });
+router.get("/forum/mod/login", async (context) => {
+    if (!isForumModerationEnabled()) {
+        context.response.status = 503;
+        context.response.body = "Forum moderation is disabled. Set FORUM_MOD_PASSWORD to enable it.";
+        context.response.headers.set("Content-Type", "text/plain; charset=utf-8");
+        return;
+    }
+
+    const existingToken = await context.cookies.get(FORUM_MOD_COOKIE_NAME);
+    if (isModeratorSessionValid(existingToken || undefined)) {
+        context.response.redirect("/forum/mod");
+        return;
+    }
+
+    const errorMessage = context.request.url.searchParams.get("error") || undefined;
+    context.response.status = 200;
+    context.response.body = renderForumModeratorLoginPage(errorMessage);
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.post("/forum/mod/login", async (context) => {
+    if (!isForumModerationEnabled()) {
+        context.response.status = 503;
+        context.response.body = "Forum moderation is disabled.";
+        context.response.headers.set("Content-Type", "text/plain; charset=utf-8");
+        return;
+    }
+
+    const form = await context.request.body.form();
+    const password = String(form.get("password") || "");
+    if (password !== getForumModeratorPassword()) {
+        context.response.redirect("/forum/mod/login?error=" + encodeURIComponent("Invalid moderator password."));
+        return;
+    }
+
+    const token = createModeratorSession();
+    const externalOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
+    context.response.headers.append(
+        "set-cookie",
+        buildSessionCookieHeader(
+            FORUM_MOD_COOKIE_NAME,
+            token,
+            isExternalOriginSecure(externalOrigin),
+            FORUM_MOD_SESSION_TTL_SECONDS,
+        ),
+    );
+    context.response.redirect("/forum/mod");
+});
+router.post("/forum/mod/logout", async (context) => {
+    const existingToken = await context.cookies.get(FORUM_MOD_COOKIE_NAME);
+    clearModeratorSession(existingToken || undefined);
+
+    const externalOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
+    context.response.headers.append(
+        "set-cookie",
+        buildSessionCookieHeader(
+            FORUM_MOD_COOKIE_NAME,
+            "",
+            isExternalOriginSecure(externalOrigin),
+            1,
+        ),
+    );
+    context.response.redirect("/forum/mod/login");
+});
+router.get("/forum/mod", async (context) => {
+    if (!isForumModerationEnabled()) {
+        context.response.status = 503;
+        context.response.body = "Forum moderation is disabled.";
+        context.response.headers.set("Content-Type", "text/plain; charset=utf-8");
+        return;
+    }
+
+    const token = await context.cookies.get(FORUM_MOD_COOKIE_NAME);
+    if (!isModeratorSessionValid(token || undefined)) {
+        context.response.redirect("/forum/mod/login?error=" + encodeURIComponent("Please sign in first."));
+        return;
+    }
+
+    const message = context.request.url.searchParams.get("message") || undefined;
+    const error = context.request.url.searchParams.get("error") || undefined;
+    context.response.body = await renderForumModeratorDashboardPage({ message, error });
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+});
+router.post("/forum/mod/remove", async (context) => {
+    const token = await context.cookies.get(FORUM_MOD_COOKIE_NAME);
+    if (!isModeratorSessionValid(token || undefined)) {
+        context.response.redirect("/forum/mod/login?error=" + encodeURIComponent("Please sign in first."));
+        return;
+    }
+
+    const form = await context.request.body.form();
+    const boardSlug = String(form.get("boardSlug") || "").trim();
+    const threadId = String(form.get("threadId") || "").trim();
+    const replyIdRaw = String(form.get("replyId") || "").trim();
+    const replyId = replyIdRaw || undefined;
+
+    const result = await removeForumPost({ boardSlug, threadId, replyId });
+    if (!result.ok) {
+        context.response.redirect("/forum/mod?error=" + encodeURIComponent(result.error));
+        return;
+    }
+
+    context.response.redirect("/forum/mod?message=" + encodeURIComponent("Post removed."));
+});
+router.post("/forum/mod/ban", async (context) => {
+    const token = await context.cookies.get(FORUM_MOD_COOKIE_NAME);
+    if (!isModeratorSessionValid(token || undefined)) {
+        context.response.redirect("/forum/mod/login?error=" + encodeURIComponent("Please sign in first."));
+        return;
+    }
+
+    const form = await context.request.body.form();
+    const author = String(form.get("author") || "").trim() || undefined;
+    const fingerprint = String(form.get("fingerprint") || "").trim() || undefined;
+
+    try {
+        await banForumIdentity({ author, fingerprint });
+        context.response.redirect("/forum/mod?message=" + encodeURIComponent("User ban saved."));
+    } catch (error) {
+        context.response.redirect("/forum/mod?error=" + encodeURIComponent(error instanceof Error ? error.message : "Unable to ban user."));
+    }
+});
+router.post("/forum/mod/words/add", async (context) => {
+    const token = await context.cookies.get(FORUM_MOD_COOKIE_NAME);
+    if (!isModeratorSessionValid(token || undefined)) {
+        context.response.redirect("/forum/mod/login?error=" + encodeURIComponent("Please sign in first."));
+        return;
+    }
+
+    const form = await context.request.body.form();
+    const word = String(form.get("word") || "").trim();
+
+    try {
+        await addForumBannedWord(word);
+        context.response.redirect("/forum/mod?message=" + encodeURIComponent("Banned word added."));
+    } catch (error) {
+        context.response.redirect("/forum/mod?error=" + encodeURIComponent(error instanceof Error ? error.message : "Unable to add banned word."));
+    }
+});
+router.post("/forum/mod/words/remove", async (context) => {
+    const token = await context.cookies.get(FORUM_MOD_COOKIE_NAME);
+    if (!isModeratorSessionValid(token || undefined)) {
+        context.response.redirect("/forum/mod/login?error=" + encodeURIComponent("Please sign in first."));
+        return;
+    }
+
+    const form = await context.request.body.form();
+    const word = String(form.get("word") || "").trim();
+    await removeForumBannedWord(word);
+    context.response.redirect("/forum/mod?message=" + encodeURIComponent("Banned word removed."));
+});
 router.get("/forum/:board", async (context) => {
     const boardSlug = context.params.board;
     if (!boardSlug) {
@@ -1314,12 +1713,48 @@ router.post("/forum/:board/thread", async (context) => {
     const title = String(form.get("title") || "");
     const body = String(form.get("body") || "");
     const author = String(form.get("author") || "");
+    const realIp = resolveClientIp(
+        context.request.ip,
+        context.request.headers.get("X-Real-IP"),
+        trustedProxyIps,
+    );
+    const authorFingerprint = await buildForumAuthorFingerprint(context.request.headers, realIp);
+    const recaptchaToken = String(form.get("g-recaptcha-response") || "").trim();
+    const bypassCaptcha = isLocalhostRequest(context.request.url, context.request.headers);
+
+    if (!recaptchaToken && !bypassCaptcha) {
+        context.response.redirect(`/forum/${encodeURIComponent(boardSlug)}?error=${encodeURIComponent("Please complete the reCAPTCHA check before submitting.")}`);
+        return;
+    }
+
+    try {
+        await verifyForumRecaptcha(recaptchaToken, {
+            bypassCaptcha,
+        });
+    } catch (error) {
+        context.response.redirect(
+            `/forum/${encodeURIComponent(boardSlug)}?error=${encodeURIComponent(error instanceof Error ? error.message : "reCAPTCHA verification failed. Please try again.")}`,
+        );
+        return;
+    }
+
+    const moderation = await evaluateForumSubmission({
+        author,
+        authorFingerprint,
+        title,
+        body,
+    });
+    if (!moderation.ok) {
+        context.response.redirect(`/forum/${encodeURIComponent(boardSlug)}?error=${encodeURIComponent(moderation.error)}`);
+        return;
+    }
 
     const result = await createForumThread({
         boardSlug,
         title,
         body,
         author,
+        authorFingerprint,
     });
 
     if (!result.ok) {
@@ -1374,12 +1809,51 @@ router.post("/forum/:board/thread/:threadId/reply", async (context) => {
     const form = await context.request.body.form();
     const body = String(form.get("body") || "");
     const author = String(form.get("author") || "");
+    const realIp = resolveClientIp(
+        context.request.ip,
+        context.request.headers.get("X-Real-IP"),
+        trustedProxyIps,
+    );
+    const authorFingerprint = await buildForumAuthorFingerprint(context.request.headers, realIp);
+    const recaptchaToken = String(form.get("g-recaptcha-response") || "").trim();
+    const bypassCaptcha = isLocalhostRequest(context.request.url, context.request.headers);
+
+    if (!recaptchaToken && !bypassCaptcha) {
+        context.response.redirect(
+            `/forum/${encodeURIComponent(boardSlug)}/thread/${encodeURIComponent(threadId)}?error=${encodeURIComponent("Please complete the reCAPTCHA check before submitting.")}`,
+        );
+        return;
+    }
+
+    try {
+        await verifyForumRecaptcha(recaptchaToken, {
+            bypassCaptcha,
+        });
+    } catch (error) {
+        context.response.redirect(
+            `/forum/${encodeURIComponent(boardSlug)}/thread/${encodeURIComponent(threadId)}?error=${encodeURIComponent(error instanceof Error ? error.message : "reCAPTCHA verification failed. Please try again.")}`,
+        );
+        return;
+    }
+
+    const moderation = await evaluateForumSubmission({
+        author,
+        authorFingerprint,
+        body,
+    });
+    if (!moderation.ok) {
+        context.response.redirect(
+            `/forum/${encodeURIComponent(boardSlug)}/thread/${encodeURIComponent(threadId)}?error=${encodeURIComponent(moderation.error)}`,
+        );
+        return;
+    }
 
     const result = await createForumReply({
         boardSlug,
         threadId,
         body,
         author,
+        authorFingerprint,
     });
 
     if (!result.ok) {
@@ -1501,7 +1975,9 @@ router.post("/careers/:slug/apply", async (context) => {
             }
         }
 
-        const result = await submitJobApplication(job, form);
+        const result = await submitJobApplication(job, form, {
+            bypassCaptcha: isLocalhostRequest(context.request.url, context.request.headers),
+        });
 
         if (result.ok) {
             context.response.redirect(`/careers/success?job=${encodeURIComponent(job.slug)}`);
@@ -1617,7 +2093,9 @@ router.get("/api/devicer/snippet", async (context) => {
 router.post('/contact', async (context) => {
   try {
     const form = await context.request.body.form();
-    await handleUserRequest(form);
+    await handleUserRequest(form, {
+        bypassCaptcha: isLocalhostRequest(context.request.url, context.request.headers),
+    });
         context.response.redirect('/?contact=success#contact');
   } catch (error) {
     console.error('Error processing request:', error);

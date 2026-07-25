@@ -47,13 +47,17 @@ class ResendMailProvider implements MailProvider {
   }
 }
 
-export async function handleUserRequest(form: URLSearchParams): Promise<void> {
+interface ContactRequestOptions {
+  bypassCaptcha?: boolean;
+}
+
+export async function handleUserRequest(form: URLSearchParams, options?: ContactRequestOptions): Promise<void> {
   const recaptchaToken = sanitizeText(form.get("g-recaptcha-response"), 4000);
-  if (!recaptchaToken) {
+  if (!recaptchaToken && !options?.bypassCaptcha) {
     throw new Error("Please complete the reCAPTCHA check before submitting.");
   }
 
-  await verifyRecaptcha(recaptchaToken);
+  await verifyRecaptcha(recaptchaToken, options);
 
   const userRequest = parseUserRequest(form);
   const provider = createMailProvider();
@@ -106,7 +110,11 @@ function parseUserRequest(form: URLSearchParams): UserRequest {
   return request;
 }
 
-async function verifyRecaptcha(token: string): Promise<void> {
+async function verifyRecaptcha(token: string, options?: ContactRequestOptions): Promise<void> {
+  if (options?.bypassCaptcha) {
+    return;
+  }
+
   const recaptchaSecret = Deno.env.get("RECAPTCHA_SECRET_KEY") || "";
   if (!recaptchaSecret) {
     throw new Error("RECAPTCHA_SECRET_KEY is not configured.");
