@@ -1155,6 +1155,16 @@ function renderPageShell(options: {
         margin: 0.45rem 0;
       }
 
+      .post-body.markdown ul,
+      .post-body.markdown ol {
+        padding-left: 1.25rem;
+        margin-left: 0.35rem;
+      }
+
+      .post-body.markdown li {
+        margin: 0.2rem 0;
+      }
+
       .post-body.markdown pre {
         overflow-x: auto;
         padding: 0.55rem;
