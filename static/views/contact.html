@@ -88,13 +88,16 @@
 
       .toggle-row {
         display: flex;
-        align-items: flex-start;
+        align-items: baseline;
         gap: 0.6rem;
       }
 
       .toggle-row input[type="checkbox"] {
-        margin-top: 0.2rem;
-        transform: scale(1.15);
+        margin-top: 0;
+        flex-shrink: 0;
+        width: 1.05rem;
+        height: 1.05rem;
+        transform: none;
       }
 
       .toggle-text {
