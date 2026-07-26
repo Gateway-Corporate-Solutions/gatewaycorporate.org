@@ -65,7 +65,7 @@ and implementation implications over abstract positioning.
 #v(0.3em)
 
 After review, route architecture-fit questions through
-#link("https://gatewaycorporate.org/#contact")[gatewaycorporate.org/\#contact]
+#link("https://gatewaycorporate.org/contact")[gatewaycorporate.org/contact]
 to map paper findings to your production environment.
 
 #v(0.7em)

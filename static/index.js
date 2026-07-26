@@ -770,7 +770,7 @@ function applyHomepageCtaExperiment() {
   const buttonMap = {
     services: heroButtons.querySelector('a[href="/services"]'),
     products: heroButtons.querySelector('a[href="/products"]'),
-    contact: heroButtons.querySelector('a[href="#contact"]'),
+    contact: heroButtons.querySelector('a[href="/contact"]'),
   };
 
   if (
@@ -2029,6 +2029,7 @@ function renderAnalyticsConsentBanner() {
 function renderContactStatusBanner() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get("contact");
+  const reason = params.get("reason");
 
   if (!status) {
     return;
@@ -2047,7 +2048,17 @@ function renderContactStatusBanner() {
       status: "success",
     });
   } else if (status === "error") {
-    container.innerHTML = '<div class="form-banner form-banner-error" role="alert" style="max-width: 820px; width: 95%;">We could not send your message right now. Please try again shortly or email office@gatewaycorporate.org directly.</div>';
+    const safeReason = typeof reason === "string" && reason.trim()
+      ? reason.trim()
+      : "We could not send your message right now. Please try again shortly or email office@gatewaycorporate.org directly.";
+    container.innerHTML = "";
+    const banner = document.createElement("div");
+    banner.className = "form-banner form-banner-error";
+    banner.setAttribute("role", "alert");
+    banner.style.maxWidth = "820px";
+    banner.style.width = "95%";
+    banner.textContent = safeReason;
+    container.appendChild(banner);
     ExperimentTelemetry.emit("form_submit_result", {
       formType: "contact",
       formId: "contact-form",
@@ -2056,6 +2067,7 @@ function renderContactStatusBanner() {
   }
 
   params.delete("contact");
+  params.delete("reason");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
   window.history.replaceState({}, "", nextUrl);

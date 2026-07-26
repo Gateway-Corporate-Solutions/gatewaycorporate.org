@@ -558,7 +558,7 @@ function renderPageShell(options: {
             <li><a href="/faq" class="nav-link">FAQ</a></li>
             <li><a href="/careers" class="nav-link">Careers</a></li>
             <li><a href="/blog" class="nav-link">Blog</a></li>
-            <li><a href="/#contact" class="nav-link">Contact</a></li>
+            <li><a href="/contact" class="nav-link">Contact</a></li>
           </ul>
         </div>
       </div>
@@ -725,7 +725,7 @@ export function renderBlogPostPage(post: BlogPost, allPosts: BlogPost[]): string
           <div class="prose">${post.html}</div>
           <div class="article-nav">
             <a href="/blog" class="btn btn-secondary btn-sm">Back to blog</a>
-            <a href="/#contact" class="btn btn-primary btn-sm">Talk to Gateway Corporate</a>
+            <a href="/contact" class="btn btn-primary btn-sm">Talk to Gateway Corporate</a>
           </div>
         </article>
       </section>

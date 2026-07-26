@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/components.css">
+    <link rel="stylesheet" href="/enhancements.css">
+    <script src="/index.js" defer></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+    <title>Contact Gateway Corporate | Consultations and Project Intake</title>
+    <meta name="description" content="Contact Gateway Corporate for project intake, architecture reviews, and product consultations. Book a 30-minute appointment in available CST slots.">
+    <link rel="canonical" href="https://gatewaycorporate.org/contact">
+
+    <style>
+      .contact-shell {
+        max-width: 1220px;
+        margin: 0 auto;
+      }
+
+      .contact-grid {
+        display: grid;
+        grid-template-columns: minmax(270px, 0.9fr) minmax(0, 1.35fr);
+        gap: 1.15rem;
+      }
+
+      .contact-panel {
+        border: 1px solid rgba(125, 211, 252, 0.2);
+        border-radius: 18px;
+        padding: 1.15rem;
+        background:
+          radial-gradient(circle at 95% 10%, rgba(56, 189, 248, 0.12) 0%, rgba(56, 189, 248, 0) 34%),
+          linear-gradient(170deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.78) 100%);
+      }
+
+      .contact-panel h3 {
+        margin-bottom: 0.45rem;
+      }
+
+      .contact-list {
+        margin: 0;
+        padding-left: 1.1rem;
+        display: grid;
+        gap: 0.52rem;
+        color: #dbeafe;
+      }
+
+      .insight-stack {
+        display: grid;
+        gap: 0.65rem;
+        margin-top: 0.85rem;
+      }
+
+      .insight-item {
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 12px;
+        padding: 0.7rem;
+        background: rgba(15, 23, 42, 0.45);
+      }
+
+      .insight-item p {
+        margin: 0;
+        color: #dbeafe;
+        font-size: 0.92rem;
+      }
+
+      .book-panel {
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 14px;
+        padding: 0.95rem;
+        margin-top: 0.8rem;
+        background: rgba(15, 23, 42, 0.56);
+        transition: opacity 0.2s ease;
+      }
+
+      .book-panel.is-disabled {
+        opacity: 0.58;
+      }
+
+      .booking-toggle {
+        border: 1px solid rgba(201, 149, 111, 0.4);
+        border-radius: 14px;
+        padding: 0.85rem;
+        margin-bottom: 0.95rem;
+        background: rgba(201, 149, 111, 0.08);
+      }
+
+      .toggle-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+      }
+
+      .toggle-row input[type="checkbox"] {
+        margin-top: 0.2rem;
+        transform: scale(1.15);
+      }
+
+      .toggle-text {
+        margin: 0;
+        color: #f5ede1;
+        font-size: 0.95rem;
+      }
+
+      .toggle-subtext {
+        margin: 0.2rem 0 0;
+        color: #cbd5e1;
+        font-size: 0.84rem;
+      }
+
+      .slot-grid {
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.45rem;
+        margin: 0.7rem 0 0;
+        padding: 0;
+      }
+
+      .slot-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.42rem;
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: 999px;
+        padding: 0.3rem 0.6rem;
+        color: #e2e8f0;
+        font-size: 0.81rem;
+        background: rgba(15, 23, 42, 0.45);
+      }
+
+      .slot-dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: #93c5fd;
+      }
+
+      .slot-pill[data-state="open"] .slot-dot {
+        background: #84cc16;
+      }
+
+      .slot-pill[data-state="booked"] .slot-dot {
+        background: #f97316;
+      }
+
+      .slot-help {
+        margin: 0.55rem 0 0;
+        font-size: 0.86rem;
+        color: #cbd5e1;
+      }
+
+      .slot-help.error {
+        color: #fecaca;
+      }
+
+      .form-headline {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.5rem;
+      }
+
+      .form-headline .status-chip {
+        border: 1px solid rgba(147, 197, 253, 0.35);
+        border-radius: 999px;
+        padding: 0.22rem 0.55rem;
+        font-size: 0.75rem;
+        color: #cfe1ff;
+      }
+
+      @media (max-width: 900px) {
+        .contact-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .slot-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="nav-content">
+          <a href="/" class="nav-brand">
+            <img src="/logo.png" alt="Gateway Corporate Logo" class="nav-logo">
+            Gateway Corporate
+          </a>
+          <div class="nav-indicator"></div>
+        </div>
+      </nav>
+      <div class="scroll-progress"></div>
+
+      <section class="hero hero-compact">
+        <canvas id="network-graph" aria-hidden="true"></canvas>
+        <div class="hero-content">
+          <p class="eyebrow">Project Intake and Consultation</p>
+          <h1 class="hero-title">Contact Gateway Corporate</h1>
+          <h3 class="hero-subtitle">Share your context, constraints, and timeline. Book a 30-minute architecture call when you are ready.</h3>
+        </div>
+      </section>
+
+      <button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
+        <div class="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+
+      <div id="dropdown-menu" class="dropdown-menu">
+        <div class="menu-container">
+          <ul class="nav-list">
+            <li><a href="/#about" class="nav-link">About Us</a></li>
+            <li><a href="/services" class="nav-link">Services</a></li>
+            <li><a href="/products" class="nav-link">Products</a></li>
+            <li><a href="/faq" class="nav-link">FAQ</a></li>
+            <li><a href="/careers" class="nav-link">Careers</a></li>
+            <li><a href="/blog" class="nav-link">Blog</a></li>
+            <li><a href="/forum" class="nav-link">Forum</a></li>
+            <li><a href="/contact" class="nav-link">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main class="section contact-shell">
+      <div class="contact-grid">
+        <section class="contact-panel" aria-labelledby="contact-coverage-title">
+          <h2 id="contact-coverage-title" class="section-title" style="margin-bottom: 0.5rem;">What We Cover</h2>
+          <p class="text-lead" style="margin-top: 0;">Use this channel for direct project discussions and quick technical alignment.</p>
+          <ul class="contact-list">
+            <li>Architecture and product-fit reviews for Devicer, HyperLocal 2, and NashTwin.</li>
+            <li>Production hardening plans for AI operations and governance controls.</li>
+            <li>Signal intelligence integrations, threat surfaces, and anti-fraud posture.</li>
+            <li>Custom platform scoping, delivery sequencing, and ownership mapping.</li>
+          </ul>
+          <div class="book-panel" style="margin-top: 1rem;">
+            <h3 class="heading-4">Consultation Slot Window</h3>
+            <p class="card-text" style="margin: 0.3rem 0 0;">Bookable slots are 30 minutes each between 10:30 AM and 12:30 PM CST.</p>
+            <p class="card-text" style="margin: 0.35rem 0 0;">Booked slots are blocked from double booking automatically.</p>
+          </div>
+        </section>
+
+        <section class="contact-panel" aria-labelledby="contact-form-title">
+          <div class="form-headline">
+            <h2 id="contact-form-title" class="section-title" style="margin-bottom: 0.35rem;">Send A Request</h2>
+            <span class="status-chip">1 business day response target</span>
+          </div>
+          <p class="text-small" style="margin-top: 0; color: #cbd5e1;">Choose either a general inquiry or an appointment booking in the same form.</p>
+
+          <form id="contact-form" method="post" action="/contact" class="form" aria-label="Contact Form">
+            <input type="hidden" id="requestType" name="requestType" value="message">
+
+            <div class="booking-toggle" role="group" aria-labelledby="booking-toggle-label">
+              <div class="toggle-row">
+                <input type="checkbox" id="scheduleAppointment" name="scheduleAppointment" value="1">
+                <div>
+                  <label id="booking-toggle-label" for="scheduleAppointment" class="toggle-text">I also want to reserve a 30-minute consultation slot.</label>
+                  <p class="toggle-subtext">When selected, you can pick an open slot between 10:30 AM and 12:30 PM CST.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="name" class="form-label">Your Name</label>
+              <input type="text" id="name" name="name" class="form-input" required aria-required="true" placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+              <label for="email" class="form-label">Your Email</label>
+              <input type="email" id="email" name="email" class="form-input" required aria-required="true" placeholder="your.email@example.com">
+            </div>
+
+            <div class="form-group">
+              <label for="phone" class="form-label">Phone (optional)</label>
+              <input type="tel" id="phone" name="phone" class="form-input" placeholder="+1 555 123 4567">
+            </div>
+
+            <div class="form-group">
+              <label for="company" class="form-label">Company or Organization (optional)</label>
+              <input type="text" id="company" name="company" class="form-input" placeholder="Company name">
+            </div>
+
+            <div class="form-group">
+              <label for="referral" class="form-label">How did you hear about us? (optional)</label>
+              <input type="text" id="referral" name="referral" class="form-input" placeholder="Search engine, referral, social media, etc.">
+            </div>
+
+            <div id="appointment-fields" class="book-panel is-disabled">
+              <div class="form-group">
+                <label for="appointmentDate" class="form-label">Appointment Date</label>
+                <input type="date" id="appointmentDate" name="appointmentDate" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label for="appointmentSlot" class="form-label">30-Minute CST Timeslot</label>
+                <select id="appointmentSlot" name="appointmentSlot" class="form-input">
+                  <option value="">Choose a slot</option>
+                  <option value="10:30-11:00">10:30 AM - 11:00 AM CST</option>
+                  <option value="11:00-11:30">11:00 AM - 11:30 AM CST</option>
+                  <option value="11:30-12:00">11:30 AM - 12:00 PM CST</option>
+                  <option value="12:00-12:30">12:00 PM - 12:30 PM CST</option>
+                </select>
+              </div>
+
+              <ul id="slot-grid" class="slot-grid" aria-live="polite">
+                <li class="slot-pill" data-slot-id="10:30-11:00" data-state="unknown"><span class="slot-dot" aria-hidden="true"></span>10:30 AM - 11:00 AM</li>
+                <li class="slot-pill" data-slot-id="11:00-11:30" data-state="unknown"><span class="slot-dot" aria-hidden="true"></span>11:00 AM - 11:30 AM</li>
+                <li class="slot-pill" data-slot-id="11:30-12:00" data-state="unknown"><span class="slot-dot" aria-hidden="true"></span>11:30 AM - 12:00 PM</li>
+                <li class="slot-pill" data-slot-id="12:00-12:30" data-state="unknown"><span class="slot-dot" aria-hidden="true"></span>12:00 PM - 12:30 PM</li>
+              </ul>
+
+              <p id="slot-help" class="slot-help">Choose a date to load live slot availability.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="message" class="form-label">How can we help you?</label>
+              <textarea id="message" name="message" class="form-textarea" required aria-required="true" placeholder="Tell us about your project, timeline, and constraints."></textarea>
+            </div>
+
+            <div class="form-group recaptcha-submit-row">
+              <div class="g-recaptcha" data-sitekey="6LcIVHArAAAAAPZ1scQS8vrN_JRhCBzjOoJHuw2i"></div>
+              <button type="submit" class="btn btn-primary w-full btn-lg" aria-label="Send Message">Send Request</button>
+            </div>
+
+            <p class="text-small" style="margin-top: 1rem; color: #cbd5e1;">
+              Appointment slots are locked immediately on submit to prevent double booking, then notifications are sent with your booking details.
+            </p>
+          </form>
+          <div id="contact-status" style="margin-top: 1rem;"></div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        const requestType = document.getElementById("requestType");
+        const scheduleAppointment = document.getElementById("scheduleAppointment");
+        const appointmentFields = document.getElementById("appointment-fields");
+        const appointmentDate = document.getElementById("appointmentDate");
+        const appointmentSlot = document.getElementById("appointmentSlot");
+        const slotGrid = document.getElementById("slot-grid");
+        const slotHelp = document.getElementById("slot-help");
+
+        if (!(requestType instanceof HTMLInputElement) ||
+          !(scheduleAppointment instanceof HTMLInputElement) ||
+          !(appointmentFields instanceof HTMLElement) ||
+          !(appointmentDate instanceof HTMLInputElement) ||
+          !(appointmentSlot instanceof HTMLSelectElement) ||
+          !(slotGrid instanceof HTMLElement) ||
+          !(slotHelp instanceof HTMLElement)
+        ) {
+          return;
+        }
+
+        const defaultSlotLabel = "Choose a slot";
+        const slotPills = Array.from(slotGrid.querySelectorAll(".slot-pill"));
+        const optionBaseText = new Map(
+          Array.from(appointmentSlot.options)
+            .filter((option) => option.value)
+            .map((option) => [option.value, option.textContent || option.value]),
+        );
+
+        function setSlotPillState(slotId, state) {
+          const pill = slotGrid.querySelector(`.slot-pill[data-slot-id="${slotId}"]`);
+          if (!(pill instanceof HTMLElement)) {
+            return;
+          }
+          pill.dataset.state = state;
+        }
+
+        function resetSlotPills() {
+          for (const pill of slotPills) {
+            if (pill instanceof HTMLElement) {
+              pill.dataset.state = "unknown";
+            }
+          }
+        }
+
+        function setSlotsPendingSelection() {
+          appointmentSlot.value = "";
+          for (const option of Array.from(appointmentSlot.options)) {
+            if (!option.value) {
+              option.textContent = defaultSlotLabel;
+              continue;
+            }
+
+            option.disabled = true;
+            option.textContent = optionBaseText.get(option.value) || option.value;
+          }
+        }
+
+        function setBookingEnabled(enabled) {
+          requestType.value = enabled ? "appointment" : "message";
+          appointmentFields.classList.toggle("is-disabled", !enabled);
+          appointmentDate.required = enabled;
+          appointmentSlot.required = enabled;
+          appointmentDate.disabled = !enabled;
+          appointmentSlot.disabled = !enabled;
+
+          if (!enabled) {
+            appointmentDate.value = "";
+            appointmentSlot.value = "";
+            slotHelp.textContent = "Choose a date to load live slot availability.";
+            slotHelp.classList.remove("error");
+            setSlotsPendingSelection();
+            resetSlotPills();
+            return;
+          }
+
+          setSlotsPendingSelection();
+          slotHelp.textContent = "Choose a date to load live slot availability.";
+          slotHelp.classList.remove("error");
+        }
+
+        async function loadAvailabilityForDate(dateValue) {
+          if (!dateValue) {
+            return;
+          }
+
+          try {
+            const response = await fetch(`/contact/availability?date=${encodeURIComponent(dateValue)}`);
+            if (!response.ok) {
+              throw new Error("Unable to load availability right now.");
+            }
+
+            const payload = await response.json();
+            const slots = Array.isArray(payload.slots) ? payload.slots : [];
+            const availabilityMap = new Map(slots.map((slot) => [slot.id, Boolean(slot.available)]));
+
+            let availableCount = 0;
+            for (const option of Array.from(appointmentSlot.options)) {
+              if (!option.value) {
+                option.textContent = defaultSlotLabel;
+                continue;
+              }
+
+              const available = availabilityMap.get(option.value);
+              if (available) {
+                availableCount += 1;
+                option.disabled = false;
+                option.textContent = optionBaseText.get(option.value) || option.value;
+                setSlotPillState(option.value, "open");
+              } else {
+                option.disabled = true;
+                option.textContent = `${optionBaseText.get(option.value) || option.value} (Booked)`;
+                setSlotPillState(option.value, "booked");
+                if (appointmentSlot.value === option.value) {
+                  appointmentSlot.value = "";
+                }
+              }
+            }
+
+            if (availableCount > 0) {
+              slotHelp.textContent = `${availableCount} slot${availableCount === 1 ? "" : "s"} available for ${dateValue}.`;
+              slotHelp.classList.remove("error");
+            } else {
+              slotHelp.textContent = `No slots remaining for ${dateValue}. Please choose another date.`;
+              slotHelp.classList.add("error");
+            }
+          } catch (error) {
+            slotHelp.textContent = error instanceof Error ? error.message : "Unable to load availability right now.";
+            slotHelp.classList.add("error");
+            resetSlotPills();
+          }
+        }
+
+        scheduleAppointment.addEventListener("change", () => {
+          const wantsAppointment = scheduleAppointment.checked;
+          setBookingEnabled(wantsAppointment);
+          if (wantsAppointment && appointmentDate.value) {
+            loadAvailabilityForDate(appointmentDate.value);
+          }
+        });
+
+        appointmentDate.addEventListener("change", () => {
+          loadAvailabilityForDate(appointmentDate.value);
+        });
+
+        const today = new Date().toISOString().slice(0, 10);
+        appointmentDate.min = today;
+
+        setBookingEnabled(scheduleAppointment.checked);
+      })();
+    </script>
+  </body>
+</html>

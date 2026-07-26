@@ -26,13 +26,16 @@ The site also supports a markdown-powered careers section with direct email appl
 - Required environment variables for application delivery: `RESEND_API_KEY`, `CAREERS_EMAIL_FROM`, and `RECAPTCHA_SECRET_KEY`
 - Optional environment variable: `CAREERS_EMAIL_TO` to override the default inbox
 
-## Contact form
+## Contact and appointment booking
 
-The homepage contact form delivers messages through Resend to `office@gatewaycorporate.org`.
+The contact flow is now on a dedicated `/contact` page and supports either a general inquiry or a 30-minute appointment booking.
 
+- Bookable slots: `10:30-11:00`, `11:00-11:30`, `11:30-12:00`, and `12:00-12:30` CST
+- Slot uniqueness is enforced server-side with SQLite (`data/contact-bookings.db`) so duplicate bookings are rejected
+- Scarcity effect defaults to reserving about 25% of slots as unavailable each date (`CONTACT_APPOINTMENT_SCARCITY_ENABLED=true`, `CONTACT_APPOINTMENT_SCARCITY_RATE=0.25`)
 - Required environment variables: `RESEND_API_KEY`, `RECAPTCHA_SECRET_KEY`, and either `CONTACT_EMAIL_FROM` or `CAREERS_EMAIL_FROM`
 - Optional environment variable: `CONTACT_EMAIL_TO` to override the default inbox
-- If Twilio env vars remain configured, the contact flow will also send the existing SMS notification
+- For appointment bookings, Twilio SMS settings are required: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_NUMBER`, and `NOTIFICATION_NUMBER`
 
 ## Devicer snippet key
 

@@ -34,7 +34,7 @@ const companyColumn: FooterColumn = {
     { label: "FAQ", href: "/faq" },
     { label: "Forum", href: "/forum" },
     { label: "Journal", href: "/blog" },
-    { label: "Contact", href: "/#contact" },
+    { label: "Contact", href: "/contact" },
   ],
 };
 

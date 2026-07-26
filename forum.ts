@@ -1383,7 +1383,7 @@ function renderPageShell(options: {
             <li><a href="/products" class="nav-link">Products</a></li>
             <li><a href="/forum" class="nav-link">Forum</a></li>
             <li><a href="/blog" class="nav-link">Blog</a></li>
-            <li><a href="/#contact" class="nav-link">Contact</a></li>
+            <li><a href="/contact" class="nav-link">Contact</a></li>
           </ul>
         </div>
       </div>

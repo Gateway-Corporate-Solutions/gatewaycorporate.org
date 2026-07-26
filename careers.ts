@@ -463,7 +463,7 @@ function renderPageShell(options: {
             <li><a href="/careers" class="nav-link">Careers</a></li>
             <li><a href="/blog" class="nav-link">Blog</a></li>
             <li><a href="/#team" class="nav-link">Our Team</a></li>
-            <li><a href="/#contact" class="nav-link">Contact</a></li>
+            <li><a href="/contact" class="nav-link">Contact</a></li>
           </ul>
         </div>
       </div>
@@ -625,7 +625,7 @@ export function renderJobPostingPage(
             <div class="prose">${job.html}</div>
             <div class="article-nav">
               <a href="/careers" class="btn btn-secondary btn-sm">Back to careers</a>
-              <a href="/#contact" class="btn btn-primary btn-sm">Contact Gateway Corporate</a>
+              <a href="/contact" class="btn btn-primary btn-sm">Contact Gateway Corporate</a>
             </div>
           </article>
           <div class="careers-sidebar">

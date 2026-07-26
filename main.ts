@@ -42,7 +42,7 @@ import {
     verifyForumRecaptcha,
 } from "./forum.ts";
 import { submitJobApplication } from "./applications.ts";
-import { handleUserRequest } from "./contact.ts";
+import { getAvailableAppointmentSlots, handleUserRequest } from "./contact.ts";
 import {
     buildExperimentContext,
     evaluateAndOptionallyDisableExperiments,
@@ -1108,6 +1108,23 @@ async function renderHomePage(
     context.response.headers.set("Content-Type", "text/html; charset=utf-8");
 }
 
+async function renderContactPage(
+    context: {
+        request: { headers: Headers; url: URL };
+        cookies: { get(name: string): Promise<string | undefined> };
+        response: { body: unknown; headers: Headers };
+    },
+) {
+    const contactTemplate = await Deno.readTextFile("./static/views/contact.html");
+    const rendered = injectFooterIntoHtml(
+        contactTemplate,
+        resolveFooterVariant("index"),
+    );
+
+    context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
+    context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+}
+
 function renderForumModeratorLoginPage(errorMessage?: string): string {
         const errorMarkup = errorMessage
                 ? `<p style="color:#fecaca;background:rgba(127,29,29,.35);border:1px solid rgba(248,113,113,.55);border-radius:10px;padding:.6rem .75rem;margin:0 0 1rem;">${escapeHtml(errorMessage)}</p>`
@@ -1308,6 +1325,11 @@ router.get("/sitemap.xml", async (context) => {
                         priority: 1.0,
                 },
             {
+                loc: `${siteOrigin}/contact`,
+                lastmod: await getSitemapLastModified("./static/views/contact.html", today),
+                priority: 0.8,
+            },
+            {
                 loc: `${siteOrigin}/services`,
                 lastmod: await getSitemapLastModified("./static/views/services.html", today),
                 priority: 0.9,
@@ -1386,6 +1408,7 @@ router.get("/seo/sitemap-health", async (context) => {
 
         const includedPaths = new Set<string>([
             "/",
+            "/contact",
             "/services",
             "/faq",
             "/blog",
@@ -1401,6 +1424,7 @@ router.get("/seo/sitemap-health", async (context) => {
 
         const expectedPaths = [
             "/",
+            "/contact",
             "/services",
             "/faq",
             "/blog",
@@ -1418,6 +1442,7 @@ router.get("/seo/sitemap-health", async (context) => {
 
         const freshnessChecks = [
             { path: "/", date: await getSitemapLastModified("./static/views/index.html", now.toISOString().slice(0, 10)) },
+            { path: "/contact", date: await getSitemapLastModified("./static/views/contact.html", now.toISOString().slice(0, 10)) },
             { path: "/services", date: await getSitemapLastModified("./static/views/services.html", now.toISOString().slice(0, 10)) },
             { path: "/faq", date: await getSitemapLastModified("./static/views/faq.html", now.toISOString().slice(0, 10)) },
             { path: "/forum", date: now.toISOString().slice(0, 10) },
@@ -1469,6 +1494,40 @@ router.get("/", async (context) => {
 });
 router.get("/index.html", async (context) => {
     await renderHomePage(context);
+});
+router.get("/contact", async (context) => {
+    try {
+        await renderContactPage(context);
+    } catch (error) {
+        console.error(`Error reading contact view file: ${error}`);
+        context.response.status = 404;
+        context.response.body = "Contact page not found";
+    }
+});
+router.get("/contact/availability", (context) => {
+    try {
+        const date = String(context.request.url.searchParams.get("date") || "").trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            context.response.status = 400;
+            context.response.body = {
+                error: "Please provide date as YYYY-MM-DD.",
+            };
+            context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+            return;
+        }
+
+        context.response.status = 200;
+        context.response.body = {
+            date,
+            slots: getAvailableAppointmentSlots(date),
+        };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    } catch (error) {
+        console.error("Error reading contact availability:", error);
+        context.response.status = 500;
+        context.response.body = { error: "Availability lookup unavailable." };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    }
 });
 router.get("/services", async (context) => {
     try {
@@ -2101,10 +2160,11 @@ router.post('/contact', async (context) => {
     await handleUserRequest(form, {
         bypassCaptcha: isLocalhostRequest(context.request.url, context.request.headers),
     });
-        context.response.redirect('/?contact=success#contact');
+                context.response.redirect('/contact?contact=success');
   } catch (error) {
     console.error('Error processing request:', error);
-        context.response.redirect('/?contact=error#contact');
+        const reason = error instanceof Error ? error.message : "We could not send your message right now.";
+                context.response.redirect(`/contact?contact=error&reason=${encodeURIComponent(reason)}`);
   }
 });
 
