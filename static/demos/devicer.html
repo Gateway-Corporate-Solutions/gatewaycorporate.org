@@ -817,7 +817,12 @@ Allow first-party analytics on this site to run a live device assessment.
 
 						await new Promise((resolve, reject) => {
 							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
+							let settled = false;
 							const timeoutId = window.setTimeout(() => {
+								if (settled) {
+									return;
+								}
+								settled = true;
 								socket.close();
 								reject(new Error("Telemetry probe timed out waiting for a server response."));
 							}, 10000);
@@ -830,6 +835,10 @@ Allow first-party analytics on this site to run a live device assessment.
 								try {
 									const detail = JSON.parse(event.data);
 									if (detail && typeof detail === "object" && detail.type === "fingerprint") {
+										if (settled) {
+											return;
+										}
+										settled = true;
 										window.__GCX__ = window.__GCX__ || {};
 										window.__GCX__.riskTelemetry = detail.data;
 										renderFingerprint(detail.data);
@@ -841,8 +850,23 @@ Allow first-party analytics on this site to run a live device assessment.
 										window.clearTimeout(timeoutId);
 										socket.close();
 										resolve();
+										return;
+									}
+
+									if (detail && typeof detail === "object" && detail.type === "error") {
+										if (settled) {
+											return;
+										}
+										settled = true;
+										window.clearTimeout(timeoutId);
+										socket.close();
+										reject(new Error(typeof detail.data === "string" ? detail.data : "Telemetry probe returned an error."));
 									}
 								} catch (error) {
+									if (settled) {
+										return;
+									}
+									settled = true;
 									window.clearTimeout(timeoutId);
 									socket.close();
 									reject(error);
@@ -850,17 +874,29 @@ Allow first-party analytics on this site to run a live device assessment.
 							});
 
 							socket.addEventListener("error", () => {
+								if (settled) {
+									return;
+								}
+								settled = true;
 								window.clearTimeout(timeoutId);
 								reject(new Error("Telemetry probe websocket failed."));
 							}, { once: true });
 
-							socket.addEventListener("close", () => {
+							socket.addEventListener("close", (closeEvent) => {
+								if (settled) {
+									window.clearTimeout(timeoutId);
+									return;
+								}
+
+								settled = true;
 								window.clearTimeout(timeoutId);
+								const reason = closeEvent.reason ? ` (${closeEvent.reason})` : "";
+								reject(new Error(`Telemetry websocket closed before fingerprint response. Code ${closeEvent.code}${reason}`));
 							});
 						});
 					} catch (error) {
 						console.error("Demo telemetry probe failed:", error);
-						setText("demo-runtime-status", "Live assessment probe failed. Interact with the page or allow analytics to retry the standard telemetry path.");
+						setText("demo-runtime-status", `Live assessment probe failed: ${error instanceof Error ? error.message : "unknown error"}`);
 						setRunDemoState({
 							disabled: false,
 							label: "Retry Demo Assessment",
