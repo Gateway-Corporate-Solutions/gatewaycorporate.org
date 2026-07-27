@@ -1606,6 +1606,7 @@ router.get("/demos", async (context) => {
         );
         context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
         context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        context.response.headers.set("Cache-Control", "private, no-store");
     } catch (error) {
         console.error(`Error reading demos view file: ${error}`);
         context.response.status = 404;
@@ -1621,6 +1622,7 @@ router.get("/demos/devicer", async (context) => {
         );
         context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
         context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+        context.response.headers.set("Cache-Control", "private, no-store");
     } catch (error) {
         console.error(`Error reading Devicer demo view file: ${error}`);
         context.response.status = 404;
