@@ -127,6 +127,25 @@
 				gap: 0.75rem;
 			}
 
+			.demo-runtime-status {
+				margin: 0.25rem auto 0;
+				max-width: 760px;
+				text-align: center;
+				color: #d7c4ab;
+				font-size: 0.92rem;
+				line-height: 1.5;
+			}
+
+			.demo-runtime-status strong {
+				color: #fff2df;
+			}
+
+			.demo-runtime-controls {
+				display: flex;
+				justify-content: center;
+				margin-top: 0.85rem;
+			}
+
 			.demo-strip {
 				margin-top: 2rem;
 				display: grid;
@@ -475,8 +494,15 @@
 						See how fingerprint signals become explainable decisions in milliseconds.
 					</p>
 					<div class="demo-actions reveal delay-3">
+						<button id="run-demo-btn" class="btn btn-accent" type="button">Run Demo Assessment</button>
 						<a class="btn btn-primary" href="/products/devicer">Explore Product Details</a>
 						<a class="btn btn-secondary" href="/contact">Book a Demo Walkthrough</a>
+					</div>
+					<p id="demo-runtime-status" class="demo-runtime-status reveal delay-3">
+						<strong>Live assessment:</strong> waiting for first-party telemetry. Allow analytics to run the live VPN and country checks on this page.
+					</p>
+					<div class="demo-runtime-controls reveal delay-3">
+						<p id="run-demo-hint" class="text-small" style="margin:0; color:#d7c4ab;">Use the button to start or rerun the live device assessment on demand.</p>
 					</div>
 
 					<div class="demo-strip reveal delay-4">
@@ -505,25 +531,25 @@
 					<article class="demo-card reveal">
 						<div class="demo-card-header">
 							<h2 class="demo-card-title">Session Fingerprint</h2>
-							<span class="demo-card-chip">Trusted Client</span>
+							<span id="demo-session-chip" class="demo-card-chip">Awaiting Telemetry</span>
 						</div>
 						<div class="demo-card-body">
 							<div class="signal-grid">
 								<div class="signal-block">
 									<p class="signal-label">Device Signature</p>
-									<p class="signal-value">fpr_a17e92d4c8</p>
+									<p id="demo-device-signature" class="signal-value">Waiting for session fingerprint</p>
 								</div>
 								<div class="signal-block">
 									<p class="signal-label">IP Context</p>
-									<p class="signal-value">US-MO / Residential / No VPN</p>
+									<p id="demo-ip-context" class="signal-value">Waiting for IP enrichment</p>
 								</div>
 								<div class="signal-block">
 									<p class="signal-label">TLS Profile</p>
-									<p class="signal-value">Stable Across 4 Sessions</p>
+									<p id="demo-tls-profile" class="signal-value">Waiting for TLS enrichment</p>
 								</div>
 								<div class="signal-block">
 									<p class="signal-label">Behavioral Fit</p>
-									<p class="signal-value">Aligned with Baseline</p>
+									<p id="demo-behavior-fit" class="signal-value">Waiting for behavior score</p>
 								</div>
 							</div>
 
@@ -548,7 +574,7 @@
 
 							<div class="risk-line">
 								<div class="risk-bar"><span></span></div>
-								<p class="risk-copy">Risk posture: low. No VPN, no high-risk country, and no impossible-travel alert. Continue session and re-evaluate only on privileged actions.</p>
+								<p id="demo-risk-copy" class="risk-copy">Risk posture pending. Waiting for live VPN, country, TLS, and bot signals from the runtime.</p>
 							</div>
 						</div>
 					</article>
@@ -559,15 +585,8 @@
 							<span class="demo-card-chip">Streaming</span>
 						</div>
 						<div class="demo-card-body">
-							<pre class="terminal-view"><span class="cool">[08:11:04]</span> Session opened from edge endpoint <span class="warm">api-gw-03</span>
-<span class="cool">[08:11:04]</span> Browser profile parsed, 41 normalized attributes
-<span class="cool">[08:11:05]</span> TLS bundle mapped to known cohort <span class="ok">confidence 0.91</span>
-<span class="cool">[08:11:05]</span> IP enrichment: ASN 7018, US-MO, residential class, vpn=false, proxy=false
-<span class="cool">[08:11:06]</span> Country corridor check: <span class="ok">high-risk-country=false</span>, impossible-travel=false
-<span class="cool">[08:11:06]</span> Peer reputation dataset indicates low abuse probability
-<span class="cool">[08:11:06]</span> Behavior drift check: no substantial divergence
-<span class="cool">[08:11:07]</span> Recommendation generated: <span class="ok">allow + monitor</span>
-<span class="cool">[08:11:07]</span> Analyst memo: "Escalate only if VPN flips true, country changes outside user corridor, or TLS consistency drops."
+							<pre id="demo-live-feed" class="terminal-view">Waiting for runtime telemetry.
+Allow first-party analytics on this site to run a live device assessment.
 
 <span class="warm">Tip:</span> In production, this panel is fed by websocket telemetry and replayable audit events.
 							</pre>
@@ -585,33 +604,33 @@
 						<div class="insight-grid">
 							<div class="insight-tile">
 								<p class="k">Network Disposition</p>
-								<p class="v">VPN: no, Proxy: no, Tor: no</p>
-								<p class="d">Traffic resolves to a residential ASN and does not present hosting or anonymizer indicators.</p>
+								<p id="insight-network-value" class="v">Waiting for network posture</p>
+								<p id="insight-network-detail" class="d">The live stream will populate VPN, proxy, Tor, and hosting indicators here.</p>
 							</div>
 							<div class="insight-tile">
 								<p class="k">Country Risk</p>
-								<p class="v">US corridor, high-risk-country=false</p>
-								<p class="d">Current country aligns with prior sessions and falls outside the demo blacklist set used for elevated review.</p>
+								<p id="insight-country-value" class="v">Waiting for country classification</p>
+								<p id="insight-country-detail" class="d">The live stream will classify the current source country and flag elevated review countries.</p>
 							</div>
 							<div class="insight-tile">
-								<p class="k">Impossible Travel</p>
-								<p class="v">Not detected</p>
-								<p class="d">No geo jump or timezone mismatch suggests account takeover or session brokering.</p>
+								<p class="k">IP Risk Score</p>
+								<p id="insight-iprisk-value" class="v">Waiting for risk scoring</p>
+								<p id="insight-iprisk-detail" class="d">The live stream will surface the server-side IP risk score when enrichment is available.</p>
 							</div>
 							<div class="insight-tile">
 								<p class="k">TLS / JA4 Consistency</p>
-								<p class="v">Stable across 4 trusted sessions</p>
-								<p class="d">Handshake characteristics still match the user’s known device cohort, reducing spoof likelihood.</p>
+								<p id="insight-tls-value" class="v">Waiting for TLS comparison</p>
+								<p id="insight-tls-detail" class="d">The live stream will show whether the current handshake matches the known device cohort.</p>
 							</div>
 							<div class="insight-tile">
 								<p class="k">Bot / Headless Screen</p>
-								<p class="v">No headless or crawler signals</p>
-								<p class="d">Behavior and user-agent classification remain consistent with an interactive human session.</p>
+								<p id="insight-bot-value" class="v">Waiting for bot screening</p>
+								<p id="insight-bot-detail" class="d">The live stream will report bot decision, headless markers, and human-score evidence.</p>
 							</div>
 							<div class="insight-tile">
 								<p class="k">Operator Action</p>
-								<p class="v">Allow, monitor, no manual review</p>
-								<p class="d">Escalate to step-up authentication if VPN becomes true, the source country changes, or velocity spikes.</p>
+								<p id="insight-action-value" class="v">Waiting for policy recommendation</p>
+								<p id="insight-action-detail" class="d">The live stream will turn the current network and bot posture into an explicit operator action.</p>
 							</div>
 						</div>
 					</div>
@@ -634,6 +653,433 @@
 				</div>
 			</section>
 		</main>
+		<script>
+			(() => {
+				const HIGH_RISK_COUNTRIES = new Set(["IN", "BD", "NG", "RO", "RU", "IR", "CN", "KP"]);
+				const CONSENT_KEY = "gcx_analytics_consent";
+				let fallbackProbeStarted = false;
+				let fallbackProbeInFlight = false;
+
+				function getById(id) {
+					return document.getElementById(id);
+				}
+
+				function setText(id, value) {
+					const element = getById(id);
+					if (element) {
+						element.textContent = value;
+					}
+				}
+
+				function setRunDemoState(options) {
+					const button = getById("run-demo-btn");
+					const hint = getById("run-demo-hint");
+					if (button) {
+						button.disabled = options.disabled === true;
+						button.textContent = options.label;
+					}
+					if (hint && options.hint) {
+						hint.textContent = options.hint;
+					}
+				}
+
+				function yesNoUnknown(value) {
+					if (value === true) {
+						return "yes";
+					}
+					if (value === false) {
+						return "no";
+					}
+					return "unknown";
+				}
+
+				function formatPercent(value) {
+					return typeof value === "number" && Number.isFinite(value)
+						? `${Math.round(value)}%`
+						: null;
+				}
+
+				function currentTimeLabel() {
+					return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+				}
+
+				function buildWebSocketUrl(locationObject, token) {
+					const scheme = locationObject.protocol === "https:" ? "wss:" : "ws:";
+					return `${scheme}//${locationObject.host}/wss?token=${encodeURIComponent(token)}`;
+				}
+
+				function loadScript(src) {
+					if (src === "/bundle.js" && window.snatch) {
+						return Promise.resolve();
+					}
+
+					return new Promise((resolve, reject) => {
+						const existing = document.querySelector(`script[src="${src}"]`);
+						if (existing) {
+							if (existing.getAttribute("data-loaded") === "true" || (src === "/bundle.js" && window.snatch)) {
+								resolve();
+								return;
+							}
+
+							const readyState = existing.readyState;
+							if (readyState === "loaded" || readyState === "complete") {
+								existing.setAttribute("data-loaded", "true");
+								resolve();
+								return;
+							}
+
+							existing.addEventListener("load", () => resolve(), { once: true });
+							existing.addEventListener("error", () => reject(new Error(`Failed to load script: ${src}`)), { once: true });
+							return;
+						}
+
+						const script = document.createElement("script");
+						script.src = src;
+						script.async = true;
+						script.addEventListener("load", () => {
+							script.setAttribute("data-loaded", "true");
+							resolve();
+						}, { once: true });
+						script.addEventListener("error", () => reject(new Error(`Failed to load script: ${src}`)), { once: true });
+						document.head.appendChild(script);
+					});
+				}
+
+				function sleep(ms) {
+					return new Promise((resolve) => window.setTimeout(resolve, ms));
+				}
+
+				async function collectDemoFingerprintPayload() {
+					await loadScript("/bundle.js");
+
+					const exported = window.snatch;
+					const Snatch = (exported && exported.default) || exported;
+					if (typeof Snatch !== "function") {
+						throw new Error("Fingerprint collector unavailable.");
+					}
+
+					const agent = new Snatch();
+					if (typeof agent.capture === "function") {
+						return await agent.capture({
+							minBehavioralDurationMs: 250,
+							maxBehavioralWaitMs: 1200,
+							pollIntervalMs: 100,
+							requireInteraction: false,
+						});
+					}
+
+					await agent.ready;
+					await sleep(300);
+					if (agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
+						agent.dataset.behavioralMetrics = agent._behavioral.computeBehavioralMetrics();
+					}
+					return agent.dataset || null;
+				}
+
+				async function startFallbackProbe(force = false) {
+					if (fallbackProbeInFlight) {
+						return;
+					}
+
+					if (fallbackProbeStarted && !force) {
+						return;
+					}
+
+					fallbackProbeStarted = true;
+					fallbackProbeInFlight = true;
+					const token = window.__GCX__ && typeof window.__GCX__.websocketToken === "string"
+						? window.__GCX__.websocketToken
+						: "";
+
+					if (!token) {
+						setText("demo-runtime-status", "Live assessment unavailable because the websocket token is missing.");
+						setRunDemoState({
+							disabled: false,
+							label: "Run Demo Assessment",
+							hint: "The page is missing a websocket token, so the live assessment could not start.",
+						});
+						fallbackProbeInFlight = false;
+						return;
+					}
+
+					setText("demo-runtime-status", "Live assessment starting. Running a demo-local fingerprint probe now.");
+					setRunDemoState({
+						disabled: true,
+						label: "Running Assessment...",
+						hint: "Collecting fingerprint data and requesting live server-side enrichment.",
+					});
+
+					try {
+						const payload = await collectDemoFingerprintPayload();
+						if (!payload) {
+							throw new Error("Fingerprint payload capture returned no data.");
+						}
+
+						await new Promise((resolve, reject) => {
+							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
+							const timeoutId = window.setTimeout(() => {
+								socket.close();
+								reject(new Error("Telemetry probe timed out waiting for a server response."));
+							}, 10000);
+
+							socket.addEventListener("open", () => {
+								socket.send(JSON.stringify({ type: "data", data: payload }));
+							}, { once: true });
+
+							socket.addEventListener("message", (event) => {
+								try {
+									const detail = JSON.parse(event.data);
+									if (detail && typeof detail === "object" && detail.type === "fingerprint") {
+										window.__GCX__ = window.__GCX__ || {};
+										window.__GCX__.riskTelemetry = detail.data;
+										renderFingerprint(detail.data);
+										setRunDemoState({
+											disabled: false,
+											label: "Run Demo Again",
+											hint: "Live assessment complete. Run it again after changing networks or browser posture.",
+										});
+										window.clearTimeout(timeoutId);
+										socket.close();
+										resolve();
+									}
+								} catch (error) {
+									window.clearTimeout(timeoutId);
+									socket.close();
+									reject(error);
+								}
+							});
+
+							socket.addEventListener("error", () => {
+								window.clearTimeout(timeoutId);
+								reject(new Error("Telemetry probe websocket failed."));
+							}, { once: true });
+
+							socket.addEventListener("close", () => {
+								window.clearTimeout(timeoutId);
+							});
+						});
+					} catch (error) {
+						console.error("Demo telemetry probe failed:", error);
+						setText("demo-runtime-status", "Live assessment probe failed. Interact with the page or allow analytics to retry the standard telemetry path.");
+						setRunDemoState({
+							disabled: false,
+							label: "Retry Demo Assessment",
+							hint: "The live assessment failed. Retry now or change browser/network conditions and run again.",
+						});
+					} finally {
+						fallbackProbeInFlight = false;
+					}
+				}
+
+				function buildAction(payload, highRiskCountry) {
+					const ip = payload.ip || {};
+					const bot = payload.bot || {};
+					const tls = payload.tls || {};
+
+					if (bot.decision === "block" || ip.isTor === true) {
+						return {
+							label: "Block or hard challenge",
+							detail: "Tor traffic or a blocking bot decision is present. Treat the session as elevated risk immediately.",
+							risk: "Risk posture: elevated. Tor or bot-block signals are present. Deny or require strong step-up verification.",
+							chip: "High Risk",
+						};
+					}
+
+					if (ip.isVpn === true || ip.isProxy === true || highRiskCountry || bot.decision === "challenge" || tls.ja4Match === false) {
+						return {
+							label: "Step-up authentication",
+							detail: "VPN, proxy, high-risk country, challenge bot score, or JA4 mismatch detected. Require additional verification before privileged actions.",
+							risk: "Risk posture: moderate. Review the session before privileged actions and trigger step-up verification.",
+							chip: "Review Required",
+						};
+					}
+
+					return {
+						label: "Allow and monitor",
+						detail: "No VPN, proxy, Tor, or high-risk country indicators are present in the live stream. Continue and log routine checkpoints.",
+						risk: "Risk posture: low. No VPN, no proxy, and no high-risk country flags in the current live assessment.",
+						chip: "Trusted Client",
+					};
+				}
+
+				function renderLiveFeed(payload, highRiskCountry, action) {
+					const ip = payload.ip || {};
+					const tls = payload.tls || {};
+					const bot = payload.bot || {};
+					const peer = payload.peer || {};
+					const lines = [
+						`[${currentTimeLabel()}] Session fingerprint received for ${payload.deviceId || payload.hash || "unknown-device"}`,
+						`[${currentTimeLabel()}] IP enrichment | country: ${ip.country || "unknown"}, vpn: ${yesNoUnknown(ip.isVpn)}, proxy: ${yesNoUnknown(ip.isProxy)}, tor: ${yesNoUnknown(ip.isTor)}, hosting: ${yesNoUnknown(ip.isHosting)}`,
+						`[${currentTimeLabel()}] Country risk review | high-risk country: ${highRiskCountry ? "true" : "false"}, ip-risk-score: ${ip.riskScore ?? "unknown"}`,
+						`[${currentTimeLabel()}] TLS comparison | consistency: ${formatPercent(tls.consistencyScore) || "unknown"}, ja4-match: ${yesNoUnknown(tls.ja4Match)}`,
+						`[${currentTimeLabel()}] Bot screening | decision: ${bot.decision || "unknown"}, headless: ${yesNoUnknown(bot.isHeadless)}, human-score: ${formatPercent(bot.behavioralHumanScore) || "unknown"}`,
+						`[${currentTimeLabel()}] Peer posture | trust-score: ${peer.trustScore ?? "unknown"}, taint-score: ${peer.taintScore ?? "unknown"}`,
+						`[${currentTimeLabel()}] Operator recommendation | ${action.label}`,
+					];
+
+					setText("demo-live-feed", `${lines.join("\n")}\n\nTip: This panel is driven by the live websocket fingerprint event stream.`);
+				}
+
+				function renderFingerprint(payload) {
+					if (!payload || typeof payload !== "object") {
+						return;
+					}
+
+					const ip = payload.ip && typeof payload.ip === "object" ? payload.ip : {};
+					const tls = payload.tls && typeof payload.tls === "object" ? payload.tls : {};
+					const bot = payload.bot && typeof payload.bot === "object" ? payload.bot : {};
+					const country = typeof ip.country === "string" ? ip.country : "unknown";
+					const highRiskCountry = HIGH_RISK_COUNTRIES.has(country);
+					const action = buildAction(payload, highRiskCountry);
+
+					setText("demo-runtime-status", "Live assessment active. VPN, proxy, country, TLS, and bot signals are being read from the current device session.");
+					setRunDemoState({
+						disabled: false,
+						label: "Run Demo Again",
+						hint: "The console is showing live server-side enrichment for this session. Rerun to refresh the assessment.",
+					});
+					setText("demo-session-chip", action.chip);
+					setText("demo-device-signature", payload.deviceId || payload.hash || "Observed session");
+					setText(
+						"demo-ip-context",
+						`${country} / VPN ${yesNoUnknown(ip.isVpn)} / Proxy ${yesNoUnknown(ip.isProxy)} / Tor ${yesNoUnknown(ip.isTor)}`,
+					);
+					setText(
+						"demo-tls-profile",
+						tls.consistencyScore !== undefined || tls.ja4Match !== undefined
+							? `${formatPercent(tls.consistencyScore) || "Unknown"} consistency / JA4 ${yesNoUnknown(tls.ja4Match)}`
+							: "No TLS enrichment returned",
+					);
+					setText(
+						"demo-behavior-fit",
+						bot.decision
+							? `${bot.decision} / human score ${formatPercent(bot.behavioralHumanScore) || "unknown"}`
+							: "No behavioral classification returned",
+					);
+					setText("demo-risk-copy", action.risk);
+
+					setText("insight-network-value", `VPN: ${yesNoUnknown(ip.isVpn)}, Proxy: ${yesNoUnknown(ip.isProxy)}, Tor: ${yesNoUnknown(ip.isTor)}`);
+					setText("insight-network-detail", ip.isHosting === true
+						? "The request appears to originate from hosting infrastructure. Treat it as non-routine traffic."
+						: "The live stream is reading network posture from server-side IP enrichment, including hosting and anonymizer indicators.");
+
+					setText("insight-country-value", `${country}, high-risk country: ${highRiskCountry ? "true" : "false"}`);
+					setText("insight-country-detail", highRiskCountry
+						? "This source country is in the elevated-review set. Require step-up verification before sensitive actions."
+						: "The current source country is not in the elevated-review set used by the live Devicer risk flow.");
+
+					setText("insight-iprisk-value", ip.riskScore !== undefined && ip.riskScore !== null ? String(ip.riskScore) : "Unavailable");
+					setText("insight-iprisk-detail", ip.riskScore !== undefined && ip.riskScore !== null
+						? "This score comes from server-side IP enrichment and should be combined with VPN, proxy, and TLS posture before actioning."
+						: "No server-side IP risk score was returned for this session.");
+
+					setText("insight-tls-value", tls.ja4Match === undefined && tls.consistencyScore === undefined
+						? "Unavailable"
+						: `JA4 ${yesNoUnknown(tls.ja4Match)}, consistency ${formatPercent(tls.consistencyScore) || "unknown"}`);
+					setText("insight-tls-detail", tls.ja4Match === false
+						? "The current TLS fingerprint diverges from the expected device cohort. Increase scrutiny for spoofing or session brokering."
+						: "TLS consistency is being read from the live event stream and compared against the known cohort when available.");
+
+					setText("insight-bot-value", `decision=${bot.decision || "unknown"}, headless=${yesNoUnknown(bot.isHeadless)}`);
+					setText("insight-bot-detail", bot.decision === "block" || bot.decision === "challenge"
+						? "Bot screening recommends intervention. Review the bot factors and human score before permitting high-value actions."
+						: "No blocking bot decision is present in the current live classification.");
+
+					setText("insight-action-value", action.label);
+					setText("insight-action-detail", action.detail);
+
+					renderLiveFeed(payload, highRiskCountry, action);
+				}
+
+				function applyExistingTelemetry() {
+					const existing = window.__GCX__ && window.__GCX__.riskTelemetry;
+					if (existing) {
+						renderFingerprint(existing);
+						return true;
+					}
+					return false;
+				}
+
+				function renderConsentState() {
+					const consent = window.localStorage.getItem(CONSENT_KEY);
+					if (consent === "declined") {
+						setText("demo-runtime-status", "Live assessment disabled because analytics consent was declined. Allow analytics to run the VPN and country checks.");
+						setRunDemoState({
+							disabled: true,
+							label: "Run Demo Assessment",
+							hint: "Analytics consent is declined, so the live assessment cannot start until consent is allowed.",
+						});
+					} else if (consent !== "accepted") {
+						setText("demo-runtime-status", "Live assessment waiting for consent. Allow analytics to run the VPN and country checks on this page.");
+						setRunDemoState({
+							disabled: true,
+							label: "Run Demo Assessment",
+							hint: "Accept analytics consent first, then run the live device assessment.",
+						});
+					} else {
+						setRunDemoState({
+							disabled: false,
+							label: "Run Demo Assessment",
+							hint: "Consent is active. Run the assessment now or wait for the automatic probe.",
+						});
+						window.setTimeout(() => {
+							if (!applyExistingTelemetry()) {
+								void startFallbackProbe();
+							}
+						}, 1800);
+					}
+				}
+
+				window.addEventListener("gcx:risk-telemetry", (event) => {
+					const detail = event && event.detail;
+					if (!detail || typeof detail !== "object") {
+						return;
+					}
+
+					if (detail.type === "fingerprint") {
+						renderFingerprint(detail.data);
+						return;
+					}
+
+					if (detail.type === "blacklistAlert" && detail.data && typeof detail.data.country === "string") {
+						setText("insight-country-value", `${detail.data.country}, high-risk-country=true`);
+						setText("insight-country-detail", "This session was actively flagged by the server for elevated country risk. Require step-up verification.");
+					}
+				});
+
+				const runDemoButton = getById("run-demo-btn");
+				if (runDemoButton) {
+					runDemoButton.addEventListener("click", () => {
+						const consent = window.localStorage.getItem(CONSENT_KEY);
+						if (consent !== "accepted") {
+							setText("demo-runtime-status", "Live assessment requires analytics consent. Allow analytics first, then run the demo assessment.");
+							return;
+						}
+
+						void startFallbackProbe(true);
+					});
+				}
+
+				document.addEventListener("click", (event) => {
+					const target = event.target;
+					if (!(target instanceof HTMLElement)) {
+						return;
+					}
+
+					if (target.getAttribute("data-consent-action") === "accept") {
+						window.setTimeout(() => {
+							if (!applyExistingTelemetry()) {
+								void startFallbackProbe();
+							}
+						}, 900);
+					}
+				});
+
+				if (!applyExistingTelemetry()) {
+					renderConsentState();
+				}
+			})();
+		</script>
 		{{SITE_FOOTER}}
 	</body>
 </html>
