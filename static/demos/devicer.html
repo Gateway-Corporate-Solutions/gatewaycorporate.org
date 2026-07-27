@@ -1053,16 +1053,12 @@ Allow first-party analytics on this site to run a live device assessment.
 							hint: "Accept analytics consent first, then run the live device assessment.",
 						});
 					} else {
+						setText("demo-runtime-status", "Live assessment ready. Click Run Demo Assessment to trigger an on-demand websocket probe, or wait for background telemetry.");
 						setRunDemoState({
 							disabled: false,
 							label: "Run Demo Assessment",
-							hint: "Consent is active. Run the assessment now or wait for the automatic probe.",
+							hint: "Consent is active. Run the assessment when ready; automatic probing is disabled to avoid page-load websocket races.",
 						});
-						window.setTimeout(() => {
-							if (!applyExistingTelemetry()) {
-								void startFallbackProbe();
-							}
-						}, 1800);
 					}
 				}
 
@@ -1103,11 +1099,12 @@ Allow first-party analytics on this site to run a live device assessment.
 					}
 
 					if (target.getAttribute("data-consent-action") === "accept") {
-						window.setTimeout(() => {
-							if (!applyExistingTelemetry()) {
-								void startFallbackProbe();
-							}
-						}, 900);
+						setText("demo-runtime-status", "Analytics consent accepted. Click Run Demo Assessment to start the live websocket probe.");
+						setRunDemoState({
+							disabled: false,
+							label: "Run Demo Assessment",
+							hint: "Consent is active. Launch the on-demand assessment when ready.",
+						});
 					}
 				});
 
