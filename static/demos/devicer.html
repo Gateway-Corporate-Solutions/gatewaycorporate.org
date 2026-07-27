@@ -980,7 +980,7 @@ Allow first-party analytics on this site to run a live device assessment.
 						? "The current TLS fingerprint diverges from the expected device cohort. Increase scrutiny for spoofing or session brokering."
 						: "TLS consistency is being read from the live event stream and compared against the known cohort when available.");
 
-					setText("insight-bot-value", `decision=${bot.decision || "unknown"}, headless=${yesNoUnknown(bot.isHeadless)}`);
+					setText("insight-bot-value", `decision: ${bot.decision || "unknown"}, headless: ${yesNoUnknown(bot.isHeadless)}`);
 					setText("insight-bot-detail", bot.decision === "block" || bot.decision === "challenge"
 						? "Bot screening recommends intervention. Review the bot factors and human score before permitting high-value actions."
 						: "No blocking bot decision is present in the current live classification.");

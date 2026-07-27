@@ -220,6 +220,12 @@ function isLocalhostRequest(url: URL, headers: Headers): boolean {
     return isLoopbackHost(hostHeader) || isLoopbackHost(url.host) || isLoopbackHost(url.hostname);
 }
 
+function getForwardedClientIp(headers: Headers): string | null {
+    return headers.get("CF-Connecting-IP") ||
+        headers.get("X-Forwarded-For") ||
+        headers.get("X-Real-IP");
+}
+
 function isTlsComplexityError(error: unknown): boolean {
     if (!(error instanceof Error)) {
         return false;
@@ -1822,7 +1828,7 @@ router.post("/forum/:board/thread", async (context) => {
     const author = String(form.get("author") || "");
     const realIp = resolveClientIp(
         context.request.ip,
-        context.request.headers.get("X-Real-IP"),
+        getForwardedClientIp(context.request.headers),
         trustedProxyIps,
     );
     const authorFingerprint = await buildForumAuthorFingerprint(context.request.headers, realIp);
@@ -1918,7 +1924,7 @@ router.post("/forum/:board/thread/:threadId/reply", async (context) => {
     const author = String(form.get("author") || "");
     const realIp = resolveClientIp(
         context.request.ip,
-        context.request.headers.get("X-Real-IP"),
+        getForwardedClientIp(context.request.headers),
         trustedProxyIps,
     );
     const authorFingerprint = await buildForumAuthorFingerprint(context.request.headers, realIp);
@@ -2244,7 +2250,7 @@ router.get("/wss", async (context) => {
     const requestHeaders = Object.fromEntries(context.request.headers.entries());
     const realIp = resolveClientIp(
         context.request.ip,
-        context.request.headers.get("X-Real-IP"),
+        getForwardedClientIp(context.request.headers),
         trustedProxyIps,
     );
 

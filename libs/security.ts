@@ -118,6 +118,30 @@ export function isOriginAllowed(
   return configuredOrigins.has(origin);
 }
 
+function isIpv4(value: string): boolean {
+  const octets = value.split(".");
+  if (octets.length !== 4) {
+    return false;
+  }
+
+  return octets.every((octet) => {
+    if (!/^\d{1,3}$/.test(octet)) {
+      return false;
+    }
+
+    const numeric = Number(octet);
+    return numeric >= 0 && numeric <= 255;
+  });
+}
+
+function isIpv6(value: string): boolean {
+  return /^[0-9a-fA-F:]+$/.test(value) && value.includes(":");
+}
+
+function isIpAddress(value: string): boolean {
+  return isIpv4(value) || isIpv6(value);
+}
+
 export function applySecurityHeaders(headers: Headers, isSecureOrigin: boolean): void {
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
@@ -306,11 +330,15 @@ export class RateLimiter {
 
 export function resolveClientIp(
   requestIp: string,
-  xRealIpHeader: string | null,
+  forwardedIpHeader: string | null,
   trustedProxyIps: Set<string>,
 ): string {
-  const fromHeader = xRealIpHeader?.split(",")[0]?.trim();
-  if (fromHeader && trustedProxyIps.has(requestIp)) {
+  if (!trustedProxyIps.has(requestIp)) {
+    return requestIp;
+  }
+
+  const fromHeader = forwardedIpHeader?.split(",")[0]?.trim() ?? "";
+  if (isIpAddress(fromHeader)) {
     return fromHeader;
   }
 
