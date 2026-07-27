@@ -340,6 +340,13 @@
 				font-weight: 700;
 			}
 
+			.insight-tile .d {
+				margin-top: 0.35rem;
+				color: #cbd5e1;
+				font-size: 0.84rem;
+				line-height: 1.45;
+			}
+
 			.cta-band {
 				text-align: center;
 			}
@@ -508,7 +515,7 @@
 								</div>
 								<div class="signal-block">
 									<p class="signal-label">IP Context</p>
-									<p class="signal-value">Residential / Missouri</p>
+									<p class="signal-value">US-MO / Residential / No VPN</p>
 								</div>
 								<div class="signal-block">
 									<p class="signal-label">TLS Profile</p>
@@ -541,7 +548,7 @@
 
 							<div class="risk-line">
 								<div class="risk-bar"><span></span></div>
-								<p class="risk-copy">Risk posture: low-to-moderate. Continue session, monitor for secondary anomalies.</p>
+								<p class="risk-copy">Risk posture: low. No VPN, no high-risk country, and no impossible-travel alert. Continue session and re-evaluate only on privileged actions.</p>
 							</div>
 						</div>
 					</article>
@@ -555,11 +562,12 @@
 							<pre class="terminal-view"><span class="cool">[08:11:04]</span> Session opened from edge endpoint <span class="warm">api-gw-03</span>
 <span class="cool">[08:11:04]</span> Browser profile parsed, 41 normalized attributes
 <span class="cool">[08:11:05]</span> TLS bundle mapped to known cohort <span class="ok">confidence 0.91</span>
-<span class="cool">[08:11:05]</span> IP enrichment: ASN 7018, location signal verified
+<span class="cool">[08:11:05]</span> IP enrichment: ASN 7018, US-MO, residential class, vpn=false, proxy=false
+<span class="cool">[08:11:06]</span> Country corridor check: <span class="ok">high-risk-country=false</span>, impossible-travel=false
 <span class="cool">[08:11:06]</span> Peer reputation dataset indicates low abuse probability
 <span class="cool">[08:11:06]</span> Behavior drift check: no substantial divergence
 <span class="cool">[08:11:07]</span> Recommendation generated: <span class="ok">allow + monitor</span>
-<span class="cool">[08:11:07]</span> Analyst memo: "Pattern aligned with prior trusted operator flows."
+<span class="cool">[08:11:07]</span> Analyst memo: "Escalate only if VPN flips true, country changes outside user corridor, or TLS consistency drops."
 
 <span class="warm">Tip:</span> In production, this panel is fed by websocket telemetry and replayable audit events.
 							</pre>
@@ -576,28 +584,34 @@
 					<div class="card-body">
 						<div class="insight-grid">
 							<div class="insight-tile">
-								<p class="k">Cluster Match</p>
-								<p class="v">Returning trusted pattern (cluster-04)</p>
+								<p class="k">Network Disposition</p>
+								<p class="v">VPN: no, Proxy: no, Tor: no</p>
+								<p class="d">Traffic resolves to a residential ASN and does not present hosting or anonymizer indicators.</p>
 							</div>
 							<div class="insight-tile">
-								<p class="k">Expected Behavior</p>
-								<p class="v">Navigation cadence within normal envelope</p>
+								<p class="k">Country Risk</p>
+								<p class="v">US corridor, high-risk-country=false</p>
+								<p class="d">Current country aligns with prior sessions and falls outside the demo blacklist set used for elevated review.</p>
 							</div>
 							<div class="insight-tile">
-								<p class="k">Spoof Resistance</p>
-								<p class="v">Cross-signal entropy remained consistent</p>
+								<p class="k">Impossible Travel</p>
+								<p class="v">Not detected</p>
+								<p class="d">No geo jump or timezone mismatch suggests account takeover or session brokering.</p>
 							</div>
 							<div class="insight-tile">
-								<p class="k">Action Policy</p>
-								<p class="v">Allow and log strategic checkpoints</p>
+								<p class="k">TLS / JA4 Consistency</p>
+								<p class="v">Stable across 4 trusted sessions</p>
+								<p class="d">Handshake characteristics still match the user’s known device cohort, reducing spoof likelihood.</p>
 							</div>
 							<div class="insight-tile">
-								<p class="k">Operator Confidence</p>
-								<p class="v">High confidence with no manual override needed</p>
+								<p class="k">Bot / Headless Screen</p>
+								<p class="v">No headless or crawler signals</p>
+								<p class="d">Behavior and user-agent classification remain consistent with an interactive human session.</p>
 							</div>
 							<div class="insight-tile">
-								<p class="k">Suggested Next Signal</p>
-								<p class="v">Contextual challenge only if velocity spikes</p>
+								<p class="k">Operator Action</p>
+								<p class="v">Allow, monitor, no manual review</p>
+								<p class="d">Escalate to step-up authentication if VPN becomes true, the source country changes, or velocity spikes.</p>
 							</div>
 						</div>
 					</div>
