@@ -888,6 +888,7 @@ function renderHomepageProductCard(productId: HomepageProductId): string {
                         </div>
                         <div class="btn-group mt-md product-actions">
                             <a href="/products/devicer" class="btn btn-primary btn-sm">View Technical Overview</a>
+                            <a href="/demos/devicer" class="btn btn-secondary btn-sm">Open Interactive Demo</a>
                             <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
                         </div>
                     </article>`;
@@ -1339,6 +1340,16 @@ router.get("/sitemap.xml", async (context) => {
                 lastmod: await getSitemapLastModified("./static/views/faq.html", today),
                 priority: 0.7,
             },
+            {
+                loc: `${siteOrigin}/demos`,
+                lastmod: await getSitemapLastModified("./static/views/demos.html", today),
+                priority: 0.7,
+            },
+            {
+                loc: `${siteOrigin}/demos/devicer`,
+                lastmod: await getSitemapLastModified("./static/demos/devicer.html", today),
+                priority: 0.7,
+            },
                 {
                         loc: `${siteOrigin}/blog`,
                         lastmod: today,
@@ -1411,6 +1422,8 @@ router.get("/seo/sitemap-health", async (context) => {
             "/contact",
             "/services",
             "/faq",
+            "/demos",
+            "/demos/devicer",
             "/blog",
             "/careers",
             "/forum",
@@ -1427,6 +1440,8 @@ router.get("/seo/sitemap-health", async (context) => {
             "/contact",
             "/services",
             "/faq",
+            "/demos",
+            "/demos/devicer",
             "/blog",
             "/careers",
             "/forum",
@@ -1445,6 +1460,8 @@ router.get("/seo/sitemap-health", async (context) => {
             { path: "/contact", date: await getSitemapLastModified("./static/views/contact.html", now.toISOString().slice(0, 10)) },
             { path: "/services", date: await getSitemapLastModified("./static/views/services.html", now.toISOString().slice(0, 10)) },
             { path: "/faq", date: await getSitemapLastModified("./static/views/faq.html", now.toISOString().slice(0, 10)) },
+            { path: "/demos", date: await getSitemapLastModified("./static/views/demos.html", now.toISOString().slice(0, 10)) },
+            { path: "/demos/devicer", date: await getSitemapLastModified("./static/demos/devicer.html", now.toISOString().slice(0, 10)) },
             { path: "/forum", date: now.toISOString().slice(0, 10) },
             ...FORUM_BOARDS.map((board) => ({ path: `/forum/${board.slug}`, date: now.toISOString().slice(0, 10) })),
             { path: "/products", date: await getSitemapLastModified("./static/views/products.html", now.toISOString().slice(0, 10)) },
@@ -1572,6 +1589,36 @@ router.get("/faq", async (context) => {
         console.error(`Error reading FAQ view file: ${error}`);
         context.response.status = 404;
         context.response.body = "FAQ page not found";
+    }
+});
+router.get("/demos", async (context) => {
+    try {
+        const demosHtml = Deno.readTextFileSync("./static/views/demos.html");
+        const rendered = injectFooterIntoHtml(
+            demosHtml,
+            resolveFooterVariant("index"),
+        );
+        context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+    } catch (error) {
+        console.error(`Error reading demos view file: ${error}`);
+        context.response.status = 404;
+        context.response.body = "Demos page not found";
+    }
+});
+router.get("/demos/devicer", async (context) => {
+    try {
+        const demoHtml = Deno.readTextFileSync("./static/demos/devicer.html");
+        const rendered = injectFooterIntoHtml(
+            demoHtml,
+            resolveFooterVariant("devicer"),
+        );
+        context.response.body = await injectRuntimeBootstrapForHtml(context, rendered);
+        context.response.headers.set("Content-Type", "text/html; charset=utf-8");
+    } catch (error) {
+        console.error(`Error reading Devicer demo view file: ${error}`);
+        context.response.status = 404;
+        context.response.body = "Devicer demo page not found";
     }
 });
 router.get("/forum", async (context) => {

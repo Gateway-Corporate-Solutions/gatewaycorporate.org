@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/components.css">
+		<link rel="stylesheet" href="/enhancements.css">
+		<script src="/index.js" defer></script>
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+		<meta name="author" content="Gateway Corporate">
+		<meta name="keywords" content="Devicer demo, device intelligence, fingerprint demo, Gateway Corporate, cyber intelligence">
+		<meta property="og:locale" content="en_US">
+
+		<title>Devicer Demo | Gateway Corporate</title>
+		<meta name="title" content="Devicer Demo | Gateway Corporate">
+		<meta
+			name="description"
+			content="Explore the Devicer intelligence workflow through a live-style demo view designed for analysts, operators, and engineering teams."
+		>
+
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://gatewaycorporate.org/demos/devicer">
+		<meta property="og:title" content="Devicer Demo | Gateway Corporate">
+		<meta
+			property="og:description"
+			content="A modern Devicer demo surface showing signal intake, enrichment, scoring, and operational recommendations."
+		>
+		<meta property="og:image" content="https://gatewaycorporate.org/embed.png">
+
+		<meta property="twitter:card" content="summary_large_image">
+		<meta property="twitter:url" content="https://gatewaycorporate.org/demos/devicer">
+		<meta property="twitter:title" content="Devicer Demo | Gateway Corporate">
+		<meta
+			property="twitter:description"
+			content="See Devicer's signal pipeline and decision surfaces in a modern interactive demo layout."
+		>
+		<meta property="twitter:image" content="https://gatewaycorporate.org/embed.png">
+
+		<link rel="canonical" href="https://gatewaycorporate.org/demos/devicer">
+
+		<style>
+			:root {
+				--demo-paper: #f3ede3;
+				--demo-ink: #181513;
+				--demo-shell-a: #141210;
+				--demo-shell-b: #1f1915;
+				--demo-shell-c: #2a211c;
+				--demo-accent: #cf9e6f;
+				--demo-accent-strong: #dfaf7b;
+				--demo-cyan: #78aabf;
+				--demo-grid-line: rgba(255, 255, 255, 0.06);
+			}
+
+			.section {
+				max-width: 1220px;
+			}
+
+			.demo-hero {
+				min-height: 84vh;
+				overflow: hidden;
+				background:
+					radial-gradient(circle at 15% 12%, rgba(201, 149, 111, 0.28) 0%, rgba(201, 149, 111, 0) 42%),
+					radial-gradient(circle at 85% 4%, rgba(122, 150, 168, 0.18) 0%, rgba(122, 150, 168, 0) 35%),
+					linear-gradient(145deg, var(--demo-shell-a) 0%, var(--demo-shell-b) 46%, var(--demo-shell-c) 100%);
+			}
+
+			.demo-hero-grid {
+				position: relative;
+				display: grid;
+				gap: 1.2rem;
+			}
+
+			.demo-hero-grid::after {
+				content: "";
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				background-image:
+					linear-gradient(to right, var(--demo-grid-line) 1px, transparent 1px),
+					linear-gradient(to bottom, var(--demo-grid-line) 1px, transparent 1px);
+				background-size: 40px 40px;
+				mask-image: radial-gradient(circle at 50% 30%, #000 25%, transparent 85%);
+				opacity: 0.35;
+			}
+
+			.demo-kicker {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				width: fit-content;
+				margin: 0 auto;
+				padding: 0.4rem 0.85rem;
+				border-radius: 999px;
+				border: 1px solid rgba(201, 149, 111, 0.45);
+				background: rgba(0, 0, 0, 0.22);
+				color: #e7d4bd;
+				font-size: 0.78rem;
+				letter-spacing: 0.13em;
+				text-transform: uppercase;
+				font-weight: 700;
+			}
+
+			.demo-title {
+				margin: 1rem 0 0.95rem;
+				text-align: center;
+				font-size: clamp(2.1rem, 5.4vw, 4.5rem);
+				line-height: 1.05;
+				letter-spacing: -0.02em;
+				color: #fff5e9;
+			}
+
+			.demo-subtitle {
+				margin: 0 auto;
+				text-align: center;
+				max-width: 850px;
+				color: #e7ddcf;
+				line-height: 1.6;
+				font-size: clamp(1rem, 2.05vw, 1.24rem);
+			}
+
+			.demo-actions {
+				margin-top: 1.5rem;
+				display: flex;
+				justify-content: center;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+			}
+
+			.demo-strip {
+				margin-top: 2rem;
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 0.8rem;
+			}
+
+			.demo-strip-card {
+				border-radius: 14px;
+				border: 1px solid rgba(201, 149, 111, 0.24);
+				background: linear-gradient(165deg, rgba(255, 255, 255, 0.05) 0%, rgba(30, 24, 20, 0.35) 100%);
+				box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+				padding: 0.95rem;
+			}
+
+			.demo-strip-label {
+				margin: 0;
+				color: #d7c4ab;
+				font-size: 0.76rem;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+
+			.demo-strip-value {
+				margin: 0.35rem 0 0;
+				color: #fff8ee;
+				font-size: 1.4rem;
+				font-weight: 800;
+			}
+
+			.demo-main {
+				display: grid;
+				grid-template-columns: 1.3fr 1fr;
+				gap: 1rem;
+			}
+
+			.demo-card {
+				border: 1px solid rgba(255, 255, 255, 0.12);
+				border-radius: 18px;
+				background: linear-gradient(170deg, rgba(19, 17, 15, 0.95) 0%, rgba(33, 26, 22, 0.95) 100%);
+				overflow: hidden;
+			}
+
+			.demo-card-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 0.65rem;
+				padding: 0.9rem 1rem;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+			}
+
+			.demo-card-title {
+				margin: 0;
+				color: var(--demo-paper);
+				font-size: 0.94rem;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+			}
+
+			.demo-card-chip {
+				padding: 0.22rem 0.58rem;
+				border-radius: 999px;
+				border: 1px solid rgba(120, 170, 191, 0.45);
+				color: #cae8f6;
+				font-size: 0.72rem;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+			}
+
+			.demo-card-body {
+				padding: 1rem;
+			}
+
+			.signal-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 0.7rem;
+			}
+
+			.signal-block {
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.09);
+				background: rgba(0, 0, 0, 0.2);
+				padding: 0.75rem;
+			}
+
+			.signal-label {
+				margin: 0;
+				color: #cab8a2;
+				font-size: 0.72rem;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+
+			.signal-value {
+				margin: 0.3rem 0 0;
+				color: #fff3e2;
+				font-size: 0.98rem;
+				font-weight: 700;
+			}
+
+			.pipeline {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 0.6rem;
+			}
+
+			.pipeline-step {
+				border: 1px solid rgba(201, 149, 111, 0.28);
+				border-radius: 12px;
+				padding: 0.75rem;
+				background: rgba(255, 255, 255, 0.025);
+			}
+
+			.pipeline-step strong {
+				display: block;
+				color: #f5e5d3;
+				font-size: 0.8rem;
+				letter-spacing: 0.04em;
+				text-transform: uppercase;
+			}
+
+			.pipeline-step span {
+				display: block;
+				margin-top: 0.3rem;
+				color: #d4c2ac;
+				font-size: 0.86rem;
+				line-height: 1.35;
+			}
+
+			.risk-line {
+				margin-top: 0.85rem;
+			}
+
+			.risk-bar {
+				height: 10px;
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.11);
+				overflow: hidden;
+			}
+
+			.risk-bar > span {
+				display: block;
+				width: 37%;
+				height: 100%;
+				background: linear-gradient(90deg, #7cb342 0%, #c9956f 54%, #d98252 100%);
+			}
+
+			.risk-copy {
+				margin: 0.45rem 0 0;
+				color: #ead9c5;
+				font-size: 0.88rem;
+			}
+
+			.terminal-view {
+				margin: 0;
+				min-height: 280px;
+				max-height: 460px;
+				overflow: auto;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.13);
+				background: rgba(4, 3, 3, 0.45);
+				color: #e3f4fb;
+				font-family: "Courier New", Courier, monospace;
+				font-size: 0.83rem;
+				line-height: 1.58;
+				padding: 0.9rem;
+				white-space: pre-wrap;
+			}
+
+			.terminal-view .warm {
+				color: #ffd7ae;
+			}
+
+			.terminal-view .cool {
+				color: #8bd3ef;
+			}
+
+			.terminal-view .ok {
+				color: #b0df84;
+			}
+
+			.insight-grid {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 0.7rem;
+			}
+
+			.insight-tile {
+				border: 1px solid rgba(148, 163, 184, 0.3);
+				border-radius: 14px;
+				background: rgba(15, 23, 42, 0.24);
+				padding: 0.8rem;
+			}
+
+			.insight-tile p {
+				margin: 0;
+			}
+
+			.insight-tile .k {
+				color: #b7d4df;
+				font-size: 0.74rem;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+
+			.insight-tile .v {
+				margin-top: 0.3rem;
+				color: #f6f0e8;
+				font-weight: 700;
+			}
+
+			.cta-band {
+				text-align: center;
+			}
+
+			.cta-band .text-base {
+				max-width: 840px;
+				margin: 0.8rem auto 0;
+			}
+
+			@keyframes revealUp {
+				from {
+					opacity: 0;
+					transform: translateY(22px);
+				}
+
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.reveal {
+				opacity: 0;
+				animation: revealUp 0.7s ease forwards;
+			}
+
+			.reveal.delay-1 {
+				animation-delay: 0.08s;
+			}
+
+			.reveal.delay-2 {
+				animation-delay: 0.16s;
+			}
+
+			.reveal.delay-3 {
+				animation-delay: 0.24s;
+			}
+
+			.reveal.delay-4 {
+				animation-delay: 0.32s;
+			}
+
+			@media (max-width: 1020px) {
+				.demo-strip {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+
+				.demo-main {
+					grid-template-columns: 1fr;
+				}
+
+				.pipeline {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+
+				.insight-grid {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+			}
+
+			@media (max-width: 660px) {
+				.demo-strip,
+				.signal-grid,
+				.pipeline,
+				.insight-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.demo-title {
+					font-size: clamp(1.8rem, 11vw, 2.6rem);
+				}
+
+				.demo-subtitle {
+					font-size: 1rem;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<nav class="navbar">
+				<div class="nav-content">
+					<a href="/" class="nav-brand">
+						<img src="/logo.png" alt="Gateway Corporate Logo" class="nav-logo">
+						Gateway Corporate
+					</a>
+					<div class="nav-indicator"></div>
+				</div>
+			</nav>
+			<div class="scroll-progress"></div>
+
+			<button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
+				<div class="hamburger">
+					<span></span>
+					<span></span>
+					<span></span>
+				</div>
+			</button>
+
+			<div id="dropdown-menu" class="dropdown-menu">
+				<div class="menu-container">
+					<ul class="nav-list">
+						<li><a href="/#about" class="nav-link">About Us</a></li>
+						<li><a href="/services" class="nav-link">Services</a></li>
+						<li><a href="/products" class="nav-link">Products</a></li>
+						<li><a href="/demos" class="nav-link">Demos</a></li>
+						<li><a href="/faq" class="nav-link">FAQ</a></li>
+						<li><a href="/careers" class="nav-link">Careers</a></li>
+						<li><a href="/blog" class="nav-link">Blog</a></li>
+						<li><a href="/#team" class="nav-link">Our Team</a></li>
+						<li><a href="/contact" class="nav-link">Contact</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+
+		<main>
+			<section class="hero demo-hero">
+				<canvas id="network-graph" aria-hidden="true"></canvas>
+				<div class="hero-content section demo-hero-grid">
+					<p class="demo-kicker reveal">Live Experience Preview</p>
+					<h1 class="demo-title reveal delay-1">Devicer Intelligence Console</h1>
+					<p class="demo-subtitle reveal delay-2">
+						A modern operator view inspired by our FP-Cicis implementation, adapted for Gateway Corporate styling.
+						See how fingerprint signals become explainable decisions in milliseconds.
+					</p>
+					<div class="demo-actions reveal delay-3">
+						<a class="btn btn-primary" href="/products/devicer">Explore Product Details</a>
+						<a class="btn btn-secondary" href="/contact">Book a Demo Walkthrough</a>
+					</div>
+
+					<div class="demo-strip reveal delay-4">
+						<article class="demo-strip-card">
+							<p class="demo-strip-label">Signals Collected</p>
+							<p class="demo-strip-value">142</p>
+						</article>
+						<article class="demo-strip-card">
+							<p class="demo-strip-label">Pipeline Latency</p>
+							<p class="demo-strip-value">87ms</p>
+						</article>
+						<article class="demo-strip-card">
+							<p class="demo-strip-label">Enrichment Sources</p>
+							<p class="demo-strip-value">5 Active</p>
+						</article>
+						<article class="demo-strip-card">
+							<p class="demo-strip-label">Decision Confidence</p>
+							<p class="demo-strip-value">94.2%</p>
+						</article>
+					</div>
+				</div>
+			</section>
+
+			<section class="section">
+				<div class="demo-main">
+					<article class="demo-card reveal">
+						<div class="demo-card-header">
+							<h2 class="demo-card-title">Session Fingerprint</h2>
+							<span class="demo-card-chip">Trusted Client</span>
+						</div>
+						<div class="demo-card-body">
+							<div class="signal-grid">
+								<div class="signal-block">
+									<p class="signal-label">Device Signature</p>
+									<p class="signal-value">fpr_a17e92d4c8</p>
+								</div>
+								<div class="signal-block">
+									<p class="signal-label">IP Context</p>
+									<p class="signal-value">Residential / Missouri</p>
+								</div>
+								<div class="signal-block">
+									<p class="signal-label">TLS Profile</p>
+									<p class="signal-value">Stable Across 4 Sessions</p>
+								</div>
+								<div class="signal-block">
+									<p class="signal-label">Behavioral Fit</p>
+									<p class="signal-value">Aligned with Baseline</p>
+								</div>
+							</div>
+
+							<div style="margin-top: 0.9rem;" class="pipeline">
+								<div class="pipeline-step">
+									<strong>Capture</strong>
+									<span>Browser, network, and handshake telemetry intake.</span>
+								</div>
+								<div class="pipeline-step">
+									<strong>Enrich</strong>
+									<span>IP, ASN, TLS, and peer-context augmentation.</span>
+								</div>
+								<div class="pipeline-step">
+									<strong>Compare</strong>
+									<span>Signal similarity and drift checks against known clusters.</span>
+								</div>
+								<div class="pipeline-step">
+									<strong>Decide</strong>
+									<span>Confidence score and action recommendation output.</span>
+								</div>
+							</div>
+
+							<div class="risk-line">
+								<div class="risk-bar"><span></span></div>
+								<p class="risk-copy">Risk posture: low-to-moderate. Continue session, monitor for secondary anomalies.</p>
+							</div>
+						</div>
+					</article>
+
+					<article class="demo-card reveal delay-1">
+						<div class="demo-card-header">
+							<h2 class="demo-card-title">Live Analyst Feed</h2>
+							<span class="demo-card-chip">Streaming</span>
+						</div>
+						<div class="demo-card-body">
+							<pre class="terminal-view"><span class="cool">[08:11:04]</span> Session opened from edge endpoint <span class="warm">api-gw-03</span>
+<span class="cool">[08:11:04]</span> Browser profile parsed, 41 normalized attributes
+<span class="cool">[08:11:05]</span> TLS bundle mapped to known cohort <span class="ok">confidence 0.91</span>
+<span class="cool">[08:11:05]</span> IP enrichment: ASN 7018, location signal verified
+<span class="cool">[08:11:06]</span> Peer reputation dataset indicates low abuse probability
+<span class="cool">[08:11:06]</span> Behavior drift check: no substantial divergence
+<span class="cool">[08:11:07]</span> Recommendation generated: <span class="ok">allow + monitor</span>
+<span class="cool">[08:11:07]</span> Analyst memo: "Pattern aligned with prior trusted operator flows."
+
+<span class="warm">Tip:</span> In production, this panel is fed by websocket telemetry and replayable audit events.
+							</pre>
+						</div>
+					</article>
+				</div>
+			</section>
+
+			<section class="section reveal delay-2">
+				<div class="card card-primary">
+					<div class="card-header">
+						<h2 class="card-title">Operational Insights</h2>
+					</div>
+					<div class="card-body">
+						<div class="insight-grid">
+							<div class="insight-tile">
+								<p class="k">Cluster Match</p>
+								<p class="v">Returning trusted pattern (cluster-04)</p>
+							</div>
+							<div class="insight-tile">
+								<p class="k">Expected Behavior</p>
+								<p class="v">Navigation cadence within normal envelope</p>
+							</div>
+							<div class="insight-tile">
+								<p class="k">Spoof Resistance</p>
+								<p class="v">Cross-signal entropy remained consistent</p>
+							</div>
+							<div class="insight-tile">
+								<p class="k">Action Policy</p>
+								<p class="v">Allow and log strategic checkpoints</p>
+							</div>
+							<div class="insight-tile">
+								<p class="k">Operator Confidence</p>
+								<p class="v">High confidence with no manual override needed</p>
+							</div>
+							<div class="insight-tile">
+								<p class="k">Suggested Next Signal</p>
+								<p class="v">Contextual challenge only if velocity spikes</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section">
+				<div class="card card-secondary cta-band reveal delay-3">
+					<div class="card-body">
+						<h2 class="heading-3" style="margin-bottom: 0;">Deploy This Workflow In Your Environment</h2>
+						<p class="text-base">
+							Gateway Corporate can tailor this demo surface to your stack, connect it to your ingestion stream,
+							and ship a governed rollout with measurable performance and reliability targets.
+						</p>
+						<div class="hero-buttons" style="justify-content: center; margin-top: 1rem;">
+							<a href="/contact" class="btn btn-primary">Schedule Technical Demo</a>
+							<a href="/papers/FP-Devicer.pdf" class="btn btn-secondary" data-whitepaper-cta="devicer-demo">Read FP-Devicer Whitepaper</a>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		{{SITE_FOOTER}}
+	</body>
+</html>

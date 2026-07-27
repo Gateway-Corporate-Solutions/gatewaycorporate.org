@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/components.css">
+		<link rel="stylesheet" href="/enhancements.css">
+		<script src="/index.js" defer></script>
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+		<meta name="author" content="Gateway Corporate">
+		<meta name="keywords" content="Gateway Corporate demos, Devicer demo, product demos, intelligence software showcases">
+		<meta property="og:locale" content="en_US">
+
+		<title>Demos | Gateway Corporate</title>
+		<meta name="title" content="Demos | Gateway Corporate">
+		<meta
+			name="description"
+			content="Explore interactive product demos from Gateway Corporate, including the Devicer intelligence console experience."
+		>
+
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://gatewaycorporate.org/demos">
+		<meta property="og:title" content="Demos | Gateway Corporate">
+		<meta
+			property="og:description"
+			content="Hands-on demo experiences for Gateway Corporate products and intelligence workflows."
+		>
+		<meta property="og:image" content="https://gatewaycorporate.org/embed.png">
+
+		<meta property="twitter:card" content="summary_large_image">
+		<meta property="twitter:url" content="https://gatewaycorporate.org/demos">
+		<meta property="twitter:title" content="Demos | Gateway Corporate">
+		<meta
+			property="twitter:description"
+			content="Browse Gateway Corporate demo experiences and open the Devicer intelligence console preview."
+		>
+		<meta property="twitter:image" content="https://gatewaycorporate.org/embed.png">
+
+		<link rel="canonical" href="https://gatewaycorporate.org/demos">
+
+		<style>
+			.section {
+				max-width: 1200px;
+			}
+
+			.demos-hero {
+				text-align: center;
+			}
+
+			.demos-hero .text-lead {
+				max-width: 880px;
+				margin: 0 auto;
+			}
+
+			.demos-hero-actions {
+				margin-top: 1.25rem;
+				display: flex;
+				justify-content: center;
+				gap: 0.75rem;
+				flex-wrap: wrap;
+			}
+
+			.demo-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 1rem;
+			}
+
+			.demo-card {
+				border: 1px solid rgba(148, 163, 184, 0.24);
+				border-radius: 18px;
+				background: linear-gradient(165deg, rgba(255, 255, 255, 0.03) 0%, rgba(15, 23, 42, 0.28) 100%);
+				overflow: hidden;
+			}
+
+			.demo-card-header {
+				padding: 1rem;
+				border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+			}
+
+			.demo-card-title {
+				margin: 0;
+			}
+
+			.demo-card-body {
+				padding: 1rem;
+			}
+
+			.demo-stat-grid {
+				margin-top: 0.95rem;
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 0.6rem;
+			}
+
+			.demo-stat {
+				border: 1px solid rgba(148, 163, 184, 0.28);
+				border-radius: 10px;
+				padding: 0.55rem 0.65rem;
+				background: rgba(0, 0, 0, 0.18);
+			}
+
+			.demo-stat p {
+				margin: 0;
+			}
+
+			.demo-stat .k {
+				color: #bfd3eb;
+				font-size: 0.72rem;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+
+			.demo-stat .v {
+				color: #f8fafc;
+				font-size: 1rem;
+				font-weight: 700;
+				margin-top: 0.22rem;
+			}
+
+			.preview-shell {
+				margin-top: 0.9rem;
+				border-radius: 12px;
+				border: 1px solid rgba(125, 211, 252, 0.25);
+				background: rgba(15, 23, 42, 0.3);
+				padding: 0.75rem;
+			}
+
+			.preview-shell code {
+				display: block;
+				color: #cde8f3;
+				font-family: "Courier New", Courier, monospace;
+				font-size: 0.82rem;
+				line-height: 1.5;
+				white-space: pre-wrap;
+			}
+
+			.coming-soon {
+				display: grid;
+				gap: 0.6rem;
+			}
+
+			.coming-soon-item {
+				border: 1px solid rgba(148, 163, 184, 0.24);
+				border-radius: 12px;
+				padding: 0.75rem;
+				background: rgba(255, 255, 255, 0.02);
+			}
+
+			.cta-band {
+				text-align: center;
+				max-width: 900px;
+				margin: 0 auto;
+			}
+
+			@media (max-width: 880px) {
+				.demo-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.demo-stat-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<nav class="navbar">
+				<div class="nav-content">
+					<a href="/" class="nav-brand">
+						<img src="/logo.png" alt="Gateway Corporate Logo" class="nav-logo">
+						Gateway Corporate
+					</a>
+					<div class="nav-indicator"></div>
+				</div>
+			</nav>
+			<div class="scroll-progress"></div>
+
+			<button id="menu-btn" class="menu-icon" aria-label="Open Menu" aria-controls="dropdown-menu" aria-expanded="false">
+				<div class="hamburger">
+					<span></span>
+					<span></span>
+					<span></span>
+				</div>
+			</button>
+
+			<div id="dropdown-menu" class="dropdown-menu">
+				<div class="menu-container">
+					<ul class="nav-list">
+						<li><a href="/#about" class="nav-link">About Us</a></li>
+						<li><a href="/services" class="nav-link">Services</a></li>
+						<li><a href="/products" class="nav-link">Products</a></li>
+						<li><a href="/demos" class="nav-link">Demos</a></li>
+						<li><a href="/faq" class="nav-link">FAQ</a></li>
+						<li><a href="/careers" class="nav-link">Careers</a></li>
+						<li><a href="/blog" class="nav-link">Blog</a></li>
+						<li><a href="/#team" class="nav-link">Our Team</a></li>
+						<li><a href="/contact" class="nav-link">Contact</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+
+		<main>
+			<section class="hero demos-hero">
+				<canvas id="network-graph" aria-hidden="true"></canvas>
+				<div class="hero-content section">
+					<div class="section-header">
+						<h1 class="section-title">Product Demos</h1>
+						<p class="text-lead">
+							Explore live-style Gateway Corporate product experiences designed for technical evaluators,
+							operations leaders, and engineering teams validating real deployment fit.
+						</p>
+						<div class="demos-hero-actions">
+							<a href="/demos/devicer" class="btn btn-primary btn-sm">Open Devicer Demo</a>
+							<a href="/products/devicer" class="btn btn-secondary btn-sm">Read Product Details</a>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section">
+				<div class="demo-grid">
+					<article class="demo-card">
+						<div class="demo-card-header">
+							<h2 class="demo-card-title heading-3">Devicer Intelligence Console</h2>
+							<p class="text-secondary">Signal intake, enrichment, scoring, and explainable trust decisions in a modern operator view.</p>
+						</div>
+						<div class="demo-card-body">
+							<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem;">
+								<span class="flair-tag flair-intelligence">Device Fingerprinting</span>
+								<span class="flair-tag flair-scoring">Decision Scoring</span>
+								<span class="flair-tag flair-security">Risk Analysis</span>
+							</div>
+							<p class="card-text">
+								This demo shows a realistic analyst workflow inspired by FP-Cicis, adapted to Gateway's design system and
+								product narrative.
+							</p>
+							<div class="demo-stat-grid">
+								<div class="demo-stat">
+									<p class="k">Latency</p>
+									<p class="v">87ms</p>
+								</div>
+								<div class="demo-stat">
+									<p class="k">Sources</p>
+									<p class="v">5 active</p>
+								</div>
+								<div class="demo-stat">
+									<p class="k">Confidence</p>
+									<p class="v">94.2%</p>
+								</div>
+							</div>
+							<div class="preview-shell">
+								<code>[allow + monitor] Trusted client pattern detected. Drift below threshold.</code>
+							</div>
+							<div style="margin-top:1rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+								<a href="/demos/devicer" class="btn btn-primary btn-sm">Launch Demo</a>
+								<a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm" data-whitepaper-cta="demos-index">Read Whitepaper</a>
+							</div>
+						</div>
+					</article>
+
+					<article class="demo-card">
+						<div class="demo-card-header">
+							<h2 class="demo-card-title heading-3">Upcoming Demo Tracks</h2>
+							<p class="text-secondary">Additional guided experiences are in development for CRM and strategic simulation workflows.</p>
+						</div>
+						<div class="demo-card-body">
+							<div class="coming-soon">
+								<div class="coming-soon-item">
+									<p class="heading-4" style="margin:0;">HyperLocal 2 Operator Flow</p>
+									<p class="text-small" style="margin-top:0.35rem;">Routing, permissions, and safe automation in CRM-native messaging.</p>
+								</div>
+								<div class="coming-soon-item">
+									<p class="heading-4" style="margin:0;">NashTwin Scenario Board</p>
+									<p class="text-small" style="margin-top:0.35rem;">Decision simulation surfaces for policy, pricing, and market response testing.</p>
+								</div>
+								<div class="coming-soon-item">
+									<p class="heading-4" style="margin:0;">Cross-Product Command Center</p>
+									<p class="text-small" style="margin-top:0.35rem;">A unified cockpit connecting trust intelligence, messaging, and strategic controls.</p>
+								</div>
+							</div>
+							<div style="margin-top:1rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+								<a href="/contact" class="btn btn-primary btn-sm">Request Priority Access</a>
+								<a href="/products" class="btn btn-secondary btn-sm">Browse Products</a>
+							</div>
+						</div>
+					</article>
+				</div>
+			</section>
+
+			<section class="section">
+				<div class="card card-secondary cta-band">
+					<div class="card-body">
+						<h2 class="heading-3" style="margin-bottom: 0;">Need A Demo Tailored To Your Environment?</h2>
+						<p class="text-base">
+							We can adapt these demos to your data model, risk policy, and operational constraints so your team evaluates
+							real integration readiness, not generic mockups.
+						</p>
+						<div style="margin-top:1rem; display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+							<a href="/contact" class="btn btn-primary">Schedule Technical Session</a>
+							<a href="/services" class="btn btn-secondary">View Service Model</a>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		{{SITE_FOOTER}}
+	</body>
+</html>
