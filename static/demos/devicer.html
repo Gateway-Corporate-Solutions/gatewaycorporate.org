@@ -167,10 +167,88 @@
 				margin-top: 0.85rem;
 			}
 
+			.demo-progress {
+				margin: 0.95rem auto 0;
+				max-width: 820px;
+				padding: 0.7rem 0.9rem 0.8rem;
+				border-radius: 14px;
+				border: 1px solid rgba(201, 149, 111, 0.24);
+				background: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, rgba(26, 20, 17, 0.36) 100%);
+			}
+
+			.demo-progress-track {
+				position: relative;
+				height: 6px;
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.18);
+				overflow: hidden;
+			}
+
+			.demo-progress-fill {
+				display: block;
+				height: 100%;
+				width: 0%;
+				border-radius: 999px;
+				background: linear-gradient(90deg, #cf9e6f 0%, #dfaf7b 45%, #78aabf 100%);
+				transition: width 360ms ease;
+			}
+
+			.demo-progress-points {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 0.55rem;
+				margin-top: 0.58rem;
+			}
+
+			.demo-progress-point {
+				display: grid;
+				justify-items: center;
+				gap: 0.3rem;
+				text-align: center;
+			}
+
+			.demo-progress-dot {
+				width: 0.62rem;
+				height: 0.62rem;
+				border-radius: 50%;
+				background: rgba(230, 214, 197, 0.38);
+				box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+				transition: background-color 260ms ease, transform 260ms ease, box-shadow 260ms ease;
+			}
+
+			.demo-progress-label {
+				color: #d7c4ab;
+				font-size: 0.74rem;
+				letter-spacing: 0.04em;
+				text-transform: uppercase;
+				font-weight: 700;
+				line-height: 1.25;
+			}
+
+			.demo-progress-point.is-complete .demo-progress-dot {
+				background: #dfaf7b;
+				box-shadow: 0 0 0 4px rgba(223, 175, 123, 0.24);
+			}
+
+			.demo-progress-point.is-active .demo-progress-dot {
+				background: #78aabf;
+				transform: scale(1.15);
+				box-shadow: 0 0 0 4px rgba(120, 170, 191, 0.26);
+				animation: progressPulse 1.05s ease-in-out infinite;
+			}
+
+			.demo-progress-point.is-active .demo-progress-label {
+				color: #eef8ff;
+			}
+
+			.demo-progress-point.is-complete .demo-progress-label {
+				color: #f6dfc4;
+			}
+
 			.demo-strip {
 				margin-top: 2rem;
 				display: grid;
-				grid-template-columns: repeat(4, minmax(0, 1fr));
+				grid-template-columns: repeat(3, minmax(0, 1fr));
 				gap: 0.8rem;
 			}
 
@@ -418,6 +496,20 @@
 				}
 			}
 
+			@keyframes progressPulse {
+				0% {
+					transform: scale(1.05);
+				}
+
+				50% {
+					transform: scale(1.2);
+				}
+
+				100% {
+					transform: scale(1.05);
+				}
+			}
+
 			.reveal {
 				opacity: 0;
 				animation: revealUp 0.7s ease forwards;
@@ -463,6 +555,10 @@
 				.pipeline,
 				.insight-grid {
 					grid-template-columns: 1fr;
+				}
+
+				.demo-progress-points {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
 				}
 
 				.demo-title {
@@ -538,23 +634,42 @@
 					<div class="demo-runtime-controls reveal delay-3">
 						<p id="run-demo-hint" class="text-small" style="margin:0; color:#d7c4ab;">Use the button to start or rerun the live device assessment on demand.</p>
 					</div>
+					<div class="demo-progress reveal delay-3" aria-live="polite" aria-label="Fingerprinting progress">
+						<div class="demo-progress-track" role="presentation">
+							<span id="demo-progress-fill" class="demo-progress-fill"></span>
+						</div>
+						<div class="demo-progress-points">
+							<div class="demo-progress-point" data-progress-stage="0">
+								<span class="demo-progress-dot" aria-hidden="true"></span>
+								<span class="demo-progress-label">Collecting Data</span>
+							</div>
+							<div class="demo-progress-point" data-progress-stage="1">
+								<span class="demo-progress-dot" aria-hidden="true"></span>
+								<span class="demo-progress-label">Querying Server</span>
+							</div>
+							<div class="demo-progress-point" data-progress-stage="2">
+								<span class="demo-progress-dot" aria-hidden="true"></span>
+								<span class="demo-progress-label">Performing Analysis</span>
+							</div>
+							<div class="demo-progress-point" data-progress-stage="3">
+								<span class="demo-progress-dot" aria-hidden="true"></span>
+								<span class="demo-progress-label">Generating Response</span>
+							</div>
+						</div>
+					</div>
 
 					<div class="demo-strip reveal delay-4">
 						<article class="demo-strip-card">
 							<p class="demo-strip-label">Signals Collected</p>
-							<p class="demo-strip-value">142</p>
-						</article>
-						<article class="demo-strip-card">
-							<p class="demo-strip-label">Pipeline Latency</p>
-							<p class="demo-strip-value">87ms</p>
+							<p id="demo-stat-signals" class="demo-strip-value">Waiting...</p>
 						</article>
 						<article class="demo-strip-card">
 							<p class="demo-strip-label">Enrichment Sources</p>
-							<p class="demo-strip-value">5 Active</p>
+							<p id="demo-stat-enrichment" class="demo-strip-value">0 Active</p>
 						</article>
 						<article class="demo-strip-card">
-							<p class="demo-strip-label">Decision Confidence</p>
-							<p class="demo-strip-value">94.2%</p>
+							<p class="demo-strip-label">Risk Assessment</p>
+							<p id="demo-stat-confidence" class="demo-strip-value">Pending</p>
 						</article>
 					</div>
 				</div>
@@ -691,26 +806,15 @@ Allow first-party analytics on this site to run a live device assessment.
 			(() => {
 				const HIGH_RISK_COUNTRIES = new Set(["IN", "BD", "NG", "RO", "RU", "IR", "CN", "KP"]);
 				const CONSENT_KEY = "gcx_analytics_consent";
+				const DEMO_PROGRESS_MAX_STAGE = 3;
+				const DEMO_PROGRESS_STAGE_MIN_MS = 450;
 				let fallbackProbeStarted = false;
 				let fallbackProbeInFlight = false;
 				let behavioralFollowupInFlight = false;
-
-				function stripCoreBehavioralFields(payload) {
-					if (!payload || typeof payload !== "object") {
-						return payload;
-					}
-
-					const clone = JSON.parse(JSON.stringify(payload));
-					if (clone && typeof clone === "object") {
-						delete clone.behavioralMetrics;
-						delete clone.behavioral;
-						delete clone.mouseTrajectory;
-						delete clone.keyboardTimeline;
-						delete clone.interactionEvents;
-					}
-
-					return clone;
-				}
+				let progressDisplayedStage = -1;
+				let progressQueuedStage = -1;
+				let progressLastPaintAt = 0;
+				let progressAdvanceTimerId = null;
 
 				function getById(id) {
 					return document.getElementById(id);
@@ -749,6 +853,81 @@ Allow first-party analytics on this site to run a live device assessment.
 					}
 				}
 
+				function applyProgressStage(stage) {
+					const stageNumber = typeof stage === "number" && Number.isFinite(stage)
+						? Math.max(-1, Math.min(DEMO_PROGRESS_MAX_STAGE, Math.trunc(stage)))
+						: -1;
+					const fill = getById("demo-progress-fill");
+					const points = document.querySelectorAll("[data-progress-stage]");
+					if (fill) {
+						const width = stageNumber < 0 ? 0 : (stageNumber / DEMO_PROGRESS_MAX_STAGE) * 100;
+						fill.style.width = `${width}%`;
+					}
+
+					points.forEach((point) => {
+						const raw = point.getAttribute("data-progress-stage");
+						const pointStage = raw === null ? -1 : Number.parseInt(raw, 10);
+						point.classList.remove("is-active", "is-complete");
+						if (stageNumber < 0 || !Number.isFinite(pointStage)) {
+							return;
+						}
+
+						if (pointStage < stageNumber) {
+							point.classList.add("is-complete");
+						} else if (pointStage === stageNumber) {
+							point.classList.add("is-active");
+						}
+					});
+
+					progressDisplayedStage = stageNumber;
+					progressLastPaintAt = window.performance.now();
+				}
+
+				function scheduleProgressAdvance() {
+					if (progressAdvanceTimerId !== null) {
+						return;
+					}
+
+					const elapsed = window.performance.now() - progressLastPaintAt;
+					const waitMs = Math.max(0, DEMO_PROGRESS_STAGE_MIN_MS - elapsed);
+					progressAdvanceTimerId = window.setTimeout(() => {
+						progressAdvanceTimerId = null;
+						if (progressQueuedStage <= progressDisplayedStage) {
+							return;
+						}
+
+						const nextStage = Math.min(progressDisplayedStage + 1, progressQueuedStage);
+						applyProgressStage(nextStage);
+						if (progressQueuedStage > progressDisplayedStage) {
+							scheduleProgressAdvance();
+						}
+					}, waitMs);
+				}
+
+				function setProgressStage(stage, options = {}) {
+					const stageNumber = typeof stage === "number" && Number.isFinite(stage)
+						? Math.max(-1, Math.min(DEMO_PROGRESS_MAX_STAGE, Math.trunc(stage)))
+						: -1;
+					const immediate = options && options.immediate === true;
+
+					if (immediate || stageNumber < 0) {
+						if (progressAdvanceTimerId !== null) {
+							window.clearTimeout(progressAdvanceTimerId);
+							progressAdvanceTimerId = null;
+						}
+						progressQueuedStage = stageNumber;
+						applyProgressStage(stageNumber);
+						return;
+					}
+
+					if (stageNumber <= progressDisplayedStage) {
+						return;
+					}
+
+					progressQueuedStage = Math.max(progressQueuedStage, stageNumber);
+					scheduleProgressAdvance();
+				}
+
 				function yesNoUnknown(value) {
 					if (value === true) {
 						return "yes";
@@ -767,6 +946,64 @@ Allow first-party analytics on this site to run a live device assessment.
 
 				function currentTimeLabel() {
 					return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+				}
+
+				function countPrimitiveSignals(value) {
+					if (value === null || value === undefined) {
+						return 0;
+					}
+					if (Array.isArray(value)) {
+						return value.reduce((total, entry) => total + countPrimitiveSignals(entry), 0);
+					}
+					if (typeof value === "object") {
+						return Object.values(value).reduce((total, entry) => total + countPrimitiveSignals(entry), 0);
+					}
+					if (typeof value === "string") {
+						return value.trim() ? 1 : 0;
+					}
+					if (typeof value === "number") {
+						return Number.isFinite(value) ? 1 : 0;
+					}
+					if (typeof value === "boolean") {
+						return 1;
+					}
+					return 0;
+				}
+
+				function renderDemoStats(payload, action, pendingBehavioral) {
+					const ip = payload.ip || {};
+					const tls = payload.tls || {};
+					const bot = payload.bot || {};
+					const peer = payload.peer || {};
+
+					const sections = [ip, tls, bot, peer];
+					const activeSources = sections.filter((section) => Object.keys(section).length > 0).length;
+					const rawSignals = countPrimitiveSignals(payload);
+					const normalizedSignalCount = Math.max(24, Math.min(180, rawSignals * 5 + (pendingBehavioral ? 0 : 12)));
+
+					let confidenceScore = null;
+					if (typeof bot.behavioralHumanScore === "number" && Number.isFinite(bot.behavioralHumanScore)) {
+						confidenceScore = Math.max(0, Math.min(100, bot.behavioralHumanScore));
+					} else if (typeof tls.consistencyScore === "number" && Number.isFinite(tls.consistencyScore)) {
+						confidenceScore = Math.max(0, Math.min(100, tls.consistencyScore));
+					} else if (typeof ip.riskScore === "number" && Number.isFinite(ip.riskScore)) {
+						confidenceScore = Math.max(25, Math.min(95, 100 - ip.riskScore));
+					}
+
+					if (action.label === "Block or hard challenge") {
+						confidenceScore = confidenceScore === null ? 95 : Math.max(confidenceScore, 95);
+					}
+
+					setText("demo-stat-signals", String(normalizedSignalCount));
+					setText("demo-stat-enrichment", `${activeSources} Active`);
+					setText("demo-stat-confidence", pendingBehavioral ? "Pending" : (confidenceScore === null ? "Unknown" : `${confidenceScore.toFixed(1)}%`));
+				}
+
+				function setDemoStatsLoading() {
+					setText("demo-stat-signals", "Collecting...");
+					setText("demo-stat-enrichment", "1 Active");
+					setText("demo-stat-confidence", "Pending");
+					setProgressStage(0, { immediate: true });
 				}
 
 				function buildWebSocketUrl(locationObject, token) {
@@ -823,21 +1060,19 @@ Allow first-party analytics on this site to run a live device assessment.
 
 					const agent = new Snatch();
 					if (typeof agent.capture === "function") {
-						const captured = await agent.capture({
+						return await agent.capture({
 							minBehavioralDurationMs: collectBehavioral ? 1200 : 0,
 							maxBehavioralWaitMs: collectBehavioral ? 4000 : 0,
 							pollIntervalMs: collectBehavioral ? 80 : 20,
 							requireInteraction: false,
 						});
-						return collectBehavioral ? captured : stripCoreBehavioralFields(captured);
 					}
 
 					await agent.ready;
 					if (collectBehavioral && agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
 						agent.dataset.behavioralMetrics = agent._behavioral.computeBehavioralMetrics();
 					}
-					const dataset = agent.dataset || null;
-					return collectBehavioral ? dataset : stripCoreBehavioralFields(dataset);
+					return agent.dataset || null;
 				}
 
 				async function sendBehavioralFollowupProbe(token) {
@@ -932,6 +1167,7 @@ Allow first-party analytics on this site to run a live device assessment.
 					}
 
 					setRuntimeStatus("Live assessment starting. Running a demo-local fingerprint probe now.", true);
+					setDemoStatsLoading();
 					setRunDemoState({
 						disabled: true,
 						label: "Running Assessment...",
@@ -943,15 +1179,20 @@ Allow first-party analytics on this site to run a live device assessment.
 						if (!payload) {
 							throw new Error("Fingerprint payload capture returned no data.");
 						}
+						setProgressStage(1);
 
 						await new Promise((resolve, reject) => {
 							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
 							let settled = false;
+							let behavioralFollowupTimer = null;
 							const timeoutId = window.setTimeout(() => {
 								if (settled) {
 									return;
 								}
 								settled = true;
+								if (behavioralFollowupTimer !== null) {
+									window.clearTimeout(behavioralFollowupTimer);
+								}
 								socket.close();
 								reject(new Error("Telemetry probe timed out waiting for a server response."));
 							}, 10000);
@@ -981,23 +1222,39 @@ Allow first-party analytics on this site to run a live device assessment.
 
 										const waitingOnBehavior = detail.type === "fingerprint" && detail.data && detail.data.pending && detail.data.pending.behavioral === true;
 										if (waitingOnBehavior) {
+											setProgressStage(2);
 											void sendBehavioralFollowupProbe(token);
-											socket.close();
+											if (behavioralFollowupTimer !== null) {
+												window.clearTimeout(behavioralFollowupTimer);
+											}
+											behavioralFollowupTimer = window.setTimeout(() => {
+												socket.close();
+											}, 10000);
 											return;
 										}
 
+										if (behavioralFollowupTimer !== null) {
+											window.clearTimeout(behavioralFollowupTimer);
+										}
+										setProgressStage(3);
 										socket.close();
 										return;
 									}
 
 									if (detail && typeof detail === "object" && detail.type === "error") {
 										if (settled) {
+											if (behavioralFollowupTimer !== null) {
+												window.clearTimeout(behavioralFollowupTimer);
+											}
 											socket.close();
 											setRuntimeStatus("Behavioral analysis did not complete, but core assessment is available.", false);
 											return;
 										}
 										settled = true;
 										window.clearTimeout(timeoutId);
+										if (behavioralFollowupTimer !== null) {
+											window.clearTimeout(behavioralFollowupTimer);
+										}
 										socket.close();
 										reject(new Error(typeof detail.data === "string" ? detail.data : "Telemetry probe returned an error."));
 									}
@@ -1007,6 +1264,9 @@ Allow first-party analytics on this site to run a live device assessment.
 									}
 									settled = true;
 									window.clearTimeout(timeoutId);
+									if (behavioralFollowupTimer !== null) {
+										window.clearTimeout(behavioralFollowupTimer);
+									}
 									socket.close();
 									reject(error);
 								}
@@ -1014,23 +1274,35 @@ Allow first-party analytics on this site to run a live device assessment.
 
 							socket.addEventListener("error", () => {
 								if (settled) {
+									if (behavioralFollowupTimer !== null) {
+										window.clearTimeout(behavioralFollowupTimer);
+									}
 									socket.close();
 									setRuntimeStatus("Behavioral analysis connection interrupted, but core assessment is available.", false);
 									return;
 								}
 								settled = true;
 								window.clearTimeout(timeoutId);
+								if (behavioralFollowupTimer !== null) {
+									window.clearTimeout(behavioralFollowupTimer);
+								}
 								reject(new Error("Telemetry probe websocket failed."));
 							}, { once: true });
 
 							socket.addEventListener("close", (closeEvent) => {
 								if (settled) {
 									window.clearTimeout(timeoutId);
+									if (behavioralFollowupTimer !== null) {
+										window.clearTimeout(behavioralFollowupTimer);
+									}
 									return;
 								}
 
 								settled = true;
 								window.clearTimeout(timeoutId);
+								if (behavioralFollowupTimer !== null) {
+									window.clearTimeout(behavioralFollowupTimer);
+								}
 								const reason = closeEvent.reason ? ` (${closeEvent.reason})` : "";
 								reject(new Error(`Telemetry websocket closed before fingerprint response. Code ${closeEvent.code}${reason}`));
 							});
@@ -1038,6 +1310,7 @@ Allow first-party analytics on this site to run a live device assessment.
 					} catch (error) {
 						console.error("Demo telemetry probe failed:", error);
 						setRuntimeStatus(`Live assessment probe failed: ${error instanceof Error ? error.message : "unknown error"}`, false);
+						setProgressStage(-1, { immediate: true });
 						setRunDemoState({
 							disabled: false,
 							label: "Retry Demo Assessment",
@@ -1119,6 +1392,8 @@ Allow first-party analytics on this site to run a live device assessment.
 					const country = typeof ip.country === "string" ? ip.country : "unknown";
 					const highRiskCountry = HIGH_RISK_COUNTRIES.has(country);
 					const action = buildAction(payload, highRiskCountry, pendingBehavioral);
+					renderDemoStats(payload, action, pendingBehavioral);
+					setProgressStage(pendingBehavioral ? 2 : 3);
 
 					if (pendingBehavioral) {
 						setRuntimeStatus("Core assessment complete. Behavioral analysis is still collecting mouse and keyboard evidence.", true);
@@ -1202,6 +1477,7 @@ Allow first-party analytics on this site to run a live device assessment.
 
 				function renderConsentState() {
 					const consent = window.localStorage.getItem(CONSENT_KEY);
+					setProgressStage(-1, { immediate: true });
 					if (consent === "declined") {
 						setRuntimeStatus("Live assessment disabled because analytics consent was declined. Allow analytics to run the VPN and country checks.", false);
 						setRunDemoState({
@@ -1217,12 +1493,13 @@ Allow first-party analytics on this site to run a live device assessment.
 							hint: "Accept analytics consent first, then run the live device assessment.",
 						});
 					} else {
-						setRuntimeStatus("Live assessment ready. Click Run Demo Assessment to trigger an on-demand websocket probe, or wait for background telemetry.", false);
+						setRuntimeStatus("Live assessment ready. Starting automatic probe because analytics consent is already active.", true);
 						setRunDemoState({
-							disabled: false,
-							label: "Run Demo Assessment",
-							hint: "Consent is active. Run the assessment when ready; automatic probing is disabled to avoid page-load websocket races.",
+							disabled: true,
+							label: "Running Assessment...",
+							hint: "Consent is active and the demo is starting automatically. You can rerun manually after completion.",
 						});
+						void startFallbackProbe(false);
 					}
 				}
 
@@ -1272,8 +1549,11 @@ Allow first-party analytics on this site to run a live device assessment.
 					}
 				});
 
-				if (!applyExistingTelemetry()) {
+				const hasExistingTelemetry = applyExistingTelemetry();
+				if (!hasExistingTelemetry) {
 					renderConsentState();
+				} else if (window.localStorage.getItem(CONSENT_KEY) === "accepted") {
+					void startFallbackProbe(false);
 				}
 			})();
 		</script>
