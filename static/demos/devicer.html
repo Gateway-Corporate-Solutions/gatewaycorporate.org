@@ -1215,15 +1215,39 @@ Allow first-party analytics on this site to run a live device assessment.
 				}
 
 				async function sendCoreProbe(token) {
-					const payload = await collectDemoFingerprintPayload("core");
-					if (!payload) {
-						throw new Error("Fingerprint payload unavailable.");
-					}
-
-					const socket = await openWebSocketWithTimeout(
+					const startAt = window.performance.now();
+					const socketPromise = openWebSocketWithTimeout(
 						buildWebSocketUrl(window.location, token),
 						DEMO_SOCKET_CONNECT_TIMEOUT_MS,
 					);
+					const payloadPromise = collectDemoFingerprintPayload("core");
+
+					let socket;
+					let payload;
+					try {
+						[socket, payload] = await Promise.all([socketPromise, payloadPromise]);
+					} catch (error) {
+						try {
+							const maybeSocket = await Promise.race([
+								socketPromise,
+								new Promise((resolve) => window.setTimeout(() => resolve(null), 0)),
+							]);
+							if (maybeSocket && typeof maybeSocket.close === "function") {
+								maybeSocket.close();
+							}
+						} catch {
+							// Ignore cleanup failures from partially opened sockets.
+						}
+						throw error;
+					}
+
+					if (!payload) {
+						socket.close();
+						throw new Error("Fingerprint payload unavailable.");
+					}
+
+					const sendAt = window.performance.now();
+					socket.send(JSON.stringify({ type: "data", data: payload }));
 
 					return await new Promise((resolve, reject) => {
 						let settled = false;
@@ -1251,8 +1275,16 @@ Allow first-party analytics on this site to run a live device assessment.
 								if (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral") {
 									settled = true;
 									window.clearTimeout(timeoutId);
+									const firstFrameAt = window.performance.now();
 									socket.close();
-									resolve(detail);
+									resolve({
+										detail,
+										timings: {
+											socketAndCaptureReadyMs: Math.round(sendAt - startAt),
+											serverResponseMs: Math.round(firstFrameAt - sendAt),
+											totalMs: Math.round(firstFrameAt - startAt),
+										},
+									});
 									return;
 								}
 
@@ -1278,7 +1310,6 @@ Allow first-party analytics on this site to run a live device assessment.
 							reject(new Error("Core probe socket error."));
 						}, { once: true });
 
-						socket.send(JSON.stringify({ type: "data", data: payload }));
 					});
 				}
 
@@ -1319,20 +1350,23 @@ Allow first-party analytics on this site to run a live device assessment.
 					try {
 						setProgressStage(1);
 
-						const directDetail = await sendCoreProbe(token);
-						if (!directDetail || !directDetail.data) {
-							setRuntimeStatus("Live assessment timed out before a fingerprint response arrived.", false);
+						const probeResult = await sendCoreProbe(token);
+						if (!probeResult || !probeResult.detail || !probeResult.detail.data) {
+							setRuntimeStatus("No telemetry frame arrived in time. Fingerprint analysis itself runs in milliseconds once data lands.", false);
 							setProgressStage(-1, { immediate: true });
 							setRunDemoState({
 								disabled: false,
 								label: "Run Demo Again",
-								hint: "No fingerprint response arrived in time. Rerun to retry the direct websocket probe.",
+								hint: "No websocket telemetry response arrived yet. Rerun to retry the transport path.",
 							});
 							return;
 						}
 
+						const directDetail = probeResult.detail;
+
 						window.__GCX__ = window.__GCX__ || {};
 						window.__GCX__.riskTelemetry = directDetail.data;
+						window.__GCX__.lastDirectProbeTiming = probeResult.timings;
 						renderFingerprint(directDetail.data);
 
 						if (directDetail.type === "fingerprint" && directDetail.data.pending && directDetail.data.pending.behavioral === true) {
@@ -1427,6 +1461,13 @@ Allow first-party analytics on this site to run a live device assessment.
 						`[${currentTimeLabel()}] Peer posture | trust-score: ${peer.trustScore ?? "unknown"}, taint-score: ${peer.taintScore ?? "unknown"}`,
 						`[${currentTimeLabel()}] Operator recommendation | ${action.label}`,
 					];
+
+					const probeTiming = window.__GCX__ && window.__GCX__.lastDirectProbeTiming;
+					if (probeTiming && typeof probeTiming === "object") {
+						lines.push(
+							`[${currentTimeLabel()}] Direct probe timing | ready-to-send: ${probeTiming.socketAndCaptureReadyMs ?? "?"}ms, server-response: ${probeTiming.serverResponseMs ?? "?"}ms, total: ${probeTiming.totalMs ?? "?"}ms`,
+						);
+					}
 
 					setText("demo-live-feed", `${lines.join("\n")}\n\nTip: This panel is driven by the live websocket fingerprint event stream.`);
 				}
