@@ -1188,6 +1188,8 @@ Allow first-party analytics on this site to run a live device assessment.
 
 					return await new Promise((resolve, reject) => {
 						let settled = false;
+						let firstFingerprintFrameAt = null;
+						let latestFingerprintDetail = null;
 						let timeoutId = window.setTimeout(() => {
 							if (settled) {
 								return;
@@ -1195,7 +1197,20 @@ Allow first-party analytics on this site to run a live device assessment.
 
 							settled = true;
 							socket.close();
-							resolve(null);
+							if (!latestFingerprintDetail) {
+								resolve(null);
+								return;
+							}
+
+							const completedAt = window.performance.now();
+							resolve({
+								detail: latestFingerprintDetail,
+								timings: {
+									socketAndCaptureReadyMs: Math.round(sendAt - startAt),
+									serverResponseMs: Math.round((firstFingerprintFrameAt || completedAt) - sendAt),
+									totalMs: Math.round(completedAt - startAt),
+								},
+							});
 						}, DEMO_PROBE_TIMEOUT_MS);
 
 						function refreshTimeoutWindow() {
@@ -1207,7 +1222,20 @@ Allow first-party analytics on this site to run a live device assessment.
 
 								settled = true;
 								socket.close();
-								resolve(null);
+								if (!latestFingerprintDetail) {
+									resolve(null);
+									return;
+								}
+
+								const completedAt = window.performance.now();
+								resolve({
+									detail: latestFingerprintDetail,
+									timings: {
+										socketAndCaptureReadyMs: Math.round(sendAt - startAt),
+										serverResponseMs: Math.round((firstFingerprintFrameAt || completedAt) - sendAt),
+										totalMs: Math.round(completedAt - startAt),
+									},
+								});
 							}, DEMO_PROBE_TIMEOUT_MS);
 						}
 
@@ -1227,16 +1255,31 @@ Allow first-party analytics on this site to run a live device assessment.
 								}
 
 								if (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral") {
+									latestFingerprintDetail = detail;
+									if (firstFingerprintFrameAt === null) {
+										firstFingerprintFrameAt = window.performance.now();
+									}
+
+									const pending = detail.data && typeof detail.data === "object" && detail.data.pending && typeof detail.data.pending === "object"
+										? detail.data.pending
+										: null;
+									const behavioralPending = pending && pending.behavioral === true;
+									const isBehavioralCompletion = detail.type === "fingerprintBehavioral" || behavioralPending !== true;
+
+									if (!isBehavioralCompletion) {
+										return;
+									}
+
 									settled = true;
 									window.clearTimeout(timeoutId);
-									const firstFrameAt = window.performance.now();
+									const completedAt = window.performance.now();
 									socket.close();
 									resolve({
 										detail,
 										timings: {
 											socketAndCaptureReadyMs: Math.round(sendAt - startAt),
-											serverResponseMs: Math.round(firstFrameAt - sendAt),
-											totalMs: Math.round(firstFrameAt - startAt),
+											serverResponseMs: Math.round((firstFingerprintFrameAt || completedAt) - sendAt),
+											totalMs: Math.round(completedAt - startAt),
 										},
 									});
 									return;
