@@ -251,7 +251,6 @@ const RiskTelemetrySocket = {
   initialized: false,
   openPromise: null,
   openPromiseResolve: null,
-  openPromiseReject: null,
 
   getToken() {
     const token = window.__GCX__?.websocketToken;
@@ -304,21 +303,19 @@ const RiskTelemetrySocket = {
   resetOpenPromise() {
     this.openPromise = null;
     this.openPromiseResolve = null;
-    this.openPromiseReject = null;
   },
 
   ensureOpenPromise() {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      return Promise.resolve();
+      return Promise.resolve(true);
     }
 
     if (this.openPromise) {
       return this.openPromise;
     }
 
-    this.openPromise = new Promise((resolve, reject) => {
+    this.openPromise = new Promise((resolve) => {
       this.openPromiseResolve = resolve;
-      this.openPromiseReject = reject;
     });
 
     return this.openPromise;
@@ -348,7 +345,7 @@ const RiskTelemetrySocket = {
   async handleOpen() {
     this.reconnectAttempts = 0;
     if (this.openPromiseResolve) {
-      this.openPromiseResolve();
+      this.openPromiseResolve(true);
       this.resetOpenPromise();
     }
     await this.sendFingerprintSnapshot();
@@ -411,23 +408,23 @@ const RiskTelemetrySocket = {
       });
 
       socket.addEventListener("error", () => {
-        if (this.openPromiseReject) {
-          this.openPromiseReject(new Error("Risk telemetry socket error."));
+        if (this.openPromiseResolve) {
+          this.openPromiseResolve(false);
           this.resetOpenPromise();
         }
         this.scheduleReconnect();
       });
 
       socket.addEventListener("close", () => {
-        if (this.openPromiseReject && socket.readyState !== WebSocket.OPEN) {
-          this.openPromiseReject(new Error("Risk telemetry socket closed before opening."));
+        if (this.openPromiseResolve && socket.readyState !== WebSocket.OPEN) {
+          this.openPromiseResolve(false);
           this.resetOpenPromise();
         }
         this.scheduleReconnect();
       });
     } catch (error) {
-      if (this.openPromiseReject) {
-        this.openPromiseReject(error instanceof Error ? error : new Error("Risk telemetry socket connection failed."));
+      if (this.openPromiseResolve) {
+        this.openPromiseResolve(false);
         this.resetOpenPromise();
       }
       console.error("Risk telemetry socket connection failed:", error);
@@ -455,7 +452,10 @@ const RiskTelemetrySocket = {
 window.__GCX__ = window.__GCX__ || {};
 window.__GCX__.requestRiskSnapshot = async () => {
   RiskTelemetrySocket.connect();
-  await RiskTelemetrySocket.ensureOpenPromise();
+  const opened = await RiskTelemetrySocket.ensureOpenPromise();
+  if (!opened) {
+    throw new Error("Risk telemetry socket unavailable.");
+  }
   await RiskTelemetrySocket.sendFingerprintSnapshot();
 };
 
