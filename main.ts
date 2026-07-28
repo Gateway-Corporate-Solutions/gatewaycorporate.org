@@ -200,6 +200,15 @@ const fingerprintIngestStats = {
     tlshComplexityFallbacks: 0,
 };
 
+type IdentifyCoreResult = {
+    identifyResult: Record<string, unknown>;
+    fingerprintCandidates: devicer.DeviceMatch[];
+    exactMatchFound: boolean;
+    closestMatch: number;
+};
+
+const inFlightIdentifyByHash = new Map<string, Promise<IdentifyCoreResult>>();
+
 function asRecord(value: unknown): Record<string, unknown> | undefined {
     return typeof value === "object" && value !== null && !Array.isArray(value)
         ? value as Record<string, unknown>
@@ -304,6 +313,34 @@ function logDevicerDiagnostic(
     }
 
     console.log("[devicer-diag]", label, { requestId });
+}
+
+async function getOrStartInFlightIdentify(
+    hash: string,
+    createIdentifyPromise: () => Promise<IdentifyCoreResult>,
+): Promise<{ result: IdentifyCoreResult; shared: boolean }> {
+    const existing = inFlightIdentifyByHash.get(hash);
+    if (existing) {
+        return {
+            result: await existing,
+            shared: true,
+        };
+    }
+
+    const started = (async () => {
+        try {
+            return await createIdentifyPromise();
+        } finally {
+            inFlightIdentifyByHash.delete(hash);
+        }
+    })();
+
+    inFlightIdentifyByHash.set(hash, started);
+
+    return {
+        result: await started,
+        shared: false,
+    };
 }
 
 function sendSocketJson(socket: WebSocket, payload: unknown): void {
@@ -2460,79 +2497,96 @@ router.get("/wss", async (context) => {
         try {
             const fingerprintData = parsedMessage.value.data;
             const hash = devicer.getHash(JSON.stringify(fingerprintData));
-            const findCandidatesStartedAt = performance.now();
-            const fingerprintCandidates = await devicerRuntime.adapters.device.findCandidates(fingerprintData, 50, 50);
-            logDevicerDiagnostic("identify.find_candidates", requestId, {
-                elapsedMs: Math.round(performance.now() - findCandidatesStartedAt),
-                candidates: fingerprintCandidates.length,
-            });
-            const exactMatchFound = fingerprintCandidates.some((fp: devicer.DeviceMatch) => fp.confidence >= 100);
-            const closestMatch = Math.max(0, ...fingerprintCandidates.map((fp: devicer.DeviceMatch) => fp.confidence));
             const userId = sanitizeUserId(requestHeaders["x-user-id"]) ?? undefined;
-
-            let identifyResult: Record<string, unknown>;
-            try {
-                const identifyStartedAt = performance.now();
-                identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
-                    ip: realIp,
-                    userId,
-                    tlsProfile,
-                    headers: requestHeaders,
-                }) as unknown as Record<string, unknown>;
-                logDevicerDiagnostic("identify.primary", requestId, {
-                    elapsedMs: Math.round(performance.now() - identifyStartedAt),
-                    usedTlsProfile: tlsProfile !== undefined,
+            const coalescedIdentifyStartedAt = performance.now();
+            const { result: coreIdentify, shared } = await getOrStartInFlightIdentify(hash, async () => {
+                const findCandidatesStartedAt = performance.now();
+                const fingerprintCandidates = await devicerRuntime.adapters.device.findCandidates(fingerprintData, 50, 50);
+                logDevicerDiagnostic("identify.find_candidates", requestId, {
+                    elapsedMs: Math.round(performance.now() - findCandidatesStartedAt),
+                    candidates: fingerprintCandidates.length,
                 });
-            } catch (error) {
-                if (!isTlsComplexityError(error)) {
-                    logDevicerDiagnostic("identify.primary_failed", requestId, {
-                        error: error instanceof Error ? error.message : String(error),
-                        usedTlsProfile: tlsProfile !== undefined,
-                    });
-                    throw error;
-                }
 
-                console.warn("Retrying identify without TLS profile due to TLSH complexity error:", error instanceof Error ? error.message : error);
+                const exactMatchFound = fingerprintCandidates.some((fp: devicer.DeviceMatch) => fp.confidence >= 100);
+                const closestMatch = Math.max(0, ...fingerprintCandidates.map((fp: devicer.DeviceMatch) => fp.confidence));
+
+                let identifyResult: Record<string, unknown>;
                 try {
-                    const identifyRetryStartedAt = performance.now();
+                    const identifyStartedAt = performance.now();
                     identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
                         ip: realIp,
                         userId,
+                        tlsProfile,
                         headers: requestHeaders,
                     }) as unknown as Record<string, unknown>;
-                    logDevicerDiagnostic("identify.retry_without_tls", requestId, {
-                        elapsedMs: Math.round(performance.now() - identifyRetryStartedAt),
+                    logDevicerDiagnostic("identify.primary", requestId, {
+                        elapsedMs: Math.round(performance.now() - identifyStartedAt),
+                        usedTlsProfile: tlsProfile !== undefined,
                     });
-                } catch (retryError) {
-                    if (!isTlsComplexityError(retryError)) {
-                        logDevicerDiagnostic("identify.retry_failed", requestId, {
-                            error: retryError instanceof Error ? retryError.message : String(retryError),
+                } catch (error) {
+                    if (!isTlsComplexityError(error)) {
+                        logDevicerDiagnostic("identify.primary_failed", requestId, {
+                            error: error instanceof Error ? error.message : String(error),
+                            usedTlsProfile: tlsProfile !== undefined,
                         });
-                        throw retryError;
+                        throw error;
                     }
 
-                    fingerprintIngestStats.tlshComplexityFallbacks += 1;
-                    const fallbackDeviceId = `fallback-${hash.slice(0, 16)}`;
+                    console.warn("Retrying identify without TLS profile due to TLSH complexity error:", error instanceof Error ? error.message : error);
+                    try {
+                        const identifyRetryStartedAt = performance.now();
+                        identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
+                            ip: realIp,
+                            userId,
+                            headers: requestHeaders,
+                        }) as unknown as Record<string, unknown>;
+                        logDevicerDiagnostic("identify.retry_without_tls", requestId, {
+                            elapsedMs: Math.round(performance.now() - identifyRetryStartedAt),
+                        });
+                    } catch (retryError) {
+                        if (!isTlsComplexityError(retryError)) {
+                            logDevicerDiagnostic("identify.retry_failed", requestId, {
+                                error: retryError instanceof Error ? retryError.message : String(retryError),
+                            });
+                            throw retryError;
+                        }
 
-                    // Preserve accumulation even when TLSH-dependent enrichment is not usable.
-                    const fallbackSaveStartedAt = performance.now();
-                    await devicerRuntime.adapters.device.save({
-                        id: crypto.randomUUID(),
-                        deviceId: fallbackDeviceId,
-                        fingerprint: fingerprintData,
-                        timestamp: new Date(),
-                    });
-                    logDevicerDiagnostic("identify.fallback_saved", requestId, {
-                        elapsedMs: Math.round(performance.now() - fallbackSaveStartedAt),
-                        fallbackDeviceId,
-                    });
+                        fingerprintIngestStats.tlshComplexityFallbacks += 1;
+                        const fallbackDeviceId = `fallback-${hash.slice(0, 16)}`;
 
-                    identifyResult = {
-                        deviceId: fallbackDeviceId,
-                        isNewDevice: true,
-                    };
+                        // Preserve accumulation even when TLSH-dependent enrichment is not usable.
+                        const fallbackSaveStartedAt = performance.now();
+                        await devicerRuntime.adapters.device.save({
+                            id: crypto.randomUUID(),
+                            deviceId: fallbackDeviceId,
+                            fingerprint: fingerprintData,
+                            timestamp: new Date(),
+                        });
+                        logDevicerDiagnostic("identify.fallback_saved", requestId, {
+                            elapsedMs: Math.round(performance.now() - fallbackSaveStartedAt),
+                            fallbackDeviceId,
+                        });
+
+                        identifyResult = {
+                            deviceId: fallbackDeviceId,
+                            isNewDevice: true,
+                        };
+                    }
                 }
-            }
+
+                return {
+                    identifyResult,
+                    fingerprintCandidates,
+                    exactMatchFound,
+                    closestMatch,
+                };
+            });
+            logDevicerDiagnostic("identify.coalesced", requestId, {
+                shared,
+                elapsedMs: Math.round(performance.now() - coalescedIdentifyStartedAt),
+            });
+
+            const { identifyResult, fingerprintCandidates, exactMatchFound, closestMatch } = coreIdentify;
 
             const resolvedDeviceId = typeof identifyResult.deviceId === "string"
                 ? identifyResult.deviceId
