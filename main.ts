@@ -2428,6 +2428,10 @@ router.get("/wss", async (context) => {
     }
     const socket = await context.upgrade();
     let socketAnalyticsTimer: ReturnType<typeof setInterval> | undefined;
+    let identifyInFlight = false;
+    let lastProcessedHash: string | null = null;
+    let lastProcessedAt = 0;
+    const DUPLICATE_SUPPRESSION_WINDOW_MS = 15_000;
 
     const cleanupSocket = () => {
         if (socketAnalyticsTimer !== undefined) {
@@ -2497,6 +2501,32 @@ router.get("/wss", async (context) => {
         try {
             const fingerprintData = parsedMessage.value.data;
             const hash = devicer.getHash(JSON.stringify(fingerprintData));
+
+            if (identifyInFlight) {
+                logDevicerDiagnostic("message.skipped_inflight", requestId, {
+                    hash: hash.slice(0, 16),
+                    elapsedMs: Math.round(performance.now() - messageStartedAt),
+                });
+                sendSocketJson(socket, {
+                    type: "info",
+                    data: "Fingerprint processing already in progress.",
+                });
+                return;
+            }
+
+            if (lastProcessedHash === hash && (Date.now() - lastProcessedAt) < DUPLICATE_SUPPRESSION_WINDOW_MS) {
+                logDevicerDiagnostic("message.skipped_duplicate", requestId, {
+                    hash: hash.slice(0, 16),
+                    ageMs: Date.now() - lastProcessedAt,
+                });
+                sendSocketJson(socket, {
+                    type: "info",
+                    data: "Duplicate fingerprint snapshot ignored.",
+                });
+                return;
+            }
+
+            identifyInFlight = true;
             const userId = sanitizeUserId(requestHeaders["x-user-id"]) ?? undefined;
             const coalescedIdentifyStartedAt = performance.now();
             const { result: coreIdentify, shared } = await getOrStartInFlightIdentify(hash, async () => {
@@ -2752,6 +2782,8 @@ router.get("/wss", async (context) => {
             }
 
             fingerprintIngestStats.identifySucceeded += 1;
+            lastProcessedHash = hash;
+            lastProcessedAt = Date.now();
             logDevicerDiagnostic("message.completed", requestId, {
                 totalElapsedMs: Math.round(performance.now() - messageStartedAt),
                 deviceId: resolvedDeviceId,
@@ -2772,6 +2804,8 @@ router.get("/wss", async (context) => {
                 type: "error",
                 data: "Unable to process fingerprint payload.",
             });
+        } finally {
+            identifyInFlight = false;
         }
     };
     } catch (error) {
