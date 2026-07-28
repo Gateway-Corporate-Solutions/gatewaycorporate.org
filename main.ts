@@ -219,6 +219,15 @@ function asStringArray(value: unknown): string[] {
     return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
+function hasBehavioralMetricsPayload(value: unknown): boolean {
+    const record = asRecord(value);
+    if (!record) {
+        return false;
+    }
+
+    return asRecord(record.behavioralMetrics) !== undefined;
+}
+
 function readNumberEnv(name: string, fallback: number, min?: number, max?: number): number {
     const raw = Deno.env.get(name);
     if (!raw) {
@@ -2509,8 +2518,9 @@ router.get("/wss", async (context) => {
         try {
             const fingerprintData = parsedMessage.value.data;
             const hash = devicer.getHash(JSON.stringify(fingerprintData));
+            const includesBehavioralMetrics = hasBehavioralMetricsPayload(fingerprintData);
 
-            if (identifyInFlight) {
+            if (identifyInFlight && !includesBehavioralMetrics) {
                 logDevicerDiagnostic("message.skipped_inflight", requestId, {
                     hash: hash.slice(0, 16),
                     elapsedMs: Math.round(performance.now() - messageStartedAt),
@@ -2522,7 +2532,9 @@ router.get("/wss", async (context) => {
                 return;
             }
 
-            if (lastProcessedHash === hash && (Date.now() - lastProcessedAt) < DUPLICATE_SUPPRESSION_WINDOW_MS) {
+            if (!includesBehavioralMetrics &&
+                lastProcessedHash === hash &&
+                (Date.now() - lastProcessedAt) < DUPLICATE_SUPPRESSION_WINDOW_MS) {
                 logDevicerDiagnostic("message.skipped_duplicate", requestId, {
                     hash: hash.slice(0, 16),
                     ageMs: Date.now() - lastProcessedAt,
