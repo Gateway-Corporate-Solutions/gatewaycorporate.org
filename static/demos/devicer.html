@@ -1206,9 +1206,19 @@ Allow first-party analytics on this site to run a live device assessment.
 						const sharedProbeTrigger = window.__GCX__ && window.__GCX__.requestRiskSnapshot;
 						if (typeof sharedProbeTrigger === "function") {
 							try {
+								const sharedProbePromise = Promise.resolve()
+									.then(() => sharedProbeTrigger())
+									.then(
+										() => ({ ok: true }),
+										(error) => ({ ok: false, error }),
+									);
 								const telemetryPromise = waitForFingerprintTelemetry(DEMO_PROBE_TIMEOUT_MS);
-								await sharedProbeTrigger();
+								setProgressStage(2);
 								const detail = await telemetryPromise;
+								const sharedProbeResult = await sharedProbePromise;
+								if (!sharedProbeResult.ok) {
+									throw sharedProbeResult.error;
+								}
 								if (detail && detail.data) {
 									renderFingerprint(detail.data);
 								}
