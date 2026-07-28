@@ -210,6 +210,28 @@ function asStringArray(value: unknown): string[] {
     return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
+function readNumberEnv(name: string, fallback: number, min?: number, max?: number): number {
+    const raw = Deno.env.get(name);
+    if (!raw) {
+        return fallback;
+    }
+
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) {
+        return fallback;
+    }
+
+    let value = parsed;
+    if (typeof min === "number") {
+        value = Math.max(min, value);
+    }
+    if (typeof max === "number") {
+        value = Math.min(max, value);
+    }
+
+    return Math.round(value);
+}
+
 function isLoopbackHost(host: string | null): boolean {
     if (!host) {
         return false;
@@ -340,10 +362,20 @@ async function buildDevicerRuntime(): Promise<DevicerRuntime> {
 
     const confidenceThreshold = 85;
     const licenseKey = Deno.env.get("DEVICER_LICENSE_KEY");
+    const candidateMinScore = readNumberEnv("DEVICER_CANDIDATE_MIN_SCORE", 40, 0, 100);
+    const stabilityWindowSize = readNumberEnv("DEVICER_STABILITY_WINDOW_SIZE", isProduction ? 2 : 5, 1, 20);
+    const dedupWindowMs = readNumberEnv("DEVICER_DEDUP_WINDOW_MS", isProduction ? 30_000 : 5_000, 0, 120_000);
     const deviceManager = new devicer.DeviceManager(adapters.device, {
         matchThreshold: confidenceThreshold,
-        candidateMinScore: 40,
+        candidateMinScore,
+        stabilityWindowSize,
+        dedupWindowMs,
         logger: console,
+    });
+    console.info("Devicer manager tuning", {
+        candidateMinScore,
+        stabilityWindowSize,
+        dedupWindowMs,
     });
     let bbasManager: bbasDevicer.BbasManager | null = null;
 
