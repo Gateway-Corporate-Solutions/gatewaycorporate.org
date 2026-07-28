@@ -140,6 +140,27 @@
 				color: #fff2df;
 			}
 
+			.runtime-status-line {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+			}
+
+			.suspense-spinner {
+				display: inline-block;
+				width: 0.95rem;
+				height: 0.95rem;
+				border-radius: 50%;
+				border: 2px solid rgba(223, 175, 123, 0.24);
+				border-top-color: #dfaf7b;
+				animation: spin 0.9s linear infinite;
+				flex-shrink: 0;
+			}
+
+			.suspense-spinner.hidden {
+				display: none;
+			}
+
 			.demo-runtime-controls {
 				display: flex;
 				justify-content: center;
@@ -387,6 +408,16 @@
 				}
 			}
 
+			@keyframes spin {
+				from {
+					transform: rotate(0deg);
+				}
+
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
 			.reveal {
 				opacity: 0;
 				animation: revealUp 0.7s ease forwards;
@@ -499,7 +530,10 @@
 						<a class="btn btn-secondary" href="/contact">Book a Demo Walkthrough</a>
 					</div>
 					<p id="demo-runtime-status" class="demo-runtime-status reveal delay-3">
-						<strong>Live assessment:</strong> waiting for first-party telemetry. Allow analytics to run the live VPN and country checks on this page.
+						<span class="runtime-status-line">
+							<span id="demo-runtime-spinner" class="suspense-spinner" aria-hidden="true"></span>
+							<span id="demo-runtime-status-text"><strong>Live assessment:</strong> waiting for first-party telemetry. Allow analytics to run the live VPN and country checks on this page.</span>
+						</span>
 					</p>
 					<div class="demo-runtime-controls reveal delay-3">
 						<p id="run-demo-hint" class="text-small" style="margin:0; color:#d7c4ab;">Use the button to start or rerun the live device assessment on demand.</p>
@@ -531,7 +565,7 @@
 					<article class="demo-card reveal">
 						<div class="demo-card-header">
 							<h2 class="demo-card-title">Session Fingerprint</h2>
-							<span id="demo-session-chip" class="demo-card-chip">Awaiting Telemetry</span>
+							<span id="demo-session-chip" class="demo-card-chip"><span class="suspense-spinner" style="width:0.72rem;height:0.72rem;border-width:2px;vertical-align:-0.08rem;margin-right:0.35rem;"></span>Awaiting Telemetry</span>
 						</div>
 						<div class="demo-card-body">
 							<div class="signal-grid">
@@ -671,6 +705,20 @@ Allow first-party analytics on this site to run a live device assessment.
 					}
 				}
 
+				function setRuntimeStatus(message, isLoading = false) {
+					setText("demo-runtime-status-text", message);
+					const spinner = getById("demo-runtime-spinner");
+					if (!spinner) {
+						return;
+					}
+
+					if (isLoading) {
+						spinner.classList.remove("hidden");
+					} else {
+						spinner.classList.add("hidden");
+					}
+				}
+
 				function setRunDemoState(options) {
 					const button = getById("run-demo-btn");
 					const hint = getById("run-demo-hint");
@@ -792,7 +840,7 @@ Allow first-party analytics on this site to run a live device assessment.
 						: "";
 
 					if (!token) {
-						setText("demo-runtime-status", "Live assessment unavailable because the websocket token is missing.");
+						setRuntimeStatus("Live assessment unavailable because the websocket token is missing.", false);
 						setRunDemoState({
 							disabled: false,
 							label: "Run Demo Assessment",
@@ -802,7 +850,7 @@ Allow first-party analytics on this site to run a live device assessment.
 						return;
 					}
 
-					setText("demo-runtime-status", "Live assessment starting. Running a demo-local fingerprint probe now.");
+					setRuntimeStatus("Live assessment starting. Running a demo-local fingerprint probe now.", true);
 					setRunDemoState({
 						disabled: true,
 						label: "Running Assessment...",
@@ -896,7 +944,7 @@ Allow first-party analytics on this site to run a live device assessment.
 						});
 					} catch (error) {
 						console.error("Demo telemetry probe failed:", error);
-						setText("demo-runtime-status", `Live assessment probe failed: ${error instanceof Error ? error.message : "unknown error"}`);
+						setRuntimeStatus(`Live assessment probe failed: ${error instanceof Error ? error.message : "unknown error"}`, false);
 						setRunDemoState({
 							disabled: false,
 							label: "Retry Demo Assessment",
@@ -968,7 +1016,7 @@ Allow first-party analytics on this site to run a live device assessment.
 					const highRiskCountry = HIGH_RISK_COUNTRIES.has(country);
 					const action = buildAction(payload, highRiskCountry);
 
-					setText("demo-runtime-status", "Live assessment active. VPN, proxy, country, TLS, and bot signals are being read from the current device session.");
+					setRuntimeStatus("Live assessment active. VPN, proxy, country, TLS, and bot signals are being read from the current device session.", false);
 					setRunDemoState({
 						disabled: false,
 						label: "Run Demo Again",
@@ -1039,21 +1087,21 @@ Allow first-party analytics on this site to run a live device assessment.
 				function renderConsentState() {
 					const consent = window.localStorage.getItem(CONSENT_KEY);
 					if (consent === "declined") {
-						setText("demo-runtime-status", "Live assessment disabled because analytics consent was declined. Allow analytics to run the VPN and country checks.");
+						setRuntimeStatus("Live assessment disabled because analytics consent was declined. Allow analytics to run the VPN and country checks.", false);
 						setRunDemoState({
 							disabled: true,
 							label: "Run Demo Assessment",
 							hint: "Analytics consent is declined, so the live assessment cannot start until consent is allowed.",
 						});
 					} else if (consent !== "accepted") {
-						setText("demo-runtime-status", "Live assessment waiting for consent. Allow analytics to run the VPN and country checks on this page.");
+						setRuntimeStatus("Live assessment waiting for consent. Allow analytics to run the VPN and country checks on this page.", true);
 						setRunDemoState({
 							disabled: true,
 							label: "Run Demo Assessment",
 							hint: "Accept analytics consent first, then run the live device assessment.",
 						});
 					} else {
-						setText("demo-runtime-status", "Live assessment ready. Click Run Demo Assessment to trigger an on-demand websocket probe, or wait for background telemetry.");
+						setRuntimeStatus("Live assessment ready. Click Run Demo Assessment to trigger an on-demand websocket probe, or wait for background telemetry.", false);
 						setRunDemoState({
 							disabled: false,
 							label: "Run Demo Assessment",
@@ -1084,7 +1132,7 @@ Allow first-party analytics on this site to run a live device assessment.
 					runDemoButton.addEventListener("click", () => {
 						const consent = window.localStorage.getItem(CONSENT_KEY);
 						if (consent !== "accepted") {
-							setText("demo-runtime-status", "Live assessment requires analytics consent. Allow analytics first, then run the demo assessment.");
+							setRuntimeStatus("Live assessment requires analytics consent. Allow analytics first, then run the demo assessment.", false);
 							return;
 						}
 
@@ -1099,7 +1147,7 @@ Allow first-party analytics on this site to run a live device assessment.
 					}
 
 					if (target.getAttribute("data-consent-action") === "accept") {
-						setText("demo-runtime-status", "Analytics consent accepted. Click Run Demo Assessment to start the live websocket probe.");
+						setRuntimeStatus("Analytics consent accepted. Click Run Demo Assessment to start the live websocket probe.", false);
 						setRunDemoState({
 							disabled: false,
 							label: "Run Demo Assessment",
