@@ -810,10 +810,11 @@ Allow first-party analytics on this site to run a live device assessment.
 				const DEMO_PROGRESS_STAGE_MIN_MS = 450;
 				const DEMO_SOCKET_CONNECT_TIMEOUT_MS = 5000;
 				const DEMO_PROBE_TIMEOUT_MS = 20000;
-				const DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS = 12000;
+				const DEMO_CORE_BEHAVIORAL_MIN_MS = 1000;
+				const DEMO_CORE_BEHAVIORAL_MAX_WAIT_MS = 3500;
+				const DEMO_CORE_BEHAVIORAL_POLL_MS = 60;
 				let fallbackProbeStarted = false;
 				let fallbackProbeInFlight = false;
-				let behavioralFollowupInFlight = false;
 				let progressDisplayedStage = -1;
 				let progressQueuedStage = -1;
 				let progressLastPaintAt = 0;
@@ -1122,8 +1123,7 @@ Allow first-party analytics on this site to run a live device assessment.
 					});
 				}
 
-				async function collectDemoFingerprintPayload(mode = "core") {
-					const collectBehavioral = mode === "behavioral";
+				async function collectDemoFingerprintPayload() {
 					await loadScript("/bundle.js");
 
 					const exported = window.snatch;
@@ -1135,88 +1135,20 @@ Allow first-party analytics on this site to run a live device assessment.
 					const agent = new Snatch();
 					if (typeof agent.capture === "function") {
 						return await agent.capture({
-							minBehavioralDurationMs: collectBehavioral ? 1200 : 0,
-							maxBehavioralWaitMs: collectBehavioral ? 4000 : 0,
-							pollIntervalMs: collectBehavioral ? 80 : 20,
+							// One-shot flow: include behavioral evidence in the initial
+							// data collection phase before first websocket send.
+							minBehavioralDurationMs: DEMO_CORE_BEHAVIORAL_MIN_MS,
+							maxBehavioralWaitMs: DEMO_CORE_BEHAVIORAL_MAX_WAIT_MS,
+							pollIntervalMs: DEMO_CORE_BEHAVIORAL_POLL_MS,
 							requireInteraction: false,
 						});
 					}
 
 					await agent.ready;
-					if (collectBehavioral && agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
+					if (agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
 						agent.dataset.behavioralMetrics = agent._behavioral.computeBehavioralMetrics();
 					}
 					return agent.dataset || null;
-				}
-
-				async function sendBehavioralFollowupProbe(token) {
-					if (behavioralFollowupInFlight) {
-						return;
-					}
-
-					behavioralFollowupInFlight = true;
-					try {
-						const payload = await collectDemoFingerprintPayload("behavioral");
-						if (!payload) {
-							return;
-						}
-
-						const behavioralPayload = {
-							...payload,
-							__gcxBehavioralFollowup: true,
-						};
-
-						await new Promise((resolve) => {
-							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
-							const timeoutId = window.setTimeout(() => {
-								socket.close();
-								resolve();
-							}, DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS);
-
-							socket.addEventListener("open", () => {
-								socket.send(JSON.stringify({ type: "data", data: behavioralPayload }));
-							}, { once: true });
-
-							socket.addEventListener("message", (event) => {
-								try {
-									const detail = JSON.parse(event.data);
-									if (!detail || typeof detail !== "object") {
-										return;
-									}
-
-									if (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral") {
-										window.__GCX__ = window.__GCX__ || {};
-										window.__GCX__.riskTelemetry = detail.data;
-										renderFingerprint(detail.data);
-										if (detail.type === "fingerprintBehavioral") {
-											window.clearTimeout(timeoutId);
-											socket.close();
-											resolve();
-										}
-									}
-								} catch {
-									window.clearTimeout(timeoutId);
-									socket.close();
-									resolve();
-								}
-							});
-
-							socket.addEventListener("error", () => {
-								window.clearTimeout(timeoutId);
-								socket.close();
-								resolve();
-							}, { once: true });
-
-							socket.addEventListener("close", () => {
-								window.clearTimeout(timeoutId);
-								resolve();
-							}, { once: true });
-						});
-					} catch (error) {
-						console.warn("Behavioral follow-up probe failed:", error);
-					} finally {
-						behavioralFollowupInFlight = false;
-					}
 				}
 
 				async function sendCoreProbe(token) {
@@ -1225,7 +1157,7 @@ Allow first-party analytics on this site to run a live device assessment.
 						buildWebSocketUrl(window.location, token),
 						DEMO_SOCKET_CONNECT_TIMEOUT_MS,
 					);
-					const payloadPromise = collectDemoFingerprintPayload("core");
+					const payloadPromise = collectDemoFingerprintPayload();
 
 					let socket;
 					let payload;
@@ -1391,14 +1323,10 @@ Allow first-party analytics on this site to run a live device assessment.
 						window.__GCX__.lastDirectProbeTiming = probeResult.timings;
 						renderFingerprint(directDetail.data);
 
-						if (directDetail.type === "fingerprint" && directDetail.data.pending && directDetail.data.pending.behavioral === true) {
-							void sendBehavioralFollowupProbe(token);
-						}
-
 						setRunDemoState({
 							disabled: false,
 							label: "Run Demo Again",
-							hint: "Live telemetry updated using a direct websocket probe. Behavioral updates continue in the background.",
+							hint: "Live telemetry updated using one-shot fingerprint collection with behavioral evidence included in the first payload.",
 						});
 						return;
 					} catch (error) {
