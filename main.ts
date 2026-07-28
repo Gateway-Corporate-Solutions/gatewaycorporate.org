@@ -2709,6 +2709,7 @@ router.get("/wss", async (context) => {
             });
 
             if (devicerRuntime.bbasManager) {
+                let behavioralResponseSent = false;
                 try {
                     const bbasManager = devicerRuntime.bbasManager;
                     const behavioralMetrics = asRecord(asRecord(fingerprintData)?.behavioralMetrics) as Parameters<typeof bbasManager.analyze>[3];
@@ -2790,6 +2791,7 @@ router.get("/wss", async (context) => {
                             },
                         },
                     });
+                    behavioralResponseSent = true;
 
                     if (bbasDecision === "block" || bbasDecision === "challenge") {
                         sendSocketJson(socket, {
@@ -2807,6 +2809,54 @@ router.get("/wss", async (context) => {
                         error: error instanceof Error ? error.message : String(error),
                     });
                     console.warn("Behavioral enrichment failed:", error instanceof Error ? error.message : error);
+
+                    if (!behavioralResponseSent) {
+                        sendSocketJson(socket, {
+                            type: "fingerprintBehavioral",
+                            data: {
+                                hash,
+                                phase: "behavioral",
+                                pending: {
+                                    behavioral: false,
+                                },
+                                exactMatchFound,
+                                closestMatch: closestMatch || 0,
+                                deviceId: resolvedDeviceId,
+                                isNewDevice: identifyResult.isNewDevice === true,
+                                ip: {
+                                    riskScore: typeof ipDetails?.riskScore === "number" ? ipDetails.riskScore : null,
+                                    isProxy: ipDetails?.isProxy === true,
+                                    isVpn: ipDetails?.isVpn === true,
+                                    isTor: ipDetails?.isTor === true,
+                                    isHosting: ipDetails?.isHosting === true,
+                                    isAiAgent: agentInfo?.isAiAgent === true,
+                                    aiAgentProvider: typeof agentInfo?.aiAgentProvider === "string" ? agentInfo.aiAgentProvider : null,
+                                    country,
+                                },
+                                tls: tlsConsistency ? {
+                                    consistencyScore: typeof tlsConsistency.consistencyScore === "number" ? tlsConsistency.consistencyScore : null,
+                                    ja4Match: typeof tlsConsistency.ja4Match === "boolean" ? tlsConsistency.ja4Match : null,
+                                    factors: asStringArray(tlsConsistency.factors),
+                                } : null,
+                                peer: peerReputation ? {
+                                    peerCount: typeof peerReputation.peerCount === "number" ? peerReputation.peerCount : 0,
+                                    taintScore: typeof peerReputation.taintScore === "number" ? peerReputation.taintScore : null,
+                                    trustScore: typeof peerReputation.trustScore === "number" ? peerReputation.trustScore : null,
+                                    confidenceBoost: peerConfidenceBoost,
+                                    factors: asStringArray(peerReputation.factors),
+                                } : null,
+                                bot: {
+                                    botScore: null,
+                                    decision: "allow",
+                                    isHeadless: null,
+                                    isBot: null,
+                                    isCrawler: null,
+                                    behavioralHumanScore: null,
+                                    factors: ["behavioral_unavailable"],
+                                },
+                            },
+                        });
+                    }
                 }
             }
 
