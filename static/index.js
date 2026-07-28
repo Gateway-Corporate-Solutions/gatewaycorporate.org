@@ -339,7 +339,7 @@ const RiskTelemetrySocket = {
       const payload = JSON.parse(event.data);
       window.__GCX__ = window.__GCX__ || {};
 
-      if (payload && typeof payload === "object" && payload.type === "fingerprint") {
+      if (payload && typeof payload === "object" && (payload.type === "fingerprint" || payload.type === "fingerprintBehavioral")) {
         window.__GCX__.riskTelemetry = payload.data;
       } else if (payload && typeof payload === "object" && payload.type === "analytics") {
         window.__GCX__.riskAnalytics = payload.data;

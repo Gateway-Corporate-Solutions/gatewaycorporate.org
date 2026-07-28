@@ -167,6 +167,7 @@ type DevicerRuntime = {
     };
     confidenceThreshold: number;
     deviceManager: devicer.DeviceManager;
+    bbasManager: bbasDevicer.BbasManager | null;
 };
 
 type AnalyticsState = {
@@ -286,6 +287,7 @@ async function buildDevicerRuntime(): Promise<DevicerRuntime> {
         candidateMinScore: 40,
         logger: console,
     });
+    let bbasManager: bbasDevicer.BbasManager | null = null;
 
     try {
         const geoPath = "./data/GeoLite2-City.mmdb";
@@ -323,13 +325,12 @@ async function buildDevicerRuntime(): Promise<DevicerRuntime> {
     }
 
     try {
-        const bbasManager = new bbasDevicer.BbasManager({
+        bbasManager = new bbasDevicer.BbasManager({
             licenseKey,
             storage: adapters.bbas,
             enableBehavioralAnalysis: true,
             enableCrossPlugin: true,
         });
-        deviceManager.use(bbasManager);
     } catch (error) {
         console.warn("Failed to initialize bbas-devicer plugin:", error);
     }
@@ -338,6 +339,7 @@ async function buildDevicerRuntime(): Promise<DevicerRuntime> {
         adapters,
         confidenceThreshold,
         deviceManager,
+        bbasManager,
     };
 }
 
@@ -2337,6 +2339,7 @@ router.get("/wss", async (context) => {
             const userId = sanitizeUserId(requestHeaders["x-user-id"]) ?? undefined;
 
             let identifyResult: Record<string, unknown>;
+            let resolvedDeviceId: string;
             try {
                 identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
                     ip: realIp,
@@ -2379,25 +2382,30 @@ router.get("/wss", async (context) => {
                 }
             }
 
+            resolvedDeviceId = typeof identifyResult.deviceId === "string"
+                ? identifyResult.deviceId
+                : `fallback-${hash.slice(0, 16)}`;
+
             const tlsConsistency = asRecord(identifyResult.tlsConsistency);
             const peerReputation = asRecord(identifyResult.peerReputation);
-            const bbasEnrichment = asRecord(identifyResult.bbasEnrichment);
             const enrichmentInfo = asRecord(identifyResult.enrichmentInfo);
             const enrichmentDetails = asRecord(enrichmentInfo?.details);
             const ipDetails = asRecord(enrichmentDetails?.ip);
             const agentInfo = asRecord(ipDetails?.agentInfo);
-            const uaClassification = asRecord(bbasEnrichment?.uaClassification);
             const peerConfidenceBoost = typeof identifyResult.peerConfidenceBoost === "number" ? identifyResult.peerConfidenceBoost : null;
-            const bbasDecision = typeof identifyResult.bbasDecision === "string" ? identifyResult.bbasDecision : null;
             const country = typeof ipDetails?.country === "string" ? ipDetails.country : null;
 
             sendSocketJson(socket, {
                 type: "fingerprint",
                 data: {
                     hash,
+                    phase: "core",
+                    pending: {
+                        behavioral: devicerRuntime.bbasManager !== null,
+                    },
                     exactMatchFound,
                     closestMatch: closestMatch || 0,
-                    deviceId: typeof identifyResult.deviceId === "string" ? identifyResult.deviceId : null,
+                    deviceId: resolvedDeviceId,
                     isNewDevice: identifyResult.isNewDevice === true,
                     ip: {
                         riskScore: typeof ipDetails?.riskScore === "number" ? ipDetails.riskScore : null,
@@ -2421,19 +2429,103 @@ router.get("/wss", async (context) => {
                         confidenceBoost: peerConfidenceBoost,
                         factors: asStringArray(peerReputation.factors),
                     } : null,
-                    bot: bbasEnrichment ? {
-                        botScore: typeof bbasEnrichment.botScore === "number" ? bbasEnrichment.botScore : null,
-                        decision: bbasDecision,
-                        isHeadless: uaClassification?.isHeadless === true,
-                        isBot: uaClassification?.isBot === true,
-                        isCrawler: uaClassification?.isCrawler === true,
-                        behavioralHumanScore: typeof asRecord(bbasEnrichment.behavioralSignals)?.humanScore === "number"
-                            ? asRecord(bbasEnrichment.behavioralSignals)?.humanScore
-                            : null,
-                        factors: asStringArray(bbasEnrichment.botFactors),
-                    } : null,
+                    bot: null,
                 },
             });
+
+            if (devicerRuntime.bbasManager) {
+                try {
+                    const bbasManager = devicerRuntime.bbasManager;
+                    const behavioralMetrics = asRecord(asRecord(fingerprintData)?.behavioralMetrics) as Parameters<typeof bbasManager.analyze>[3];
+                    const crossPluginSignals = {
+                        ipRiskScore: typeof ipDetails?.riskScore === "number" ? ipDetails.riskScore : undefined,
+                        isProxy: ipDetails?.isProxy === true,
+                        isVpn: ipDetails?.isVpn === true,
+                        isTor: ipDetails?.isTor === true,
+                        isHosting: ipDetails?.isHosting === true,
+                        isAiAgent: agentInfo?.isAiAgent === true,
+                        aiAgentProvider: typeof agentInfo?.aiAgentProvider === "string" ? agentInfo.aiAgentProvider : undefined,
+                        tlsConsistencyScore: typeof tlsConsistency?.consistencyScore === "number" ? tlsConsistency.consistencyScore : undefined,
+                        tlsFactors: asStringArray(tlsConsistency?.factors),
+                        peerTaintScore: typeof peerReputation?.taintScore === "number" ? peerReputation.taintScore : undefined,
+                        rdapAsnOrg: typeof ipDetails?.asnOrg === "string" ? ipDetails.asnOrg : undefined,
+                    } as Parameters<typeof bbasManager.analyze>[2];
+
+                    const { enrichment: bbasEnrichment, decision: bbasDecision } = await bbasManager.analyze(
+                        resolvedDeviceId,
+                        {
+                            ip: realIp,
+                            userId,
+                            headers: requestHeaders,
+                        },
+                        crossPluginSignals,
+                        behavioralMetrics,
+                    );
+                    const uaClassification = asRecord(bbasEnrichment?.uaClassification);
+
+                    sendSocketJson(socket, {
+                        type: "fingerprintBehavioral",
+                        data: {
+                            hash,
+                            phase: "behavioral",
+                            pending: {
+                                behavioral: false,
+                            },
+                            exactMatchFound,
+                            closestMatch: closestMatch || 0,
+                            deviceId: resolvedDeviceId,
+                            isNewDevice: identifyResult.isNewDevice === true,
+                            ip: {
+                                riskScore: typeof ipDetails?.riskScore === "number" ? ipDetails.riskScore : null,
+                                isProxy: ipDetails?.isProxy === true,
+                                isVpn: ipDetails?.isVpn === true,
+                                isTor: ipDetails?.isTor === true,
+                                isHosting: ipDetails?.isHosting === true,
+                                isAiAgent: agentInfo?.isAiAgent === true,
+                                aiAgentProvider: typeof agentInfo?.aiAgentProvider === "string" ? agentInfo.aiAgentProvider : null,
+                                country,
+                            },
+                            tls: tlsConsistency ? {
+                                consistencyScore: typeof tlsConsistency.consistencyScore === "number" ? tlsConsistency.consistencyScore : null,
+                                ja4Match: typeof tlsConsistency.ja4Match === "boolean" ? tlsConsistency.ja4Match : null,
+                                factors: asStringArray(tlsConsistency.factors),
+                            } : null,
+                            peer: peerReputation ? {
+                                peerCount: typeof peerReputation.peerCount === "number" ? peerReputation.peerCount : 0,
+                                taintScore: typeof peerReputation.taintScore === "number" ? peerReputation.taintScore : null,
+                                trustScore: typeof peerReputation.trustScore === "number" ? peerReputation.trustScore : null,
+                                confidenceBoost: peerConfidenceBoost,
+                                factors: asStringArray(peerReputation.factors),
+                            } : null,
+                            bot: {
+                                botScore: typeof bbasEnrichment.botScore === "number" ? bbasEnrichment.botScore : null,
+                                decision: bbasDecision,
+                                isHeadless: uaClassification?.isHeadless === true,
+                                isBot: uaClassification?.isBot === true,
+                                isCrawler: uaClassification?.isCrawler === true,
+                                behavioralHumanScore: typeof asRecord(bbasEnrichment.behavioralSignals)?.humanScore === "number"
+                                    ? asRecord(bbasEnrichment.behavioralSignals)?.humanScore
+                                    : null,
+                                factors: asStringArray(bbasEnrichment.botFactors),
+                            },
+                        },
+                    });
+
+                    if (bbasDecision === "block" || bbasDecision === "challenge") {
+                        sendSocketJson(socket, {
+                            type: "botAlert",
+                            data: {
+                                hash,
+                                decision: bbasDecision,
+                                botScore: typeof bbasEnrichment?.botScore === "number" ? bbasEnrichment.botScore : null,
+                                factors: asStringArray(bbasEnrichment?.botFactors),
+                            },
+                        });
+                    }
+                } catch (error) {
+                    console.warn("Behavioral enrichment failed:", error instanceof Error ? error.message : error);
+                }
+            }
 
             if (["IN", "BD", "NG", "RO", "RU", "IR", "CN", "KP"].includes(country as string)) {
                 sendSocketJson(socket, {
@@ -2441,18 +2533,6 @@ router.get("/wss", async (context) => {
                     data: {
                         hash,
                         country,
-                    },
-                });
-            }
-
-            if (bbasDecision === "block" || bbasDecision === "challenge") {
-                sendSocketJson(socket, {
-                    type: "botAlert",
-                    data: {
-                        hash,
-                        decision: bbasDecision,
-                        botScore: typeof bbasEnrichment?.botScore === "number" ? bbasEnrichment.botScore : null,
-                        factors: asStringArray(bbasEnrichment?.botFactors),
                     },
                 });
             }

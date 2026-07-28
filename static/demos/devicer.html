@@ -866,11 +866,15 @@ Allow first-party analytics on this site to run a live device assessment.
 						await new Promise((resolve, reject) => {
 							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
 							let settled = false;
+							let behavioralFollowupTimer = null;
 							const timeoutId = window.setTimeout(() => {
 								if (settled) {
 									return;
 								}
 								settled = true;
+								if (behavioralFollowupTimer !== null) {
+									window.clearTimeout(behavioralFollowupTimer);
+								}
 								socket.close();
 								reject(new Error("Telemetry probe timed out waiting for a server response."));
 							}, 10000);
@@ -882,31 +886,54 @@ Allow first-party analytics on this site to run a live device assessment.
 							socket.addEventListener("message", (event) => {
 								try {
 									const detail = JSON.parse(event.data);
-									if (detail && typeof detail === "object" && detail.type === "fingerprint") {
-										if (settled) {
-											return;
-										}
-										settled = true;
+									if (detail && typeof detail === "object" && (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral")) {
 										window.__GCX__ = window.__GCX__ || {};
 										window.__GCX__.riskTelemetry = detail.data;
 										renderFingerprint(detail.data);
-										setRunDemoState({
-											disabled: false,
-											label: "Run Demo Again",
-											hint: "Live assessment complete. Run it again after changing networks or browser posture.",
-										});
-										window.clearTimeout(timeoutId);
+
+										if (!settled) {
+											settled = true;
+											setRunDemoState({
+												disabled: false,
+												label: "Run Demo Again",
+												hint: "Core assessment complete. Behavioral updates will stream in if still pending.",
+											});
+											window.clearTimeout(timeoutId);
+											resolve();
+										}
+
+										const waitingOnBehavior = detail.type === "fingerprint" && detail.data && detail.data.pending && detail.data.pending.behavioral === true;
+										if (waitingOnBehavior) {
+											if (behavioralFollowupTimer !== null) {
+												window.clearTimeout(behavioralFollowupTimer);
+											}
+											behavioralFollowupTimer = window.setTimeout(() => {
+												socket.close();
+											}, 10000);
+											return;
+										}
+
+										if (behavioralFollowupTimer !== null) {
+											window.clearTimeout(behavioralFollowupTimer);
+										}
 										socket.close();
-										resolve();
 										return;
 									}
 
 									if (detail && typeof detail === "object" && detail.type === "error") {
 										if (settled) {
+											if (behavioralFollowupTimer !== null) {
+												window.clearTimeout(behavioralFollowupTimer);
+											}
+											socket.close();
+											setRuntimeStatus("Behavioral analysis did not complete, but core assessment is available.", false);
 											return;
 										}
 										settled = true;
 										window.clearTimeout(timeoutId);
+										if (behavioralFollowupTimer !== null) {
+											window.clearTimeout(behavioralFollowupTimer);
+										}
 										socket.close();
 										reject(new Error(typeof detail.data === "string" ? detail.data : "Telemetry probe returned an error."));
 									}
@@ -916,6 +943,9 @@ Allow first-party analytics on this site to run a live device assessment.
 									}
 									settled = true;
 									window.clearTimeout(timeoutId);
+									if (behavioralFollowupTimer !== null) {
+										window.clearTimeout(behavioralFollowupTimer);
+									}
 									socket.close();
 									reject(error);
 								}
@@ -923,21 +953,35 @@ Allow first-party analytics on this site to run a live device assessment.
 
 							socket.addEventListener("error", () => {
 								if (settled) {
+									if (behavioralFollowupTimer !== null) {
+										window.clearTimeout(behavioralFollowupTimer);
+									}
+									socket.close();
+									setRuntimeStatus("Behavioral analysis connection interrupted, but core assessment is available.", false);
 									return;
 								}
 								settled = true;
 								window.clearTimeout(timeoutId);
+								if (behavioralFollowupTimer !== null) {
+									window.clearTimeout(behavioralFollowupTimer);
+								}
 								reject(new Error("Telemetry probe websocket failed."));
 							}, { once: true });
 
 							socket.addEventListener("close", (closeEvent) => {
 								if (settled) {
 									window.clearTimeout(timeoutId);
+									if (behavioralFollowupTimer !== null) {
+										window.clearTimeout(behavioralFollowupTimer);
+									}
 									return;
 								}
 
 								settled = true;
 								window.clearTimeout(timeoutId);
+								if (behavioralFollowupTimer !== null) {
+									window.clearTimeout(behavioralFollowupTimer);
+								}
 								const reason = closeEvent.reason ? ` (${closeEvent.reason})` : "";
 								reject(new Error(`Telemetry websocket closed before fingerprint response. Code ${closeEvent.code}${reason}`));
 							});
@@ -955,10 +999,19 @@ Allow first-party analytics on this site to run a live device assessment.
 					}
 				}
 
-				function buildAction(payload, highRiskCountry) {
+				function buildAction(payload, highRiskCountry, pendingBehavioral = false) {
 					const ip = payload.ip || {};
 					const bot = payload.bot || {};
 					const tls = payload.tls || {};
+
+					if (pendingBehavioral) {
+						return {
+							label: "Collecting behavioral evidence",
+							detail: "Core network and TLS checks are complete. Behavioral scoring is still collecting mouse and keyboard evidence.",
+							risk: "Risk posture: provisional. Hold sensitive actions until behavioral analysis finishes.",
+							chip: "Behavioral Pending",
+						};
+					}
 
 					if (bot.decision === "block" || ip.isTor === true) {
 						return {
@@ -1012,15 +1065,23 @@ Allow first-party analytics on this site to run a live device assessment.
 					const ip = payload.ip && typeof payload.ip === "object" ? payload.ip : {};
 					const tls = payload.tls && typeof payload.tls === "object" ? payload.tls : {};
 					const bot = payload.bot && typeof payload.bot === "object" ? payload.bot : {};
+					const pending = payload.pending && typeof payload.pending === "object" ? payload.pending : {};
+					const pendingBehavioral = pending.behavioral === true;
 					const country = typeof ip.country === "string" ? ip.country : "unknown";
 					const highRiskCountry = HIGH_RISK_COUNTRIES.has(country);
-					const action = buildAction(payload, highRiskCountry);
+					const action = buildAction(payload, highRiskCountry, pendingBehavioral);
 
-					setRuntimeStatus("Live assessment active. VPN, proxy, country, TLS, and bot signals are being read from the current device session.", false);
+					if (pendingBehavioral) {
+						setRuntimeStatus("Core assessment complete. Behavioral analysis is still collecting mouse and keyboard evidence.", true);
+					} else {
+						setRuntimeStatus("Live assessment active. VPN, proxy, country, TLS, and bot signals are being read from the current device session.", false);
+					}
 					setRunDemoState({
 						disabled: false,
 						label: "Run Demo Again",
-						hint: "The console is showing live server-side enrichment for this session. Rerun to refresh the assessment.",
+						hint: pendingBehavioral
+							? "Core checks are ready. Behavioral scoring is still running and will update automatically."
+							: "The console is showing live server-side enrichment for this session. Rerun to refresh the assessment.",
 					});
 					setText("demo-session-chip", action.chip);
 					setText("demo-device-signature", payload.deviceId || payload.hash || "Observed session");
@@ -1038,7 +1099,9 @@ Allow first-party analytics on this site to run a live device assessment.
 						"demo-behavior-fit",
 						bot.decision
 							? `${bot.decision} / human score ${formatPercent(bot.behavioralHumanScore) || "unknown"}`
-							: "No behavioral classification returned",
+							: pendingBehavioral
+								? "Behavioral analysis in progress"
+								: "No behavioral classification returned",
 					);
 					setText("demo-risk-copy", action.risk);
 
@@ -1064,8 +1127,12 @@ Allow first-party analytics on this site to run a live device assessment.
 						? "The current TLS fingerprint diverges from the expected device cohort. Increase scrutiny for spoofing or session brokering."
 						: "TLS consistency is being read from the live event stream and compared against the known cohort when available.");
 
-					setText("insight-bot-value", `decision: ${bot.decision || "unknown"}, headless: ${yesNoUnknown(bot.isHeadless)}`);
-					setText("insight-bot-detail", bot.decision === "block" || bot.decision === "challenge"
+					setText("insight-bot-value", pendingBehavioral
+						? "Behavioral analysis pending"
+						: `decision: ${bot.decision || "unknown"}, headless: ${yesNoUnknown(bot.isHeadless)}`);
+					setText("insight-bot-detail", pendingBehavioral
+						? "Mouse and keyboard evidence is still being evaluated. Bot decision will update automatically when ready."
+						: bot.decision === "block" || bot.decision === "challenge"
 						? "Bot screening recommends intervention. Review the bot factors and human score before permitting high-value actions."
 						: "No blocking bot decision is present in the current live classification.");
 
@@ -1116,7 +1183,7 @@ Allow first-party analytics on this site to run a live device assessment.
 						return;
 					}
 
-					if (detail.type === "fingerprint") {
+					if (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral") {
 						renderFingerprint(detail.data);
 						return;
 					}
