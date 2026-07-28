@@ -1038,6 +1038,53 @@ Allow first-party analytics on this site to run a live device assessment.
 					return `${scheme}//${locationObject.host}/wss?token=${encodeURIComponent(token)}`;
 				}
 
+				function openWebSocketWithTimeout(url, timeoutMs) {
+					return new Promise((resolve, reject) => {
+						let settled = false;
+						const socket = new WebSocket(url);
+						const timerId = window.setTimeout(() => {
+							if (settled) {
+								return;
+							}
+
+							settled = true;
+							socket.close();
+							reject(new Error("WebSocket open timed out."));
+						}, timeoutMs);
+
+						socket.addEventListener("open", () => {
+							if (settled) {
+								return;
+							}
+
+							settled = true;
+							window.clearTimeout(timerId);
+							resolve(socket);
+						}, { once: true });
+
+						socket.addEventListener("error", () => {
+							if (settled) {
+								return;
+							}
+
+							settled = true;
+							window.clearTimeout(timerId);
+							socket.close();
+							reject(new Error("WebSocket failed before opening."));
+						}, { once: true });
+
+						socket.addEventListener("close", () => {
+							if (settled) {
+								return;
+							}
+
+							settled = true;
+							window.clearTimeout(timerId);
+							reject(new Error("WebSocket closed before opening."));
+						}, { once: true });
+					});
+				}
+
 				function loadScript(src) {
 					if (src === "/bundle.js" && window.snatch) {
 						return Promise.resolve();
@@ -1167,6 +1214,66 @@ Allow first-party analytics on this site to run a live device assessment.
 					}
 				}
 
+				async function sendCoreProbe(token) {
+					const payload = await collectDemoFingerprintPayload("core");
+					if (!payload) {
+						throw new Error("Fingerprint payload unavailable.");
+					}
+
+					const socket = await openWebSocketWithTimeout(
+						buildWebSocketUrl(window.location, token),
+						DEMO_SOCKET_CONNECT_TIMEOUT_MS,
+					);
+
+					return await new Promise((resolve, reject) => {
+						let settled = false;
+						const timeoutId = window.setTimeout(() => {
+							if (settled) {
+								return;
+							}
+
+							settled = true;
+							socket.close();
+							reject(new Error("Core probe timed out waiting for fingerprint response."));
+						}, DEMO_PROBE_TIMEOUT_MS);
+
+						socket.addEventListener("message", (event) => {
+							if (settled) {
+								return;
+							}
+
+							try {
+								const detail = JSON.parse(event.data);
+								if (!detail || typeof detail !== "object") {
+									return;
+								}
+
+								if (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral") {
+									settled = true;
+									window.clearTimeout(timeoutId);
+									socket.close();
+									resolve(detail);
+								}
+							} catch {
+								// Ignore non-JSON messages and continue listening.
+							}
+						});
+
+						socket.addEventListener("error", () => {
+							if (settled) {
+								return;
+							}
+
+							settled = true;
+							window.clearTimeout(timeoutId);
+							socket.close();
+							reject(new Error("Core probe socket error."));
+						}, { once: true });
+
+						socket.send(JSON.stringify({ type: "data", data: payload }));
+					});
+				}
+
 				async function startFallbackProbe(force = false) {
 					if (fallbackProbeInFlight) {
 						return;
@@ -1203,6 +1310,29 @@ Allow first-party analytics on this site to run a live device assessment.
 
 					try {
 						setProgressStage(1);
+
+						try {
+							const directDetail = await sendCoreProbe(token);
+							if (directDetail && directDetail.data) {
+								window.__GCX__ = window.__GCX__ || {};
+								window.__GCX__.riskTelemetry = directDetail.data;
+								renderFingerprint(directDetail.data);
+							}
+
+							if (directDetail && directDetail.type === "fingerprint" && directDetail.data && directDetail.data.pending && directDetail.data.pending.behavioral === true) {
+								void sendBehavioralFollowupProbe(token);
+							}
+
+							setRunDemoState({
+								disabled: false,
+								label: "Run Demo Again",
+								hint: "Live telemetry updated using a direct low-latency probe. Behavioral updates continue in the background.",
+							});
+							return;
+						} catch (directProbeError) {
+							console.info("Direct probe did not complete in time. Falling back to shared runtime socket.", directProbeError);
+						}
+
 						const sharedProbeTrigger = window.__GCX__ && window.__GCX__.requestRiskSnapshot;
 						if (typeof sharedProbeTrigger === "function") {
 							try {
