@@ -89,6 +89,10 @@ const devicerSnippetKey = (
     Deno.env.get("DEVICER_PUBLISHABLE_KEY") ||
     ""
 ).trim();
+const DEVICER_SNIPPET_CACHE_TTL_MS = 10 * 60 * 1000;
+const DEVICER_SNIPPET_FETCH_TIMEOUT_MS = 2500;
+let cachedDevicerSnippet: { script: string; fetchedAt: number } | null = null;
+let devicerSnippetFetchInFlight: Promise<string | null> | null = null;
 const sessionStore = new SessionStore();
 const rateLimiter = new RateLimiter();
 const FORUM_MOD_COOKIE_NAME = "forum_mod_session";
@@ -256,6 +260,32 @@ function sendSocketJson(socket: WebSocket, payload: unknown): void {
     if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(payload));
     }
+}
+
+function getCachedDevicerSnippet(now = Date.now()): string | null {
+    if (!cachedDevicerSnippet) {
+        return null;
+    }
+
+    if (now - cachedDevicerSnippet.fetchedAt > DEVICER_SNIPPET_CACHE_TTL_MS) {
+        return null;
+    }
+
+    return cachedDevicerSnippet.script;
+}
+
+async function fetchDevicerSnippetFromUpstream(key: string): Promise<string | null> {
+    const upstream = await fetch(
+        `https://nash.gatewaycorporate.org/api/devicer/snippet?key=${encodeURIComponent(key)}`,
+        { signal: AbortSignal.timeout(DEVICER_SNIPPET_FETCH_TIMEOUT_MS) },
+    );
+
+    if (!upstream.ok) {
+        console.error("Devicer snippet proxy failed", upstream.status, upstream.statusText);
+        return null;
+    }
+
+    return await upstream.text();
 }
 
 async function exists(path: string): Promise<boolean> {
@@ -1556,7 +1586,7 @@ router.get("/contact/availability", (context) => {
 });
 router.get("/services", async (context) => {
     try {
-        const servicesHtml = Deno.readTextFileSync("./static/views/services.html");
+        const servicesHtml = await Deno.readTextFile("./static/views/services.html");
         const rendered = injectFooterIntoHtml(
             servicesHtml,
             resolveFooterVariant("index"),
@@ -1571,7 +1601,7 @@ router.get("/services", async (context) => {
 });
 router.get("/products", async (context) => {
     try {
-        const productsHtml = Deno.readTextFileSync("./static/views/products.html");
+        const productsHtml = await Deno.readTextFile("./static/views/products.html");
         const rendered = injectFooterIntoHtml(
             productsHtml,
             resolveFooterVariant("index"),
@@ -1586,7 +1616,7 @@ router.get("/products", async (context) => {
 });
 router.get("/faq", async (context) => {
     try {
-        const faqHtml = Deno.readTextFileSync("./static/views/faq.html");
+        const faqHtml = await Deno.readTextFile("./static/views/faq.html");
         const rendered = injectFooterIntoHtml(
             faqHtml,
             resolveFooterVariant("index"),
@@ -1601,7 +1631,7 @@ router.get("/faq", async (context) => {
 });
 router.get("/demos", async (context) => {
     try {
-        const demosHtml = Deno.readTextFileSync("./static/views/demos.html");
+        const demosHtml = await Deno.readTextFile("./static/views/demos.html");
         const rendered = injectFooterIntoHtml(
             demosHtml,
             resolveFooterVariant("index"),
@@ -1617,7 +1647,7 @@ router.get("/demos", async (context) => {
 });
 router.get("/demos/devicer", async (context) => {
     try {
-        const demoHtml = Deno.readTextFileSync("./static/demos/devicer.html");
+        const demoHtml = await Deno.readTextFile("./static/demos/devicer.html");
         const rendered = injectFooterIntoHtml(
             demoHtml,
             resolveFooterVariant("devicer"),
@@ -2126,7 +2156,7 @@ router.get("/products/:view", async (context) => {
         }
 
         try {
-            const viewHtml = Deno.readTextFileSync(`./static/products/${view}.html`);
+            const viewHtml = await Deno.readTextFile(`./static/products/${view}.html`);
             const rendered = injectFooterIntoHtml(
                 viewHtml,
                 resolveFooterVariant(view),
@@ -2143,7 +2173,7 @@ router.get("/products/:view", async (context) => {
         context.response.body = "View not provided";
     }
 });
-router.get("/papers/:paper.pdf", (context) => {
+router.get("/papers/:paper.pdf", async (context) => {
     const paper = context.params.paper;
     if (paper) {
         if (!allowedPapers.has(paper)) {
@@ -2153,7 +2183,10 @@ router.get("/papers/:paper.pdf", (context) => {
         }
 
         try {
-            context.response.body = Deno.readFileSync(`./static/papers/${paper}.pdf`);
+            await context.send({
+                root: "./static/papers",
+                path: `${paper}.pdf`,
+            });
             context.response.headers.set("Content-Type", "application/pdf");
         } catch (error) {
             console.error(`Error reading paper file: ${error}`);
@@ -2165,9 +2198,9 @@ router.get("/papers/:paper.pdf", (context) => {
         context.response.body = "Paper not provided";
     }
 })
-router.get("/mesh.obj", (context) => {
+router.get("/mesh.obj", async (context) => {
     try {
-        context.response.body = Deno.readFileSync("./static/mesh.obj");
+        await context.send({ root: "./static", path: "mesh.obj" });
         context.response.headers.set("Content-Type", "text/plain; charset=utf-8");
         context.response.headers.set(
             "Cache-Control",
@@ -2182,6 +2215,7 @@ router.get("/mesh.obj", (context) => {
 
 router.get("/api/devicer/snippet", async (context) => {
     context.response.headers.set("Content-Type", "application/javascript; charset=utf-8");
+    context.response.headers.set("Cache-Control", "public, max-age=600, stale-while-revalidate=60");
 
     if (!devicerSnippetKey) {
         context.response.status = 200;
@@ -2189,25 +2223,38 @@ router.get("/api/devicer/snippet", async (context) => {
         return;
     }
 
-    try {
-        const upstream = await fetch(
-            `https://nash.gatewaycorporate.org/api/devicer/snippet?key=${encodeURIComponent(devicerSnippetKey)}`,
-        );
+    const freshCache = getCachedDevicerSnippet();
+    if (freshCache) {
+        context.response.status = 200;
+        context.response.body = freshCache;
+        return;
+    }
 
-        if (!upstream.ok) {
-            console.error("Devicer snippet proxy failed", upstream.status, upstream.statusText);
+    try {
+        devicerSnippetFetchInFlight ||= fetchDevicerSnippetFromUpstream(devicerSnippetKey)
+            .finally(() => {
+                devicerSnippetFetchInFlight = null;
+            });
+
+        const snippet = await devicerSnippetFetchInFlight;
+
+        if (!snippet) {
             context.response.status = 200;
-            context.response.body = "/* Devicer snippet unavailable. */";
+            context.response.body = cachedDevicerSnippet?.script || "/* Devicer snippet unavailable. */";
             return;
         }
 
+        cachedDevicerSnippet = {
+            script: snippet,
+            fetchedAt: Date.now(),
+        };
+
         context.response.status = 200;
-        context.response.body = await upstream.text();
-        context.response.headers.set("Cache-Control", "private, max-age=600");
+        context.response.body = snippet;
     } catch (error) {
         console.error("Devicer snippet proxy request failed", error);
         context.response.status = 200;
-        context.response.body = "/* Devicer snippet unavailable. */";
+        context.response.body = cachedDevicerSnippet?.script || "/* Devicer snippet unavailable. */";
     }
 });
 

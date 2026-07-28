@@ -695,6 +695,23 @@ Allow first-party analytics on this site to run a live device assessment.
 				let fallbackProbeInFlight = false;
 				let behavioralFollowupInFlight = false;
 
+				function stripCoreBehavioralFields(payload) {
+					if (!payload || typeof payload !== "object") {
+						return payload;
+					}
+
+					const clone = JSON.parse(JSON.stringify(payload));
+					if (clone && typeof clone === "object") {
+						delete clone.behavioralMetrics;
+						delete clone.behavioral;
+						delete clone.mouseTrajectory;
+						delete clone.keyboardTimeline;
+						delete clone.interactionEvents;
+					}
+
+					return clone;
+				}
+
 				function getById(id) {
 					return document.getElementById(id);
 				}
@@ -806,19 +823,21 @@ Allow first-party analytics on this site to run a live device assessment.
 
 					const agent = new Snatch();
 					if (typeof agent.capture === "function") {
-						return await agent.capture({
+						const captured = await agent.capture({
 							minBehavioralDurationMs: collectBehavioral ? 1200 : 0,
 							maxBehavioralWaitMs: collectBehavioral ? 4000 : 0,
 							pollIntervalMs: collectBehavioral ? 80 : 20,
 							requireInteraction: false,
 						});
+						return collectBehavioral ? captured : stripCoreBehavioralFields(captured);
 					}
 
 					await agent.ready;
 					if (collectBehavioral && agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
 						agent.dataset.behavioralMetrics = agent._behavioral.computeBehavioralMetrics();
 					}
-					return agent.dataset || null;
+					const dataset = agent.dataset || null;
+					return collectBehavioral ? dataset : stripCoreBehavioralFields(dataset);
 				}
 
 				async function sendBehavioralFollowupProbe(token) {
@@ -928,15 +947,11 @@ Allow first-party analytics on this site to run a live device assessment.
 						await new Promise((resolve, reject) => {
 							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
 							let settled = false;
-							let behavioralFollowupTimer = null;
 							const timeoutId = window.setTimeout(() => {
 								if (settled) {
 									return;
 								}
 								settled = true;
-								if (behavioralFollowupTimer !== null) {
-									window.clearTimeout(behavioralFollowupTimer);
-								}
 								socket.close();
 								reject(new Error("Telemetry probe timed out waiting for a server response."));
 							}, 10000);
@@ -967,36 +982,22 @@ Allow first-party analytics on this site to run a live device assessment.
 										const waitingOnBehavior = detail.type === "fingerprint" && detail.data && detail.data.pending && detail.data.pending.behavioral === true;
 										if (waitingOnBehavior) {
 											void sendBehavioralFollowupProbe(token);
-											if (behavioralFollowupTimer !== null) {
-												window.clearTimeout(behavioralFollowupTimer);
-											}
-											behavioralFollowupTimer = window.setTimeout(() => {
-												socket.close();
-											}, 10000);
+											socket.close();
 											return;
 										}
 
-										if (behavioralFollowupTimer !== null) {
-											window.clearTimeout(behavioralFollowupTimer);
-										}
 										socket.close();
 										return;
 									}
 
 									if (detail && typeof detail === "object" && detail.type === "error") {
 										if (settled) {
-											if (behavioralFollowupTimer !== null) {
-												window.clearTimeout(behavioralFollowupTimer);
-											}
 											socket.close();
 											setRuntimeStatus("Behavioral analysis did not complete, but core assessment is available.", false);
 											return;
 										}
 										settled = true;
 										window.clearTimeout(timeoutId);
-										if (behavioralFollowupTimer !== null) {
-											window.clearTimeout(behavioralFollowupTimer);
-										}
 										socket.close();
 										reject(new Error(typeof detail.data === "string" ? detail.data : "Telemetry probe returned an error."));
 									}
@@ -1006,9 +1007,6 @@ Allow first-party analytics on this site to run a live device assessment.
 									}
 									settled = true;
 									window.clearTimeout(timeoutId);
-									if (behavioralFollowupTimer !== null) {
-										window.clearTimeout(behavioralFollowupTimer);
-									}
 									socket.close();
 									reject(error);
 								}
@@ -1016,35 +1014,23 @@ Allow first-party analytics on this site to run a live device assessment.
 
 							socket.addEventListener("error", () => {
 								if (settled) {
-									if (behavioralFollowupTimer !== null) {
-										window.clearTimeout(behavioralFollowupTimer);
-									}
 									socket.close();
 									setRuntimeStatus("Behavioral analysis connection interrupted, but core assessment is available.", false);
 									return;
 								}
 								settled = true;
 								window.clearTimeout(timeoutId);
-								if (behavioralFollowupTimer !== null) {
-									window.clearTimeout(behavioralFollowupTimer);
-								}
 								reject(new Error("Telemetry probe websocket failed."));
 							}, { once: true });
 
 							socket.addEventListener("close", (closeEvent) => {
 								if (settled) {
 									window.clearTimeout(timeoutId);
-									if (behavioralFollowupTimer !== null) {
-										window.clearTimeout(behavioralFollowupTimer);
-									}
 									return;
 								}
 
 								settled = true;
 								window.clearTimeout(timeoutId);
-								if (behavioralFollowupTimer !== null) {
-									window.clearTimeout(behavioralFollowupTimer);
-								}
 								const reason = closeEvent.reason ? ` (${closeEvent.reason})` : "";
 								reject(new Error(`Telemetry websocket closed before fingerprint response. Code ${closeEvent.code}${reason}`));
 							});
