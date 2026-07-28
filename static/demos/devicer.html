@@ -1214,8 +1214,12 @@ Allow first-party analytics on this site to run a live device assessment.
 									);
 								const telemetryPromise = waitForFingerprintTelemetry(DEMO_PROBE_TIMEOUT_MS);
 								setProgressStage(2);
+								const analysisTransitionId = window.setTimeout(() => {
+									setProgressStage(3);
+								}, 350);
 								const detail = await telemetryPromise;
 								const sharedProbeResult = await sharedProbePromise;
+								window.clearTimeout(analysisTransitionId);
 								if (!sharedProbeResult.ok) {
 									throw sharedProbeResult.error;
 								}
