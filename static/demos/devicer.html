@@ -808,6 +808,8 @@ Allow first-party analytics on this site to run a live device assessment.
 				const CONSENT_KEY = "gcx_analytics_consent";
 				const DEMO_PROGRESS_MAX_STAGE = 3;
 				const DEMO_PROGRESS_STAGE_MIN_MS = 450;
+				const DEMO_PROBE_TIMEOUT_MS = 25000;
+				const DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS = 20000;
 				let fallbackProbeStarted = false;
 				let fallbackProbeInFlight = false;
 				let behavioralFollowupInFlight = false;
@@ -1092,7 +1094,7 @@ Allow first-party analytics on this site to run a live device assessment.
 							const timeoutId = window.setTimeout(() => {
 								socket.close();
 								resolve();
-							}, 12000);
+							}, DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS);
 
 							socket.addEventListener("open", () => {
 								socket.send(JSON.stringify({ type: "data", data: payload }));
@@ -1195,7 +1197,7 @@ Allow first-party analytics on this site to run a live device assessment.
 								}
 								socket.close();
 								reject(new Error("Telemetry probe timed out waiting for a server response."));
-							}, 10000);
+							}, DEMO_PROBE_TIMEOUT_MS);
 
 							socket.addEventListener("open", () => {
 								socket.send(JSON.stringify({ type: "data", data: payload }));
@@ -1229,7 +1231,7 @@ Allow first-party analytics on this site to run a live device assessment.
 											}
 											behavioralFollowupTimer = window.setTimeout(() => {
 												socket.close();
-											}, 10000);
+											}, DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS);
 											return;
 										}
 
@@ -1308,14 +1310,28 @@ Allow first-party analytics on this site to run a live device assessment.
 							});
 						});
 					} catch (error) {
-						console.error("Demo telemetry probe failed:", error);
-						setRuntimeStatus(`Live assessment probe failed: ${error instanceof Error ? error.message : "unknown error"}`, false);
-						setProgressStage(-1, { immediate: true });
-						setRunDemoState({
-							disabled: false,
-							label: "Retry Demo Assessment",
-							hint: "The live assessment failed. Retry now or change browser/network conditions and run again.",
-						});
+						const failureMessage = error instanceof Error ? error.message : "unknown error";
+						const isConnectivityIssue = /timed out|websocket failed|closed before fingerprint response|connection interrupted/i.test(failureMessage);
+
+						if (isConnectivityIssue) {
+							console.warn("Demo telemetry probe unavailable in current network path:", failureMessage);
+							setRuntimeStatus("Direct websocket probe is unavailable from this network path. Waiting for background telemetry updates.", false);
+							setProgressStage(-1, { immediate: true });
+							setRunDemoState({
+								disabled: false,
+								label: "Run Demo Again",
+								hint: "Probe connection could not be established right now. The panel will still update if background telemetry arrives.",
+							});
+						} else {
+							console.error("Demo telemetry probe failed:", error);
+							setRuntimeStatus(`Live assessment probe failed: ${failureMessage}`, false);
+							setProgressStage(-1, { immediate: true });
+							setRunDemoState({
+								disabled: false,
+								label: "Retry Demo Assessment",
+								hint: "The live assessment failed. Retry now or change browser/network conditions and run again.",
+							});
+						}
 					} finally {
 						fallbackProbeInFlight = false;
 					}
