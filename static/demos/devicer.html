@@ -808,8 +808,9 @@ Allow first-party analytics on this site to run a live device assessment.
 				const CONSENT_KEY = "gcx_analytics_consent";
 				const DEMO_PROGRESS_MAX_STAGE = 3;
 				const DEMO_PROGRESS_STAGE_MIN_MS = 450;
-				const DEMO_PROBE_TIMEOUT_MS = 25000;
-				const DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS = 20000;
+				const DEMO_SOCKET_CONNECT_TIMEOUT_MS = 3500;
+				const DEMO_PROBE_TIMEOUT_MS = 9000;
+				const DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS = 8000;
 				let fallbackProbeStarted = false;
 				let fallbackProbeInFlight = false;
 				let behavioralFollowupInFlight = false;
@@ -1187,6 +1188,18 @@ Allow first-party analytics on this site to run a live device assessment.
 							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
 							let settled = false;
 							let behavioralFollowupTimer = null;
+							const connectTimeoutId = window.setTimeout(() => {
+								if (settled) {
+									return;
+								}
+								settled = true;
+								if (behavioralFollowupTimer !== null) {
+									window.clearTimeout(behavioralFollowupTimer);
+								}
+								window.clearTimeout(timeoutId);
+								socket.close();
+								reject(new Error("Telemetry probe websocket could not be opened in time."));
+							}, DEMO_SOCKET_CONNECT_TIMEOUT_MS);
 							const timeoutId = window.setTimeout(() => {
 								if (settled) {
 									return;
@@ -1200,6 +1213,7 @@ Allow first-party analytics on this site to run a live device assessment.
 							}, DEMO_PROBE_TIMEOUT_MS);
 
 							socket.addEventListener("open", () => {
+								window.clearTimeout(connectTimeoutId);
 								socket.send(JSON.stringify({ type: "data", data: payload }));
 							}, { once: true });
 
@@ -1219,6 +1233,7 @@ Allow first-party analytics on this site to run a live device assessment.
 												hint: "Core assessment complete. Behavioral updates will stream in if still pending.",
 											});
 											window.clearTimeout(timeoutId);
+											window.clearTimeout(connectTimeoutId);
 											resolve();
 										}
 
@@ -1238,6 +1253,7 @@ Allow first-party analytics on this site to run a live device assessment.
 										if (behavioralFollowupTimer !== null) {
 											window.clearTimeout(behavioralFollowupTimer);
 										}
+										window.clearTimeout(connectTimeoutId);
 										setProgressStage(3);
 										socket.close();
 										return;
@@ -1254,6 +1270,7 @@ Allow first-party analytics on this site to run a live device assessment.
 										}
 										settled = true;
 										window.clearTimeout(timeoutId);
+										window.clearTimeout(connectTimeoutId);
 										if (behavioralFollowupTimer !== null) {
 											window.clearTimeout(behavioralFollowupTimer);
 										}
@@ -1266,6 +1283,7 @@ Allow first-party analytics on this site to run a live device assessment.
 									}
 									settled = true;
 									window.clearTimeout(timeoutId);
+									window.clearTimeout(connectTimeoutId);
 									if (behavioralFollowupTimer !== null) {
 										window.clearTimeout(behavioralFollowupTimer);
 									}
@@ -1285,6 +1303,7 @@ Allow first-party analytics on this site to run a live device assessment.
 								}
 								settled = true;
 								window.clearTimeout(timeoutId);
+								window.clearTimeout(connectTimeoutId);
 								if (behavioralFollowupTimer !== null) {
 									window.clearTimeout(behavioralFollowupTimer);
 								}
@@ -1294,6 +1313,7 @@ Allow first-party analytics on this site to run a live device assessment.
 							socket.addEventListener("close", (closeEvent) => {
 								if (settled) {
 									window.clearTimeout(timeoutId);
+									window.clearTimeout(connectTimeoutId);
 									if (behavioralFollowupTimer !== null) {
 										window.clearTimeout(behavioralFollowupTimer);
 									}
@@ -1311,7 +1331,7 @@ Allow first-party analytics on this site to run a live device assessment.
 						});
 					} catch (error) {
 						const failureMessage = error instanceof Error ? error.message : "unknown error";
-						const isConnectivityIssue = /timed out|websocket failed|closed before fingerprint response|connection interrupted/i.test(failureMessage);
+						const isConnectivityIssue = /timed out|could not be opened|websocket failed|closed before fingerprint response|connection interrupted/i.test(failureMessage);
 
 						if (isConnectivityIssue) {
 							console.warn("Demo telemetry probe unavailable in current network path:", failureMessage);
