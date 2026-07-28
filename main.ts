@@ -819,7 +819,7 @@ async function injectRuntimeBootstrapForHtml(context: {
     cookies: { get(name: string): Promise<string | undefined> };
     response: { headers: Headers };
 }, html: string, experimentContext?: ReturnType<typeof buildExperimentContext>): Promise<string> {
-    const externalOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
+    const externalOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin || siteOrigin);
     const secureCookie = isExternalOriginSecure(externalOrigin);
     const sessionId = await context.cookies.get(SESSION_COOKIE_NAME);
     let session = sessionStore.getSession(sessionId);
@@ -2280,7 +2280,7 @@ router.get("/wss", async (context) => {
         return;
     }
 
-    const requestOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin);
+    const requestOrigin = resolveExternalOrigin(context.request.url, context.request.headers, configuredPublicOrigin || siteOrigin);
     const originHeader = context.request.headers.get("origin");
     const isLocalDevOrigin = isLoopbackHost(context.request.headers.get("host")) || isLoopbackHost(context.request.url.host);
 
