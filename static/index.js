@@ -249,6 +249,9 @@ const RiskTelemetrySocket = {
   heartbeatTimer: null,
   reconnectAttempts: 0,
   initialized: false,
+  openPromise: null,
+  openPromiseResolve: null,
+  openPromiseReject: null,
 
   getToken() {
     const token = window.__GCX__?.websocketToken;
@@ -298,6 +301,29 @@ const RiskTelemetrySocket = {
     }
   },
 
+  resetOpenPromise() {
+    this.openPromise = null;
+    this.openPromiseResolve = null;
+    this.openPromiseReject = null;
+  },
+
+  ensureOpenPromise() {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      return Promise.resolve();
+    }
+
+    if (this.openPromise) {
+      return this.openPromise;
+    }
+
+    this.openPromise = new Promise((resolve, reject) => {
+      this.openPromiseResolve = resolve;
+      this.openPromiseReject = reject;
+    });
+
+    return this.openPromise;
+  },
+
   scheduleReconnect() {
     this.clearTimers();
     const delay = Math.min(30_000, 1_000 * 2 ** Math.min(this.reconnectAttempts, 5));
@@ -321,6 +347,10 @@ const RiskTelemetrySocket = {
 
   async handleOpen() {
     this.reconnectAttempts = 0;
+    if (this.openPromiseResolve) {
+      this.openPromiseResolve();
+      this.resetOpenPromise();
+    }
     await this.sendFingerprintSnapshot();
 
     this.heartbeatTimer = setInterval(() => {
@@ -368,6 +398,7 @@ const RiskTelemetrySocket = {
     try {
       const socket = new WebSocket(socketUrl);
       this.socket = socket;
+      this.ensureOpenPromise();
 
       socket.addEventListener("open", () => {
         this.handleOpen().catch((error) => {
@@ -380,13 +411,25 @@ const RiskTelemetrySocket = {
       });
 
       socket.addEventListener("error", () => {
+        if (this.openPromiseReject) {
+          this.openPromiseReject(new Error("Risk telemetry socket error."));
+          this.resetOpenPromise();
+        }
         this.scheduleReconnect();
       });
 
       socket.addEventListener("close", () => {
+        if (this.openPromiseReject && socket.readyState !== WebSocket.OPEN) {
+          this.openPromiseReject(new Error("Risk telemetry socket closed before opening."));
+          this.resetOpenPromise();
+        }
         this.scheduleReconnect();
       });
     } catch (error) {
+      if (this.openPromiseReject) {
+        this.openPromiseReject(error instanceof Error ? error : new Error("Risk telemetry socket connection failed."));
+        this.resetOpenPromise();
+      }
       console.error("Risk telemetry socket connection failed:", error);
       this.scheduleReconnect();
     }
@@ -412,6 +455,7 @@ const RiskTelemetrySocket = {
 window.__GCX__ = window.__GCX__ || {};
 window.__GCX__.requestRiskSnapshot = async () => {
   RiskTelemetrySocket.connect();
+  await RiskTelemetrySocket.ensureOpenPromise();
   await RiskTelemetrySocket.sendFingerprintSnapshot();
 };
 
