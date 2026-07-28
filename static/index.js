@@ -409,6 +409,12 @@ const RiskTelemetrySocket = {
   },
 };
 
+window.__GCX__ = window.__GCX__ || {};
+window.__GCX__.requestRiskSnapshot = async () => {
+  RiskTelemetrySocket.connect();
+  await RiskTelemetrySocket.sendFingerprintSnapshot();
+};
+
 const ExperimentTelemetry = {
   queue: [],
   isSending: false,

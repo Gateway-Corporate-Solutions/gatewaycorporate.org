@@ -1009,6 +1009,30 @@ Allow first-party analytics on this site to run a live device assessment.
 					setProgressStage(0, { immediate: true });
 				}
 
+				function waitForFingerprintTelemetry(timeoutMs) {
+					return new Promise((resolve, reject) => {
+						const timeoutId = window.setTimeout(() => {
+							window.removeEventListener("gcx:risk-telemetry", handleTelemetryEvent);
+							reject(new Error("Telemetry probe timed out waiting for a server response."));
+						}, timeoutMs);
+
+						function handleTelemetryEvent(event) {
+							const detail = event && event.detail;
+							if (!detail || typeof detail !== "object") {
+								return;
+							}
+
+							if (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral") {
+								window.clearTimeout(timeoutId);
+								window.removeEventListener("gcx:risk-telemetry", handleTelemetryEvent);
+								resolve(detail);
+							}
+						}
+
+						window.addEventListener("gcx:risk-telemetry", handleTelemetryEvent);
+					});
+				}
+
 				function buildWebSocketUrl(locationObject, token) {
 					const scheme = locationObject.protocol === "https:" ? "wss:" : "ws:";
 					return `${scheme}//${locationObject.host}/wss?token=${encodeURIComponent(token)}`;
@@ -1178,11 +1202,31 @@ Allow first-party analytics on this site to run a live device assessment.
 					});
 
 					try {
+						setProgressStage(1);
+						const sharedProbeTrigger = window.__GCX__ && window.__GCX__.requestRiskSnapshot;
+						if (typeof sharedProbeTrigger === "function") {
+							try {
+								const telemetryPromise = waitForFingerprintTelemetry(DEMO_PROBE_TIMEOUT_MS);
+								await sharedProbeTrigger();
+								const detail = await telemetryPromise;
+								if (detail && detail.data) {
+									renderFingerprint(detail.data);
+								}
+								setRunDemoState({
+									disabled: false,
+									label: "Run Demo Again",
+									hint: "Live telemetry updated using the shared runtime socket. Rerun to refresh the assessment.",
+								});
+								return;
+							} catch (sharedProbeError) {
+								console.warn("Shared telemetry probe path failed, falling back to direct websocket probe:", sharedProbeError);
+							}
+						}
+
 						const payload = await collectDemoFingerprintPayload("core");
 						if (!payload) {
 							throw new Error("Fingerprint payload capture returned no data.");
 						}
-						setProgressStage(1);
 
 						await new Promise((resolve, reject) => {
 							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
