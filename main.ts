@@ -92,6 +92,8 @@ const devicerSnippetKey = (
 const DEVICER_SNIPPET_CACHE_TTL_MS = 10 * 60 * 1000;
 const DEVICER_SNIPPET_FETCH_TIMEOUT_MS = 2500;
 const GCX_WS_TOKEN_FALLBACK = (Deno.env.get("GCX_WS_TOKEN_FALLBACK") || "true").toLowerCase() !== "false";
+const DEVICER_DIAGNOSTICS_ENABLED =
+    (Deno.env.get("DEVICER_DIAGNOSTICS") || "false").toLowerCase() === "true";
 let cachedDevicerSnippet: { script: string; fetchedAt: number } | null = null;
 let devicerSnippetFetchInFlight: Promise<string | null> | null = null;
 const sessionStore = new SessionStore();
@@ -263,6 +265,23 @@ function buildAnalyticsMessage(state: AnalyticsState): string {
                 : 0,
         },
     });
+}
+
+function logDevicerDiagnostic(
+    label: string,
+    requestId: string,
+    details?: Record<string, unknown>,
+): void {
+    if (!DEVICER_DIAGNOSTICS_ENABLED) {
+        return;
+    }
+
+    if (details) {
+        console.log("[devicer-diag]", label, { requestId, ...details });
+        return;
+    }
+
+    console.log("[devicer-diag]", label, { requestId });
 }
 
 function sendSocketJson(socket: WebSocket, payload: unknown): void {
@@ -2370,8 +2389,18 @@ router.get("/wss", async (context) => {
 
     socket.onmessage = async (event) => {
         fingerprintIngestStats.messagesReceived += 1;
+        const requestId = crypto.randomUUID().slice(0, 8);
+        const messageStartedAt = performance.now();
+
+        logDevicerDiagnostic("message.received", requestId, {
+            readyState: socket.readyState,
+            ip: realIp,
+        });
 
         if (!rateLimiter.allowMessage(realIp)) {
+            logDevicerDiagnostic("message.rate_limited", requestId, {
+                elapsedMs: Math.round(performance.now() - messageStartedAt),
+            });
             sendSocketJson(socket, {
                 type: "error",
                 data: "Too many websocket messages. Please retry later.",
@@ -2383,6 +2412,10 @@ router.get("/wss", async (context) => {
 
         const parsedMessage = parseClientMessage(event.data);
         if (!parsedMessage.ok) {
+            logDevicerDiagnostic("message.parse_failed", requestId, {
+                closeCode: parsedMessage.closeCode,
+                elapsedMs: Math.round(performance.now() - messageStartedAt),
+            });
             sendSocketJson(socket, {
                 type: "error",
                 data: parsedMessage.clientMessage,
@@ -2395,33 +2428,54 @@ router.get("/wss", async (context) => {
         try {
             const fingerprintData = parsedMessage.value.data;
             const hash = devicer.getHash(JSON.stringify(fingerprintData));
+            const findCandidatesStartedAt = performance.now();
             const fingerprintCandidates = await devicerRuntime.adapters.device.findCandidates(fingerprintData, 50, 50);
+            logDevicerDiagnostic("identify.find_candidates", requestId, {
+                elapsedMs: Math.round(performance.now() - findCandidatesStartedAt),
+                candidates: fingerprintCandidates.length,
+            });
             const exactMatchFound = fingerprintCandidates.some((fp: devicer.DeviceMatch) => fp.confidence >= 100);
             const closestMatch = Math.max(0, ...fingerprintCandidates.map((fp: devicer.DeviceMatch) => fp.confidence));
             const userId = sanitizeUserId(requestHeaders["x-user-id"]) ?? undefined;
 
             let identifyResult: Record<string, unknown>;
             try {
+                const identifyStartedAt = performance.now();
                 identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
                     ip: realIp,
                     userId,
                     tlsProfile,
                     headers: requestHeaders,
                 }) as unknown as Record<string, unknown>;
+                logDevicerDiagnostic("identify.primary", requestId, {
+                    elapsedMs: Math.round(performance.now() - identifyStartedAt),
+                    usedTlsProfile: tlsProfile !== undefined,
+                });
             } catch (error) {
                 if (!isTlsComplexityError(error)) {
+                    logDevicerDiagnostic("identify.primary_failed", requestId, {
+                        error: error instanceof Error ? error.message : String(error),
+                        usedTlsProfile: tlsProfile !== undefined,
+                    });
                     throw error;
                 }
 
                 console.warn("Retrying identify without TLS profile due to TLSH complexity error:", error instanceof Error ? error.message : error);
                 try {
+                    const identifyRetryStartedAt = performance.now();
                     identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
                         ip: realIp,
                         userId,
                         headers: requestHeaders,
                     }) as unknown as Record<string, unknown>;
+                    logDevicerDiagnostic("identify.retry_without_tls", requestId, {
+                        elapsedMs: Math.round(performance.now() - identifyRetryStartedAt),
+                    });
                 } catch (retryError) {
                     if (!isTlsComplexityError(retryError)) {
+                        logDevicerDiagnostic("identify.retry_failed", requestId, {
+                            error: retryError instanceof Error ? retryError.message : String(retryError),
+                        });
                         throw retryError;
                     }
 
@@ -2429,11 +2483,16 @@ router.get("/wss", async (context) => {
                     const fallbackDeviceId = `fallback-${hash.slice(0, 16)}`;
 
                     // Preserve accumulation even when TLSH-dependent enrichment is not usable.
+                    const fallbackSaveStartedAt = performance.now();
                     await devicerRuntime.adapters.device.save({
                         id: crypto.randomUUID(),
                         deviceId: fallbackDeviceId,
                         fingerprint: fingerprintData,
                         timestamp: new Date(),
+                    });
+                    logDevicerDiagnostic("identify.fallback_saved", requestId, {
+                        elapsedMs: Math.round(performance.now() - fallbackSaveStartedAt),
+                        fallbackDeviceId,
                     });
 
                     identifyResult = {
@@ -2512,6 +2571,7 @@ router.get("/wss", async (context) => {
                         rdapAsnOrg: typeof ipDetails?.asnOrg === "string" ? ipDetails.asnOrg : undefined,
                     } as Parameters<typeof bbasManager.analyze>[2];
 
+                    const behavioralAnalyzeStartedAt = performance.now();
                     const { enrichment: bbasEnrichment, decision: bbasDecision } = await bbasManager.analyze(
                         resolvedDeviceId,
                         {
@@ -2522,6 +2582,10 @@ router.get("/wss", async (context) => {
                         crossPluginSignals,
                         behavioralMetrics,
                     );
+                    logDevicerDiagnostic("behavioral.analyze", requestId, {
+                        elapsedMs: Math.round(performance.now() - behavioralAnalyzeStartedAt),
+                        decision: bbasDecision,
+                    });
                     const uaClassification = asRecord(bbasEnrichment?.uaClassification);
 
                     sendSocketJson(socket, {
@@ -2584,6 +2648,9 @@ router.get("/wss", async (context) => {
                         });
                     }
                 } catch (error) {
+                    logDevicerDiagnostic("behavioral.failed", requestId, {
+                        error: error instanceof Error ? error.message : String(error),
+                    });
                     console.warn("Behavioral enrichment failed:", error instanceof Error ? error.message : error);
                 }
             }
@@ -2599,11 +2666,21 @@ router.get("/wss", async (context) => {
             }
 
             fingerprintIngestStats.identifySucceeded += 1;
+            logDevicerDiagnostic("message.completed", requestId, {
+                totalElapsedMs: Math.round(performance.now() - messageStartedAt),
+                deviceId: resolvedDeviceId,
+                exactMatchFound,
+                closestMatch: closestMatch || 0,
+            });
             // Keep admin analytics snapshot close to real time without
             // recomputing for every single websocket payload.
             void refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 2_500);
         } catch (error) {
             fingerprintIngestStats.identifyFailed += 1;
+            logDevicerDiagnostic("message.failed", requestId, {
+                totalElapsedMs: Math.round(performance.now() - messageStartedAt),
+                error: error instanceof Error ? error.message : String(error),
+            });
             console.error("Error processing websocket payload:", error);
             sendSocketJson(socket, {
                 type: "error",
