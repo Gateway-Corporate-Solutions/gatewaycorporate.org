@@ -809,7 +809,7 @@ Allow first-party analytics on this site to run a live device assessment.
 				const DEMO_PROGRESS_MAX_STAGE = 3;
 				const DEMO_PROGRESS_STAGE_MIN_MS = 450;
 				const DEMO_SOCKET_CONNECT_TIMEOUT_MS = 5000;
-				const DEMO_PROBE_TIMEOUT_MS = 8000;
+				const DEMO_PROBE_TIMEOUT_MS = 20000;
 				const DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS = 12000;
 				let fallbackProbeStarted = false;
 				let fallbackProbeInFlight = false;
@@ -1251,7 +1251,7 @@ Allow first-party analytics on this site to run a live device assessment.
 
 					return await new Promise((resolve, reject) => {
 						let settled = false;
-						const timeoutId = window.setTimeout(() => {
+						let timeoutId = window.setTimeout(() => {
 							if (settled) {
 								return;
 							}
@@ -1261,10 +1261,27 @@ Allow first-party analytics on this site to run a live device assessment.
 							resolve(null);
 						}, DEMO_PROBE_TIMEOUT_MS);
 
+						function refreshTimeoutWindow() {
+							window.clearTimeout(timeoutId);
+							timeoutId = window.setTimeout(() => {
+								if (settled) {
+									return;
+								}
+
+								settled = true;
+								socket.close();
+								resolve(null);
+							}, DEMO_PROBE_TIMEOUT_MS);
+						}
+
 						socket.addEventListener("message", (event) => {
 							if (settled) {
 								return;
 							}
+
+							// Treat any server frame as proof of a live connection and
+							// keep waiting for fingerprint frames.
+							refreshTimeoutWindow();
 
 							try {
 								const detail = JSON.parse(event.data);

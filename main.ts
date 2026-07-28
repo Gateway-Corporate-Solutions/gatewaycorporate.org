@@ -2498,6 +2498,14 @@ router.get("/wss", async (context) => {
             return;
         }
 
+        sendSocketJson(socket, {
+            type: "fingerprintAccepted",
+            data: {
+                requestId,
+                receivedAt: Date.now(),
+            },
+        });
+
         try {
             const fingerprintData = parsedMessage.value.data;
             const hash = devicer.getHash(JSON.stringify(fingerprintData));
