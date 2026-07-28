@@ -21,6 +21,14 @@ function hasAnalyticsConsent() {
   return getStoredAnalyticsConsent() === ANALYTICS_CONSENT_ACCEPTED;
 }
 
+function isExternallyManagedRiskTelemetryRoute() {
+  const path = window.location && typeof window.location.pathname === "string"
+    ? window.location.pathname
+    : "";
+
+  return /\/demos\/devicer(?:\.html)?$/.test(path);
+}
+
 function setAnalyticsConsent(status) {
   try {
     window.localStorage.setItem(ANALYTICS_CONSENT_KEY, status);
@@ -2064,7 +2072,9 @@ function renderAnalyticsConsentBanner() {
         console.error("Devicer analytics setup failed:", error);
       }
 
-      RiskTelemetrySocket.initialize();
+      if (!isExternallyManagedRiskTelemetryRoute()) {
+        RiskTelemetrySocket.initialize();
+      }
       ExperimentTelemetry.initialize();
       return;
     }
@@ -2427,7 +2437,9 @@ function initializePage() {
     DevicerAnalytics.ensureReady().catch((error) => {
       console.error("Devicer analytics setup failed:", error);
     });
-    RiskTelemetrySocket.initialize();
+    if (!isExternallyManagedRiskTelemetryRoute()) {
+      RiskTelemetrySocket.initialize();
+    }
   }
 
   ExperimentTelemetry.initialize();
