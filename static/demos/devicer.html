@@ -1219,172 +1219,29 @@ Allow first-party analytics on this site to run a live device assessment.
 								});
 								return;
 							} catch (sharedProbeError) {
-								console.warn("Shared telemetry probe path failed, falling back to direct websocket probe:", sharedProbeError);
+								console.info("Shared telemetry probe did not return before the demo warm-up window elapsed.", sharedProbeError);
+								setRuntimeStatus("Live telemetry is still warming up. Waiting for background updates.", false);
+								setProgressStage(-1, { immediate: true });
+								setRunDemoState({
+									disabled: false,
+									label: "Run Demo Again",
+									hint: "The shared telemetry socket is still warming up. The demo will update if background telemetry arrives.",
+								});
+								return;
 							}
 						}
-
-						const payload = await collectDemoFingerprintPayload("core");
-						if (!payload) {
-							throw new Error("Fingerprint payload capture returned no data.");
-						}
-
-						await new Promise((resolve, reject) => {
-							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
-							let settled = false;
-							let behavioralFollowupTimer = null;
-							const connectTimeoutId = window.setTimeout(() => {
-								if (settled) {
-									return;
-								}
-								settled = true;
-								if (behavioralFollowupTimer !== null) {
-									window.clearTimeout(behavioralFollowupTimer);
-								}
-								window.clearTimeout(timeoutId);
-								socket.close();
-								reject(new Error("Telemetry probe websocket could not be opened in time."));
-							}, DEMO_SOCKET_CONNECT_TIMEOUT_MS);
-							const timeoutId = window.setTimeout(() => {
-								if (settled) {
-									return;
-								}
-								settled = true;
-								if (behavioralFollowupTimer !== null) {
-									window.clearTimeout(behavioralFollowupTimer);
-								}
-								socket.close();
-								reject(new Error("Telemetry probe timed out waiting for a server response."));
-							}, DEMO_PROBE_TIMEOUT_MS);
-
-							socket.addEventListener("open", () => {
-								window.clearTimeout(connectTimeoutId);
-								socket.send(JSON.stringify({ type: "data", data: payload }));
-							}, { once: true });
-
-							socket.addEventListener("message", (event) => {
-								try {
-									const detail = JSON.parse(event.data);
-									if (detail && typeof detail === "object" && (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral")) {
-										window.__GCX__ = window.__GCX__ || {};
-										window.__GCX__.riskTelemetry = detail.data;
-										renderFingerprint(detail.data);
-
-										if (!settled) {
-											settled = true;
-											setRunDemoState({
-												disabled: false,
-												label: "Run Demo Again",
-												hint: "Core assessment complete. Behavioral updates will stream in if still pending.",
-											});
-											window.clearTimeout(timeoutId);
-											window.clearTimeout(connectTimeoutId);
-											resolve();
-										}
-
-										const waitingOnBehavior = detail.type === "fingerprint" && detail.data && detail.data.pending && detail.data.pending.behavioral === true;
-										if (waitingOnBehavior) {
-											setProgressStage(2);
-											void sendBehavioralFollowupProbe(token);
-											if (behavioralFollowupTimer !== null) {
-												window.clearTimeout(behavioralFollowupTimer);
-											}
-											behavioralFollowupTimer = window.setTimeout(() => {
-												socket.close();
-											}, DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS);
-											return;
-										}
-
-										if (behavioralFollowupTimer !== null) {
-											window.clearTimeout(behavioralFollowupTimer);
-										}
-										window.clearTimeout(connectTimeoutId);
-										setProgressStage(3);
-										socket.close();
-										return;
-									}
-
-									if (detail && typeof detail === "object" && detail.type === "error") {
-										if (settled) {
-											if (behavioralFollowupTimer !== null) {
-												window.clearTimeout(behavioralFollowupTimer);
-											}
-											socket.close();
-											setRuntimeStatus("Behavioral analysis did not complete, but core assessment is available.", false);
-											return;
-										}
-										settled = true;
-										window.clearTimeout(timeoutId);
-										window.clearTimeout(connectTimeoutId);
-										if (behavioralFollowupTimer !== null) {
-											window.clearTimeout(behavioralFollowupTimer);
-										}
-										socket.close();
-										reject(new Error(typeof detail.data === "string" ? detail.data : "Telemetry probe returned an error."));
-									}
-								} catch (error) {
-									if (settled) {
-										return;
-									}
-									settled = true;
-									window.clearTimeout(timeoutId);
-									window.clearTimeout(connectTimeoutId);
-									if (behavioralFollowupTimer !== null) {
-										window.clearTimeout(behavioralFollowupTimer);
-									}
-									socket.close();
-									reject(error);
-								}
-							});
-
-							socket.addEventListener("error", () => {
-								if (settled) {
-									if (behavioralFollowupTimer !== null) {
-										window.clearTimeout(behavioralFollowupTimer);
-									}
-									socket.close();
-									setRuntimeStatus("Behavioral analysis connection interrupted, but core assessment is available.", false);
-									return;
-								}
-								settled = true;
-								window.clearTimeout(timeoutId);
-								window.clearTimeout(connectTimeoutId);
-								if (behavioralFollowupTimer !== null) {
-									window.clearTimeout(behavioralFollowupTimer);
-								}
-								reject(new Error("Telemetry probe websocket failed."));
-							}, { once: true });
-
-							socket.addEventListener("close", (closeEvent) => {
-								if (settled) {
-									window.clearTimeout(timeoutId);
-									window.clearTimeout(connectTimeoutId);
-									if (behavioralFollowupTimer !== null) {
-										window.clearTimeout(behavioralFollowupTimer);
-									}
-									return;
-								}
-
-								settled = true;
-								window.clearTimeout(timeoutId);
-								if (behavioralFollowupTimer !== null) {
-									window.clearTimeout(behavioralFollowupTimer);
-								}
-								const reason = closeEvent.reason ? ` (${closeEvent.reason})` : "";
-								reject(new Error(`Telemetry websocket closed before fingerprint response. Code ${closeEvent.code}${reason}`));
-							});
-						});
 					} catch (error) {
 						const failureMessage = error instanceof Error ? error.message : "unknown error";
 						const isConnectivityIssue = /timed out|could not be opened|websocket failed|closed before fingerprint response|connection interrupted/i.test(failureMessage);
 
 						if (isConnectivityIssue) {
-							console.warn("Demo telemetry probe unavailable in current network path:", failureMessage);
-							setRuntimeStatus("Direct websocket probe is unavailable from this network path. Waiting for background telemetry updates.", false);
+							console.info("Demo telemetry probe did not return before the warm-up window elapsed.", failureMessage);
+							setRuntimeStatus("Live telemetry is still warming up. Waiting for background telemetry updates.", false);
 							setProgressStage(-1, { immediate: true });
 							setRunDemoState({
 								disabled: false,
 								label: "Run Demo Again",
-								hint: "Probe connection could not be established right now. The panel will still update if background telemetry arrives.",
+								hint: "The telemetry socket is still warming up. The panel will still update if background telemetry arrives.",
 							});
 						} else {
 							console.error("Demo telemetry probe failed:", error);
