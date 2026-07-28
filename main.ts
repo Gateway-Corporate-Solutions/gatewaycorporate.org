@@ -219,13 +219,32 @@ function asStringArray(value: unknown): string[] {
     return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
-function hasBehavioralMetricsPayload(value: unknown): boolean {
+function hasBehavioralIntentPayload(value: unknown): boolean {
     const record = asRecord(value);
     if (!record) {
         return false;
     }
 
+    if (record.__gcxBehavioralFollowup === true) {
+        return true;
+    }
+
     return asRecord(record.behavioralMetrics) !== undefined;
+}
+
+function sanitizeFingerprintPayload(value: unknown): Record<string, unknown> {
+    const record = asRecord(value);
+    if (!record) {
+        return {};
+    }
+
+    if (!("__gcxBehavioralFollowup" in record)) {
+        return record;
+    }
+
+    const cloned = { ...record };
+    delete cloned.__gcxBehavioralFollowup;
+    return cloned;
 }
 
 function readNumberEnv(name: string, fallback: number, min?: number, max?: number): number {
@@ -2516,9 +2535,9 @@ router.get("/wss", async (context) => {
         });
 
         try {
-            const fingerprintData = parsedMessage.value.data;
+            const fingerprintData = sanitizeFingerprintPayload(parsedMessage.value.data);
             const hash = devicer.getHash(JSON.stringify(fingerprintData));
-            const includesBehavioralMetrics = hasBehavioralMetricsPayload(fingerprintData);
+            const includesBehavioralMetrics = hasBehavioralIntentPayload(parsedMessage.value.data);
 
             if (identifyInFlight && !includesBehavioralMetrics) {
                 logDevicerDiagnostic("message.skipped_inflight", requestId, {

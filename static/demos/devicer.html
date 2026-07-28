@@ -1161,6 +1161,11 @@ Allow first-party analytics on this site to run a live device assessment.
 							return;
 						}
 
+						const behavioralPayload = {
+							...payload,
+							__gcxBehavioralFollowup: true,
+						};
+
 						await new Promise((resolve) => {
 							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
 							const timeoutId = window.setTimeout(() => {
@@ -1169,7 +1174,7 @@ Allow first-party analytics on this site to run a live device assessment.
 							}, DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS);
 
 							socket.addEventListener("open", () => {
-								socket.send(JSON.stringify({ type: "data", data: payload }));
+								socket.send(JSON.stringify({ type: "data", data: behavioralPayload }));
 							}, { once: true });
 
 							socket.addEventListener("message", (event) => {
