@@ -693,6 +693,7 @@ Allow first-party analytics on this site to run a live device assessment.
 				const CONSENT_KEY = "gcx_analytics_consent";
 				let fallbackProbeStarted = false;
 				let fallbackProbeInFlight = false;
+				let behavioralFollowupInFlight = false;
 
 				function getById(id) {
 					return document.getElementById(id);
@@ -793,11 +794,8 @@ Allow first-party analytics on this site to run a live device assessment.
 					});
 				}
 
-				function sleep(ms) {
-					return new Promise((resolve) => window.setTimeout(resolve, ms));
-				}
-
-				async function collectDemoFingerprintPayload() {
+				async function collectDemoFingerprintPayload(mode = "core") {
+					const collectBehavioral = mode === "behavioral";
 					await loadScript("/bundle.js");
 
 					const exported = window.snatch;
@@ -809,19 +807,83 @@ Allow first-party analytics on this site to run a live device assessment.
 					const agent = new Snatch();
 					if (typeof agent.capture === "function") {
 						return await agent.capture({
-							minBehavioralDurationMs: 250,
-							maxBehavioralWaitMs: 1200,
-							pollIntervalMs: 100,
+							minBehavioralDurationMs: collectBehavioral ? 1200 : 0,
+							maxBehavioralWaitMs: collectBehavioral ? 4000 : 0,
+							pollIntervalMs: collectBehavioral ? 80 : 20,
 							requireInteraction: false,
 						});
 					}
 
 					await agent.ready;
-					await sleep(300);
-					if (agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
+					if (collectBehavioral && agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
 						agent.dataset.behavioralMetrics = agent._behavioral.computeBehavioralMetrics();
 					}
 					return agent.dataset || null;
+				}
+
+				async function sendBehavioralFollowupProbe(token) {
+					if (behavioralFollowupInFlight) {
+						return;
+					}
+
+					behavioralFollowupInFlight = true;
+					try {
+						const payload = await collectDemoFingerprintPayload("behavioral");
+						if (!payload) {
+							return;
+						}
+
+						await new Promise((resolve) => {
+							const socket = new WebSocket(buildWebSocketUrl(window.location, token));
+							const timeoutId = window.setTimeout(() => {
+								socket.close();
+								resolve();
+							}, 12000);
+
+							socket.addEventListener("open", () => {
+								socket.send(JSON.stringify({ type: "data", data: payload }));
+							}, { once: true });
+
+							socket.addEventListener("message", (event) => {
+								try {
+									const detail = JSON.parse(event.data);
+									if (!detail || typeof detail !== "object") {
+										return;
+									}
+
+									if (detail.type === "fingerprint" || detail.type === "fingerprintBehavioral") {
+										window.__GCX__ = window.__GCX__ || {};
+										window.__GCX__.riskTelemetry = detail.data;
+										renderFingerprint(detail.data);
+										if (detail.type === "fingerprintBehavioral") {
+											window.clearTimeout(timeoutId);
+											socket.close();
+											resolve();
+										}
+									}
+								} catch {
+									window.clearTimeout(timeoutId);
+									socket.close();
+									resolve();
+								}
+							});
+
+							socket.addEventListener("error", () => {
+								window.clearTimeout(timeoutId);
+								socket.close();
+								resolve();
+							}, { once: true });
+
+							socket.addEventListener("close", () => {
+								window.clearTimeout(timeoutId);
+								resolve();
+							}, { once: true });
+						});
+					} catch (error) {
+						console.warn("Behavioral follow-up probe failed:", error);
+					} finally {
+						behavioralFollowupInFlight = false;
+					}
 				}
 
 				async function startFallbackProbe(force = false) {
@@ -858,7 +920,7 @@ Allow first-party analytics on this site to run a live device assessment.
 					});
 
 					try {
-						const payload = await collectDemoFingerprintPayload();
+						const payload = await collectDemoFingerprintPayload("core");
 						if (!payload) {
 							throw new Error("Fingerprint payload capture returned no data.");
 						}
@@ -904,6 +966,7 @@ Allow first-party analytics on this site to run a live device assessment.
 
 										const waitingOnBehavior = detail.type === "fingerprint" && detail.data && detail.data.pending && detail.data.pending.behavioral === true;
 										if (waitingOnBehavior) {
+											void sendBehavioralFollowupProbe(token);
 											if (behavioralFollowupTimer !== null) {
 												window.clearTimeout(behavioralFollowupTimer);
 											}
