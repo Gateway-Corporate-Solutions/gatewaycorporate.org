@@ -91,6 +91,7 @@ const devicerSnippetKey = (
 ).trim();
 const DEVICER_SNIPPET_CACHE_TTL_MS = 10 * 60 * 1000;
 const DEVICER_SNIPPET_FETCH_TIMEOUT_MS = 2500;
+const GCX_WS_TOKEN_FALLBACK = (Deno.env.get("GCX_WS_TOKEN_FALLBACK") || "true").toLowerCase() !== "false";
 let cachedDevicerSnippet: { script: string; fetchedAt: number } | null = null;
 let devicerSnippetFetchInFlight: Promise<string | null> | null = null;
 const sessionStore = new SessionStore();
@@ -240,6 +241,14 @@ function isTlsComplexityError(error: unknown): boolean {
     return message.includes("input data hasn't enough complexity") ||
         message.includes("not enough complexity") ||
         message.includes("tlsh");
+}
+
+function isLikelyWsToken(value: string | null): boolean {
+    if (!value) {
+        return false;
+    }
+
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 function buildAnalyticsMessage(state: AnalyticsState): string {
@@ -2292,10 +2301,16 @@ router.get("/wss", async (context) => {
 
     const sessionId = await context.cookies.get(SESSION_COOKIE_NAME);
     const websocketToken = context.request.url.searchParams.get("token");
-    if (!sessionStore.validateSession(sessionId, websocketToken)) {
+    const sessionValid = sessionStore.validateSession(sessionId, websocketToken);
+    const allowTokenFallback = GCX_WS_TOKEN_FALLBACK && isLikelyWsToken(websocketToken);
+    if (!sessionValid && !allowTokenFallback) {
         context.response.status = 403;
         context.response.body = "Invalid websocket session.";
         return;
+    }
+
+    if (!sessionValid && allowTokenFallback) {
+        console.warn("Allowing websocket token fallback because in-memory session validation missed. Verify sticky sessions or shared session storage for /wss.");
     }
 
     const requestHeaders = Object.fromEntries(context.request.headers.entries());
@@ -2386,7 +2401,6 @@ router.get("/wss", async (context) => {
             const userId = sanitizeUserId(requestHeaders["x-user-id"]) ?? undefined;
 
             let identifyResult: Record<string, unknown>;
-            let resolvedDeviceId: string;
             try {
                 identifyResult = await devicerRuntime.deviceManager.identify(fingerprintData, {
                     ip: realIp,
@@ -2429,7 +2443,7 @@ router.get("/wss", async (context) => {
                 }
             }
 
-            resolvedDeviceId = typeof identifyResult.deviceId === "string"
+            const resolvedDeviceId = typeof identifyResult.deviceId === "string"
                 ? identifyResult.deviceId
                 : `fallback-${hash.slice(0, 16)}`;
 

@@ -808,9 +808,9 @@ Allow first-party analytics on this site to run a live device assessment.
 				const CONSENT_KEY = "gcx_analytics_consent";
 				const DEMO_PROGRESS_MAX_STAGE = 3;
 				const DEMO_PROGRESS_STAGE_MIN_MS = 450;
-				const DEMO_SOCKET_CONNECT_TIMEOUT_MS = 3500;
-				const DEMO_PROBE_TIMEOUT_MS = 9000;
-				const DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS = 8000;
+				const DEMO_SOCKET_CONNECT_TIMEOUT_MS = 12000;
+				const DEMO_PROBE_TIMEOUT_MS = 18000;
+				const DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS = 12000;
 				let fallbackProbeStarted = false;
 				let fallbackProbeInFlight = false;
 				let behavioralFollowupInFlight = false;
@@ -1336,23 +1336,25 @@ Allow first-party analytics on this site to run a live device assessment.
 						const sharedProbeTrigger = window.__GCX__ && window.__GCX__.requestRiskSnapshot;
 						if (typeof sharedProbeTrigger === "function") {
 							try {
-								const sharedProbePromise = Promise.resolve()
-									.then(() => sharedProbeTrigger())
-									.then(
-										() => ({ ok: true }),
-										(error) => ({ ok: false, error }),
-									);
+								let sharedProbeResult;
+								try {
+									await sharedProbeTrigger();
+									sharedProbeResult = { ok: true };
+								} catch (error) {
+									sharedProbeResult = { ok: false, error };
+								}
+
+								if (!sharedProbeResult.ok) {
+									throw sharedProbeResult.error;
+								}
+
 								const telemetryPromise = waitForFingerprintTelemetry(DEMO_PROBE_TIMEOUT_MS);
 								setProgressStage(2);
 								const analysisTransitionId = window.setTimeout(() => {
 									setProgressStage(3);
 								}, 350);
 								const detail = await telemetryPromise;
-								const sharedProbeResult = await sharedProbePromise;
 								window.clearTimeout(analysisTransitionId);
-								if (!sharedProbeResult.ok) {
-									throw sharedProbeResult.error;
-								}
 								if (detail && detail.data) {
 									renderFingerprint(detail.data);
 								}
@@ -1364,12 +1366,12 @@ Allow first-party analytics on this site to run a live device assessment.
 								return;
 							} catch (sharedProbeError) {
 								console.info("Shared telemetry probe did not return before the demo warm-up window elapsed.", sharedProbeError);
-								setRuntimeStatus("Live telemetry is still warming up. Waiting for background updates.", false);
+								setRuntimeStatus("Live telemetry connection could not be established yet. Check consent, network policy, and websocket proxy support.", false);
 								setProgressStage(-1, { immediate: true });
 								setRunDemoState({
 									disabled: false,
 									label: "Run Demo Again",
-									hint: "The shared telemetry socket is still warming up. The demo will update if background telemetry arrives.",
+									hint: "Websocket setup did not complete. Rerun after verifying browser/privacy settings and edge websocket forwarding.",
 								});
 								return;
 							}
@@ -1380,12 +1382,12 @@ Allow first-party analytics on this site to run a live device assessment.
 
 						if (isConnectivityIssue) {
 							console.info("Demo telemetry probe did not return before the warm-up window elapsed.", failureMessage);
-							setRuntimeStatus("Live telemetry is still warming up. Waiting for background telemetry updates.", false);
+							setRuntimeStatus("Live telemetry connection was interrupted before a response arrived.", false);
 							setProgressStage(-1, { immediate: true });
 							setRunDemoState({
 								disabled: false,
 								label: "Run Demo Again",
-								hint: "The telemetry socket is still warming up. The panel will still update if background telemetry arrives.",
+								hint: "Connection issue detected. Rerun after confirming websocket access to /wss is allowed end-to-end.",
 							});
 						} else {
 							console.error("Demo telemetry probe failed:", error);
