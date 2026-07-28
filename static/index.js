@@ -92,15 +92,17 @@ async function collectFingerprintPayload(agent) {
 
   if (typeof agent.capture === "function") {
     return agent.capture({
-      minBehavioralDurationMs: 1500,
-      maxBehavioralWaitMs: 6000,
-      pollIntervalMs: 100,
-      requireInteraction: true,
+      // Keep websocket payload latency low in production by avoiding long
+      // behavioral waits before first send.
+      minBehavioralDurationMs: 0,
+      maxBehavioralWaitMs: 900,
+      pollIntervalMs: 50,
+      requireInteraction: false,
     });
   }
 
   await agent.ready;
-  await sleep(1500);
+  await sleep(250);
 
   if (agent._behavioral && typeof agent._behavioral.computeBehavioralMetrics === "function") {
     agent.dataset.behavioralMetrics = agent._behavioral.computeBehavioralMetrics();
