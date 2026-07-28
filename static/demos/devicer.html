@@ -808,8 +808,8 @@ Allow first-party analytics on this site to run a live device assessment.
 				const CONSENT_KEY = "gcx_analytics_consent";
 				const DEMO_PROGRESS_MAX_STAGE = 3;
 				const DEMO_PROGRESS_STAGE_MIN_MS = 450;
-				const DEMO_SOCKET_CONNECT_TIMEOUT_MS = 12000;
-				const DEMO_PROBE_TIMEOUT_MS = 18000;
+				const DEMO_SOCKET_CONNECT_TIMEOUT_MS = 5000;
+				const DEMO_PROBE_TIMEOUT_MS = 8000;
 				const DEMO_BEHAVIORAL_WAIT_TIMEOUT_MS = 12000;
 				let fallbackProbeStarted = false;
 				let fallbackProbeInFlight = false;
@@ -1234,7 +1234,7 @@ Allow first-party analytics on this site to run a live device assessment.
 
 							settled = true;
 							socket.close();
-							reject(new Error("Core probe timed out waiting for fingerprint response."));
+							resolve(null);
 						}, DEMO_PROBE_TIMEOUT_MS);
 
 						socket.addEventListener("message", (event) => {
@@ -1253,6 +1253,14 @@ Allow first-party analytics on this site to run a live device assessment.
 									window.clearTimeout(timeoutId);
 									socket.close();
 									resolve(detail);
+									return;
+								}
+
+								if (detail.type === "error") {
+									settled = true;
+									window.clearTimeout(timeoutId);
+									socket.close();
+									reject(new Error(typeof detail.data === "string" ? detail.data : "Server returned a probe error."));
 								}
 							} catch {
 								// Ignore non-JSON messages and continue listening.
@@ -1305,77 +1313,38 @@ Allow first-party analytics on this site to run a live device assessment.
 					setRunDemoState({
 						disabled: true,
 						label: "Running Assessment...",
-						hint: "Collecting fingerprint data and requesting live server-side enrichment.",
+						hint: "Opening websocket and sending a direct fingerprint snapshot now.",
 					});
 
 					try {
 						setProgressStage(1);
 
-						try {
-							const directDetail = await sendCoreProbe(token);
-							if (directDetail && directDetail.data) {
-								window.__GCX__ = window.__GCX__ || {};
-								window.__GCX__.riskTelemetry = directDetail.data;
-								renderFingerprint(directDetail.data);
-							}
-
-							if (directDetail && directDetail.type === "fingerprint" && directDetail.data && directDetail.data.pending && directDetail.data.pending.behavioral === true) {
-								void sendBehavioralFollowupProbe(token);
-							}
-
+						const directDetail = await sendCoreProbe(token);
+						if (!directDetail || !directDetail.data) {
+							setRuntimeStatus("Live assessment timed out before a fingerprint response arrived.", false);
+							setProgressStage(-1, { immediate: true });
 							setRunDemoState({
 								disabled: false,
 								label: "Run Demo Again",
-								hint: "Live telemetry updated using a direct low-latency probe. Behavioral updates continue in the background.",
+								hint: "No fingerprint response arrived in time. Rerun to retry the direct websocket probe.",
 							});
 							return;
-						} catch (directProbeError) {
-							console.info("Direct probe did not complete in time. Falling back to shared runtime socket.", directProbeError);
 						}
 
-						const sharedProbeTrigger = window.__GCX__ && window.__GCX__.requestRiskSnapshot;
-						if (typeof sharedProbeTrigger === "function") {
-							try {
-								let sharedProbeResult;
-								try {
-									await sharedProbeTrigger();
-									sharedProbeResult = { ok: true };
-								} catch (error) {
-									sharedProbeResult = { ok: false, error };
-								}
+						window.__GCX__ = window.__GCX__ || {};
+						window.__GCX__.riskTelemetry = directDetail.data;
+						renderFingerprint(directDetail.data);
 
-								if (!sharedProbeResult.ok) {
-									throw sharedProbeResult.error;
-								}
-
-								const telemetryPromise = waitForFingerprintTelemetry(DEMO_PROBE_TIMEOUT_MS);
-								setProgressStage(2);
-								const analysisTransitionId = window.setTimeout(() => {
-									setProgressStage(3);
-								}, 350);
-								const detail = await telemetryPromise;
-								window.clearTimeout(analysisTransitionId);
-								if (detail && detail.data) {
-									renderFingerprint(detail.data);
-								}
-								setRunDemoState({
-									disabled: false,
-									label: "Run Demo Again",
-									hint: "Live telemetry updated using the shared runtime socket. Rerun to refresh the assessment.",
-								});
-								return;
-							} catch (sharedProbeError) {
-								console.info("Shared telemetry probe did not return before the demo warm-up window elapsed.", sharedProbeError);
-								setRuntimeStatus("Live telemetry connection could not be established yet. Check consent, network policy, and websocket proxy support.", false);
-								setProgressStage(-1, { immediate: true });
-								setRunDemoState({
-									disabled: false,
-									label: "Run Demo Again",
-									hint: "Websocket setup did not complete. Rerun after verifying browser/privacy settings and edge websocket forwarding.",
-								});
-								return;
-							}
+						if (directDetail.type === "fingerprint" && directDetail.data.pending && directDetail.data.pending.behavioral === true) {
+							void sendBehavioralFollowupProbe(token);
 						}
+
+						setRunDemoState({
+							disabled: false,
+							label: "Run Demo Again",
+							hint: "Live telemetry updated using a direct websocket probe. Behavioral updates continue in the background.",
+						});
+						return;
 					} catch (error) {
 						const failureMessage = error instanceof Error ? error.message : "unknown error";
 						const isConnectivityIssue = /timed out|could not be opened|websocket failed|closed before fingerprint response|connection interrupted/i.test(failureMessage);
