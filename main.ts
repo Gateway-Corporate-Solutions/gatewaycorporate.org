@@ -29,6 +29,7 @@ import {
     createForumThread,
     evaluateForumSubmission,
     FORUM_BOARDS,
+    getForumBoardSummaries,
     getForumModerationQueue,
     getForumModerationState,
     getForumBoardBySlug,
@@ -2335,6 +2336,123 @@ router.get("/mesh.obj", async (context) => {
         console.error(`Error reading mesh file: ${error}`);
         context.response.status = 404;
         context.response.body = "Mesh not found";
+    }
+});
+
+router.get("/api/blog/recent", async (context) => {
+    try {
+        const limitParam = context.request.url.searchParams.get("limit");
+        const parsedLimit = limitParam ? Number.parseInt(limitParam, 10) : 10;
+        const limit = Number.isFinite(parsedLimit)
+            ? Math.max(1, Math.min(50, parsedLimit))
+            : 10;
+
+        const posts = await getBlogPosts();
+        const recent = posts.slice(0, limit).map((post) => ({
+            slug: post.slug,
+            title: post.title,
+            date: post.date,
+            excerpt: post.excerpt,
+            author: post.author,
+            tags: post.tags,
+            readingTime: post.readingTime,
+            imageUrl: post.imageUrl,
+            url: `/blog/${encodeURIComponent(post.slug)}`,
+        }));
+
+        context.response.status = 200;
+        context.response.body = {
+            ok: true,
+            count: recent.length,
+            total: posts.length,
+            items: recent,
+        };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    } catch (error) {
+        console.error("Failed to return recent blog articles", error);
+        context.response.status = 500;
+        context.response.body = { ok: false, error: "Recent blog articles unavailable" };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    }
+});
+
+router.get("/api/jobs", async (context) => {
+    try {
+        const jobs = await getJobPostings();
+        const items = jobs.map((job) => ({
+            slug: job.slug,
+            title: job.title,
+            date: job.date,
+            excerpt: job.excerpt,
+            department: job.department,
+            location: job.location,
+            employmentType: job.employmentType,
+            status: job.status,
+            team: job.team,
+            remote: job.remote,
+            tags: job.tags,
+            url: `/careers/${encodeURIComponent(job.slug)}`,
+        }));
+
+        context.response.status = 200;
+        context.response.body = {
+            ok: true,
+            count: items.length,
+            items,
+        };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    } catch (error) {
+        console.error("Failed to return job listings", error);
+        context.response.status = 500;
+        context.response.body = { ok: false, error: "Job listings unavailable" };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    }
+});
+
+router.get("/api/forum/stats", async (context) => {
+    try {
+        const boards = await getForumBoardSummaries();
+        const totals = boards.reduce(
+            (acc, board) => {
+                acc.threads += board.threadCount;
+                acc.replies += board.replyCount;
+                return acc;
+            },
+            { threads: 0, replies: 0 },
+        );
+
+        const lastActivityAt = boards
+            .map((board) => board.lastActivityAt)
+            .filter((value): value is string => typeof value === "string")
+            .sort((left, right) => new Date(right).getTime() - new Date(left).getTime())[0] || null;
+
+        context.response.status = 200;
+        context.response.body = {
+            ok: true,
+            totals: {
+                boards: boards.length,
+                threads: totals.threads,
+                replies: totals.replies,
+                posts: totals.threads + totals.replies,
+                lastActivityAt,
+            },
+            boards: boards.map((summary) => ({
+                slug: summary.board.slug,
+                name: summary.board.name,
+                description: summary.board.description,
+                threadCount: summary.threadCount,
+                replyCount: summary.replyCount,
+                postCount: summary.threadCount + summary.replyCount,
+                lastActivityAt: summary.lastActivityAt || null,
+                url: `/forum/${encodeURIComponent(summary.board.slug)}`,
+            })),
+        };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
+    } catch (error) {
+        console.error("Failed to return forum stats", error);
+        context.response.status = 500;
+        context.response.body = { ok: false, error: "Forum statistics unavailable" };
+        context.response.headers.set("Content-Type", "application/json; charset=utf-8");
     }
 });
 
