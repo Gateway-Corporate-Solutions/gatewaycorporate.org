@@ -32,7 +32,8 @@
 
     <link rel="canonical" href="https://gatewaycorporate.org/">
 
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Gateway Corporate","url":"https://gatewaycorporate.org","logo":"https://gatewaycorporate.org/logo.png","description":"Gateway Corporate builds intelligence systems, AI operations, and strategic simulation platforms.","address":{"@type":"PostalAddress","addressLocality":"St. Louis","addressRegion":"MO","addressCountry":"US"},"sameAs":[]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Gateway Corporate","url":"https://gatewaycorporate.org","logo":"https://gatewaycorporate.org/logo.png","description":"Gateway Corporate builds intelligence systems, AI operations, and strategic simulation platforms.","founder":{"@type":"Person","name":"Samuel Roux","jobTitle":"Founder and CEO","url":"https://gatewaycorporate.org/#team"},"address":{"@type":"PostalAddress","addressLocality":"St. Louis","addressRegion":"MO","addressCountry":"US"},"sameAs":[]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Samuel Roux","jobTitle":"Founder and CEO","worksFor":{"@type":"Organization","name":"Gateway Corporate","url":"https://gatewaycorporate.org"},"url":"https://gatewaycorporate.org/#team","address":{"@type":"PostalAddress","addressLocality":"St. Louis","addressRegion":"MO","addressCountry":"US"},"sameAs":["https://x.com/Samuel_Roux_","https://www.linkedin.com/in/samuel-roux-the-developer"]}</script>
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Gateway Corporate","url":"https://gatewaycorporate.org","description":"Intelligence systems, AI operations, and strategic digital twins."}</script>
 
     <style>
@@ -480,8 +481,80 @@
         box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
       }
 
-      .team-card {
-        border: 1px solid rgba(148, 163, 184, 0.23);
+      .founder-bio {
+        position: relative;
+        overflow: hidden;
+        max-width: 920px;
+        margin: 0 auto;
+        border: 1px solid rgba(125, 211, 252, 0.32);
+        border-radius: 20px;
+        padding: 1.55rem 1.7rem 1.65rem;
+        background: linear-gradient(165deg, rgba(37, 99, 235, 0.18) 0%, rgba(30, 41, 59, 0.7) 40%, rgba(15, 23, 42, 0.84) 100%);
+      }
+
+      .founder-bio::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, rgba(96, 165, 250, 0.9) 0%, rgba(56, 189, 248, 0.85) 50%, rgba(30, 64, 175, 0.95) 100%);
+      }
+
+      .founder-identity {
+        margin-bottom: 1.15rem;
+      }
+
+      .founder-name {
+        margin: 0 0 0.28rem;
+        font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        color: #f8fafc;
+      }
+
+      .founder-role {
+        margin: 0;
+        color: #93c5fd;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .founder-location {
+        margin: 0.35rem 0 0;
+        color: #cbd5e1;
+        font-size: 0.95rem;
+      }
+
+      .founder-copy p {
+        margin: 0 0 0.95rem;
+        color: #dbeafe;
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+
+      .founder-copy p:last-of-type {
+        margin-bottom: 0;
+      }
+
+      .founder-copy a {
+        color: #7dd3fc;
+        text-decoration: underline;
+        text-underline-offset: 0.16em;
+      }
+
+      .founder-copy a:hover {
+        color: #e0f2fe;
+      }
+
+      .founder-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-top: 1.2rem;
       }
 
       .intent-strip {
@@ -877,44 +950,53 @@
 
       <section id="team" class="section">
         <div class="section-header">
-          <h2 class="section-title">Leadership Team</h2>
-          <p class="text-lead">Cross-disciplinary leadership across engineering, design, and strategic operations.</p>
+          <h2 class="section-title">Leadership</h2>
+          <p class="text-lead">Samuel Roux founded Gateway Corporate and still writes the software.</p>
         </div>
 
-        <div class="grid grid-3 gap-lg card-grid">
-          <div class="card card-primary card-centered team-card">
-            <div class="icon-circle icon-lg icon-primary">👨‍💻</div>
-            <div class="card-header">
-              <h3 class="card-title">Sam Roux</h3>
-              <p class="text-secondary">Founder and CEO</p>
-            </div>
-            <div class="card-body">
-              <p class="card-text">Leads systems strategy, product direction, and technical execution across the stack.</p>
-            </div>
+        <article class="founder-bio">
+          <div class="founder-identity">
+            <h3 class="founder-name">Samuel Roux</h3>
+            <p class="founder-role">Founder and CEO</p>
+            <p class="founder-location">St. Louis, Missouri</p>
           </div>
-
-          <div class="card card-primary card-centered team-card">
-            <div class="icon-circle icon-lg icon-secondary">🎨</div>
-            <div class="card-header">
-              <h3 class="card-title">Stephen Perso</h3>
-              <p class="text-secondary">Co-Founder and Lead Design</p>
-            </div>
-            <div class="card-body">
-              <p class="card-text">Owns product experience, communication design, and interface clarity for operators.</p>
-            </div>
+          <div class="founder-copy">
+            <p>
+              Samuel Roux is the founder and CEO of Gateway Corporate. He is a software
+              developer of ten years and a newer executive, and he remains the lead
+              developer of the company's products: Devicer, HyperLocal 2, and NashTwin.
+              Systems strategy, product direction, and technical execution still run
+              through the same desk.
+            </p>
+            <p>
+              His work is guest and user intelligence software for teams that cannot
+              afford fragile systems. Devicer turns identity and telemetry signals into
+              explainable trust decisions. HyperLocal 2 puts AI into production
+              communications with operator-owned controls. NashTwin gives leadership
+              teams a way to rehearse high-stakes decisions before they spend capital
+              or reputation. The through-line is the same in each product: observe
+              reality accurately, make the reasoning inspectable, and keep a human in
+              the loop when the decision matters.
+            </p>
+            <p>
+              That stance also shows up in how the company publishes. Roux writes the
+              <a href="/blog">Gateway Corporate journal</a>, covering device
+              fingerprinting, operational AI, digital twins, and the gap between
+              academic research and production systems. He released the core of Devicer
+              as open-source middleware so identity confidence scoring is not locked
+              inside a black box.
+            </p>
+            <p>
+              He is based in St. Louis and is building Gateway Corporate to put serious
+              intelligence software within reach of organizations that used to need a
+              government budget or a Fortune 500 research team to get it.
+            </p>
           </div>
-
-          <div class="card card-primary card-centered team-card">
-            <div class="icon-circle icon-lg icon-primary">💼</div>
-            <div class="card-header">
-              <h3 class="card-title">Jonathan Walling</h3>
-              <p class="text-secondary">Mentor and Business Expert</p>
-            </div>
-            <div class="card-body">
-              <p class="card-text">Supports strategic planning, operational alignment, and scalable commercialization.</p>
-            </div>
+          <div class="founder-links">
+            <a href="/blog" class="btn btn-primary btn-sm">Read the Journal</a>
+            <a href="/contact" class="btn btn-secondary btn-sm">Work With Samuel</a>
           </div>
-        </div>
+        </article>
       </section>
 
       <section class="section">
