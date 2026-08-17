@@ -1913,7 +1913,7 @@ class NetworkGraph {
       Math.max(width, height) * 0.45,
     );
     const glowAlpha = this.lerp(0.10, 0.16, blend);
-    glow.addColorStop(0, `rgba(96, 165, 250, ${glowAlpha})`);
+    glow.addColorStop(0, `rgba(201, 149, 111, ${glowAlpha})`);
     glow.addColorStop(1, "rgba(15, 23, 42, 0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, width, height);

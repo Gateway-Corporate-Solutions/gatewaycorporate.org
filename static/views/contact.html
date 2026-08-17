@@ -26,12 +26,12 @@
       }
 
       .contact-panel {
-        border: 1px solid rgba(125, 211, 252, 0.2);
+        border: 1px solid rgba(201, 149, 111, 0.2);
         border-radius: 18px;
         padding: 1.15rem;
         background:
-          radial-gradient(circle at 95% 10%, rgba(56, 189, 248, 0.12) 0%, rgba(56, 189, 248, 0) 34%),
-          linear-gradient(170deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.78) 100%);
+          radial-gradient(circle at 95% 10%, rgba(201, 149, 111, 0.14) 0%, rgba(201, 149, 111, 0) 34%),
+          linear-gradient(170deg, rgba(15, 13, 12, 0.94) 0%, rgba(28, 25, 23, 0.8) 100%);
       }
 
       .contact-panel h3 {
@@ -43,7 +43,7 @@
         padding-left: 1.1rem;
         display: grid;
         gap: 0.52rem;
-        color: #dbeafe;
+        color: var(--gray-800);
       }
 
       .insight-stack {
@@ -53,24 +53,24 @@
       }
 
       .insight-item {
-        border: 1px solid rgba(148, 163, 184, 0.24);
+        border: 1px solid rgba(201, 149, 111, 0.16);
         border-radius: 12px;
         padding: 0.7rem;
-        background: rgba(15, 23, 42, 0.45);
+        background: rgba(24, 21, 19, 0.46);
       }
 
       .insight-item p {
         margin: 0;
-        color: #dbeafe;
+        color: var(--gray-800);
         font-size: 0.92rem;
       }
 
       .book-panel {
-        border: 1px solid rgba(56, 189, 248, 0.35);
+        border: 1px solid rgba(201, 149, 111, 0.18);
         border-radius: 14px;
         padding: 0.95rem;
         margin-top: 0.8rem;
-        background: rgba(15, 23, 42, 0.56);
+        background: rgba(24, 21, 19, 0.38);
         transition: opacity 0.2s ease;
       }
 
@@ -102,13 +102,13 @@
 
       .toggle-text {
         margin: 0;
-        color: #f5ede1;
+        color: var(--gray-900);
         font-size: 0.95rem;
       }
 
       .toggle-subtext {
         margin: 0.2rem 0 0;
-        color: #cbd5e1;
+        color: var(--gray-800);
         font-size: 0.84rem;
       }
 
@@ -125,19 +125,19 @@
         display: flex;
         align-items: center;
         gap: 0.42rem;
-        border: 1px solid rgba(148, 163, 184, 0.32);
+        border: 1px solid rgba(201, 149, 111, 0.14);
         border-radius: 999px;
         padding: 0.3rem 0.6rem;
-        color: #e2e8f0;
+        color: var(--gray-900);
         font-size: 0.81rem;
-        background: rgba(15, 23, 42, 0.45);
+        background: rgba(201, 149, 111, 0.04);
       }
 
       .slot-dot {
         width: 0.55rem;
         height: 0.55rem;
         border-radius: 999px;
-        background: #93c5fd;
+        background: var(--accent);
       }
 
       .slot-pill[data-state="open"] .slot-dot {
@@ -151,7 +151,7 @@
       .slot-help {
         margin: 0.55rem 0 0;
         font-size: 0.86rem;
-        color: #cbd5e1;
+        color: var(--gray-800);
       }
 
       .slot-help.error {
@@ -167,11 +167,11 @@
       }
 
       .form-headline .status-chip {
-        border: 1px solid rgba(147, 197, 253, 0.35);
+        border: 1px solid rgba(201, 149, 111, 0.35);
         border-radius: 999px;
         padding: 0.22rem 0.55rem;
         font-size: 0.75rem;
-        color: #cfe1ff;
+        color: #f0d0ab;
       }
 
       @media (max-width: 900px) {
@@ -258,7 +258,7 @@
             <h2 id="contact-form-title" class="section-title" style="margin-bottom: 0.35rem;">Send A Request</h2>
             <span class="status-chip">1 business day response target</span>
           </div>
-          <p class="text-small" style="margin-top: 0; color: #cbd5e1;">Choose either a general inquiry or an appointment booking in the same form.</p>
+<p class="text-small" style="margin-top: 0; color: var(--gray-800);">Choose either a general inquiry or an appointment booking in the same form.</p>
 
           <form id="contact-form" method="post" action="/contact" class="form" aria-label="Contact Form">
             <input type="hidden" id="requestType" name="requestType" value="message">
@@ -335,7 +335,7 @@
               <button type="submit" class="btn btn-primary w-full btn-lg" aria-label="Send Message">Send Request</button>
             </div>
 
-            <p class="text-small" style="margin-top: 1rem; color: #cbd5e1;">
+            <p class="text-small" style="margin-top: 1rem; color: var(--gray-800);">
               Appointment slots are locked immediately on submit to prevent double booking, then notifications are sent with your booking details.
             </p>
           </form>

@@ -74,9 +74,35 @@
 			margin-top: auto;
 		}
 
-		.grid {
-			display: grid;
-			gap: 2rem;
+		#features .feature-grid {
+			display: flex !important;
+			flex-wrap: wrap !important;
+			justify-content: center !important;
+			align-items: stretch !important;
+			gap: 2rem !important;
+			width: min(100%, 980px) !important;
+			margin-inline: auto !important;
+		}
+
+		#features .feature-grid > .card {
+			display: flex !important;
+			flex-direction: column !important;
+			flex: 0 0 305px !important;
+			width: 305px !important;
+			height: auto !important;
+			min-height: auto !important;
+			max-height: none !important;
+			overflow: visible !important;
+		}
+
+		#features .feature-grid > .card .card-body {
+			flex: 1 1 auto !important;
+			width: 100% !important;
+			display: flex !important;
+			flex-direction: column !important;
+			justify-content: space-between !important;
+			min-height: auto !important;
+			max-height: none !important;
 		}
 
 		.grid.gap-lg {
@@ -110,9 +136,9 @@
 		.stat-item {
 			text-align: center;
 			padding: 1.5rem;
-			background: rgba(255, 255, 255, 0.05);
+			background: rgba(26, 24, 22, 0.7);
 			border-radius: 16px;
-			border: 1px solid rgba(255, 255, 255, 0.1);
+			border: 1px solid rgba(201, 149, 111, 0.18);
 			-webkit-backdrop-filter: blur(10px);
 			backdrop-filter: blur(10px);
 		}
@@ -166,15 +192,15 @@
 		}
 
 		.step-card.map {
-			border-top-color: #60a5fa;
+			border-top-color: var(--secondary);
 		}
 
 		.step-card.simulate {
-			border-top-color: #a78bfa;
+			border-top-color: var(--secondary-light);
 		}
 
 		.step-card.optimize {
-			border-top-color: #34d399;
+			border-top-color: var(--success);
 		}
 
 		.step-badge {
@@ -191,24 +217,24 @@
 		}
 
 		.step-badge.step-1 {
-			background: rgba(96, 165, 250, 0.16);
-			color: #93c5fd;
+			background: rgba(201, 149, 111, 0.12);
+			color: var(--accent);
 		}
 
 		.step-badge.step-2 {
-			background: rgba(167, 139, 250, 0.16);
-			color: #c4b5fd;
+			background: rgba(122, 111, 99, 0.12);
+			color: var(--gray-800);
 		}
 
 		.step-badge.step-3 {
-			background: rgba(52, 211, 153, 0.16);
-			color: #6ee7b7;
+			background: rgba(124, 179, 66, 0.12);
+			color: var(--success);
 		}
 
 		.pricing-card {
 			transition: all 0.3s ease;
-			border: 2px solid rgba(255, 255, 255, 0.1);
-			background: linear-gradient(180deg, #202632 0%, #171b24 100%);
+			border: 2px solid rgba(201, 149, 111, 0.12);
+			background: linear-gradient(180deg, rgba(43, 36, 31, 0.96) 0%, rgba(23, 19, 16, 0.98) 100%);
 		}
 
 		.pricing-card:hover {
@@ -218,8 +244,8 @@
 		}
 
 		.pricing-card.featured {
-			border-color: rgba(167, 139, 250, 0.5);
-			box-shadow: 0 0 40px rgba(167, 139, 250, 0.1);
+			border-color: rgba(201, 149, 111, 0.45);
+			box-shadow: 0 0 40px rgba(201, 149, 111, 0.08);
 		}
 
 		.pricing-card .card-header {
@@ -292,8 +318,8 @@
 			font-weight: 700;
 			letter-spacing: 0.06em;
 			text-transform: uppercase;
-			background: rgba(167, 139, 250, 0.2);
-			color: #c4b5fd;
+			background: rgba(201, 149, 111, 0.15);
+			color: var(--accent);
 			margin-bottom: 0.75rem;
 		}
 
@@ -338,9 +364,9 @@
 			padding: 0 1.5rem;
 			border-radius: 999px;
 			overflow: hidden;
-			background: linear-gradient(135deg, rgba(96, 165, 250, 0.18) 0%, rgba(167, 139, 250, 0.2) 50%, rgba(52, 211, 153, 0.16) 100%);
-			border: 1px solid rgba(255, 255, 255, 0.14);
-			box-shadow: 0 18px 35px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+			background: linear-gradient(135deg, rgba(201, 149, 111, 0.14) 0%, rgba(122, 111, 99, 0.16) 50%, rgba(124, 179, 66, 0.10) 100%);
+			border: 1px solid rgba(201, 149, 111, 0.18);
+			box-shadow: 0 18px 35px rgba(23, 19, 16, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 		}
 
 		.rotating-promo::after {
@@ -369,7 +395,7 @@
 			letter-spacing: 0.14em;
 			text-transform: uppercase;
 			color: rgba(255, 255, 255, 0.96);
-			text-shadow: 0 0 20px rgba(96, 165, 250, 0.22);
+			text-shadow: 0 0 20px rgba(201, 149, 111, 0.22);
 			opacity: 0;
 			transform: translateY(65%);
 			animation: promoRotate 9s ease-in-out infinite;
@@ -421,7 +447,7 @@
 		}
 
 		.comparison-note {
-			color: #d6e0ea;
+			color: var(--gray-700);
 			font-size: 0.95rem;
 			line-height: 1.6;
 			margin-top: 1rem;
@@ -431,9 +457,9 @@
 			max-width: 1100px;
 			margin: 0 auto;
 			padding: 1.15rem;
-			border: 1px solid rgba(148, 163, 184, 0.25);
+			border: 1px solid rgba(201, 149, 111, 0.22);
 			border-radius: 20px;
-			background: linear-gradient(145deg, rgba(15, 23, 42, 0.58) 0%, rgba(30, 41, 59, 0.38) 100%);
+			background: linear-gradient(145deg, rgba(38, 33, 29, 0.72) 0%, rgba(28, 24, 21, 0.48) 100%);
 		}
 
 		.fit-grid {
@@ -456,18 +482,18 @@
 		.fit-list {
 			margin: 0;
 			padding-left: 1rem;
-			color: #cbd5e1;
+			color: var(--gray-700);
 			line-height: 1.5;
 		}
 
 		.fit-proof {
 			margin-top: 0.95rem;
 			padding: 0.9rem;
-			border: 1px solid rgba(125, 211, 252, 0.32);
+			border: 1px solid rgba(201, 149, 111, 0.32);
 			border-radius: 14px;
-			background: rgba(15, 23, 42, 0.4);
+			background: rgba(31, 26, 23, 0.44);
 			font-weight: 600;
-			color: #dbeafe;
+			color: var(--gray-900);
 			text-align: center;
 		}
 
@@ -484,8 +510,8 @@
 			margin: 1.2rem auto 0;
 			padding: 1rem;
 			border-radius: 18px;
-			border: 1px solid rgba(148, 163, 184, 0.24);
-			background: rgba(15, 23, 42, 0.42);
+			border: 1px solid rgba(201, 149, 111, 0.2);
+			background: rgba(31, 26, 23, 0.42);
 		}
 
 		.intent-nav-links {
@@ -500,16 +526,16 @@
 			align-items: center;
 			padding: 0.45rem 0.75rem;
 			border-radius: 999px;
-			border: 1px solid rgba(148, 163, 184, 0.35);
-			color: #dbeafe;
+			border: 1px solid rgba(201, 149, 111, 0.26);
+			color: var(--gray-800);
 			text-decoration: none;
 			font-size: 0.88rem;
 			font-weight: 600;
 		}
 
 		.intent-chip:hover {
-			border-color: rgba(96, 165, 250, 0.55);
-			background: rgba(59, 130, 246, 0.18);
+			border-color: rgba(201, 149, 111, 0.45);
+			background: rgba(201, 149, 111, 0.08);
 		}
 
 		.intent-nav .btn {
@@ -834,7 +860,7 @@
 			</p>
 		</div>
 
-		<div class="grid grid-auto-fit gap-lg card-grid">
+		<div class="feature-grid">
 			<div class="card card-primary card-centered">
 				<div class="icon-circle icon-lg icon-primary">🧬</div>
 				<div class="card-header">
@@ -1097,7 +1123,7 @@
 			<div style="
 				padding: 1.75rem 2rem;
 				border-radius: 20px;
-				background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(96, 165, 250, 0.08) 100%);
+				background: linear-gradient(135deg, rgba(201, 149, 111, 0.08) 0%, rgba(122, 111, 99, 0.08) 100%);
 				border: 1px solid rgba(52, 211, 153, 0.2);
 				text-align: center;
 				margin-bottom: 2rem;

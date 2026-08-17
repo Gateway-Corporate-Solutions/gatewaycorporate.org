@@ -38,9 +38,9 @@
 
     <style>
       :root {
-        --hero-shell: radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 42%),
-          radial-gradient(circle at 88% 8%, rgba(59, 130, 246, 0.14) 0%, rgba(59, 130, 246, 0) 35%),
-          linear-gradient(140deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.97) 48%, rgba(15, 23, 42, 0.99) 100%);
+        --hero-shell: radial-gradient(circle at 12% 10%, rgba(201, 149, 111, 0.18) 0%, rgba(201, 149, 111, 0) 42%),
+          radial-gradient(circle at 88% 8%, rgba(122, 111, 99, 0.12) 0%, rgba(122, 111, 99, 0) 35%),
+          linear-gradient(140deg, rgba(12, 11, 10, 0.98) 0%, rgba(26, 24, 22, 0.97) 48%, rgba(12, 11, 10, 0.99) 100%);
       }
 
       .section {
@@ -73,12 +73,13 @@
         font-size: 0.85rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        border-radius: 999px;
+        border: 1px solid rgba(201, 149, 111, 0.35);
+        border-radius: 0;
         padding: 0.4rem 0.8rem;
-        color: #cbd5e1;
+        color: var(--gray-800);
         margin-bottom: 1.2rem;
         margin-inline: auto;
+        background: rgba(26, 24, 22, 0.26);
       }
 
       .hero-title {
@@ -86,12 +87,12 @@
         line-height: 1.04;
         margin-bottom: 1rem;
         letter-spacing: -0.025em;
-        color: #ffffff;
-        text-shadow: 0 8px 22px rgba(2, 6, 23, 0.5);
+        color: var(--gray-900);
+        text-shadow: 0 2px 14px rgba(2, 6, 23, 0.92);
       }
 
       .hero-subtitle {
-        color: #dbeafe;
+        color: var(--gray-700);
         font-size: clamp(1rem, 2vw, 1.35rem);
         max-width: 850px;
         line-height: 1.55;
@@ -109,18 +110,18 @@
       .stat-panel {
         flex: 1 1 0;
         max-width: 18rem;
-        border: 1px solid rgba(125, 211, 252, 0.45);
-        border-radius: 16px;
+        border: 1px solid var(--rule-color);
+        border-radius: 1px;
         padding: 1.1rem;
         text-align: center;
-        background: linear-gradient(160deg, rgba(15, 23, 42, 0.72) 0%, rgba(30, 41, 59, 0.52) 100%);
-        box-shadow: 0 10px 24px rgba(2, 6, 23, 0.35);
+        background: color-mix(in oklab, var(--primary-light) 88%, var(--canvas));
+        box-shadow: none;
       }
 
       .stat-value {
         font-size: clamp(1.7rem, 3vw, 2.25rem);
-        font-weight: 800;
-        color: #f8fafc;
+        font-weight: 600;
+        color: var(--gray-900);
         margin-bottom: 0.3rem;
         letter-spacing: -0.01em;
       }
@@ -128,7 +129,7 @@
       .stat-label {
         font-size: 0.95rem;
         font-weight: 600;
-        color: #dbeafe;
+        color: var(--gray-700);
         line-height: 1.45;
       }
 
@@ -149,8 +150,8 @@
       }
 
       .splash-card {
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        background: linear-gradient(150deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.9) 100%);
+        border: 1px solid rgba(201, 149, 111, 0.18);
+        background: linear-gradient(150deg, rgba(22, 20, 18, 0.92) 0%, rgba(35, 31, 28, 0.9) 100%);
       }
 
       .offering-grid {
@@ -160,7 +161,7 @@
       }
 
       .offering-card {
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        border: 1px solid rgba(201, 149, 111, 0.14);
         border-radius: 18px;
         padding: 1.05rem;
         background: rgba(255, 255, 255, 0.02);
@@ -178,20 +179,20 @@
       }
 
       .pill-row span {
-        border: 1px solid rgba(148, 163, 184, 0.32);
+        border: 1px solid rgba(201, 149, 111, 0.28);
         border-radius: 999px;
         padding: 0.3rem 0.65rem;
         font-size: 0.8rem;
-        color: #dbeafe;
+        color: var(--gray-800);
       }
 
       .product-spotlight {
         position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        border-radius: 20px;
+        overflow: visible;
+        border: 1px solid rgba(201, 149, 111, 0.18);
+        border-radius: 1px;
         padding: 1.2rem;
-        background: linear-gradient(180deg, rgba(30, 41, 59, 0.62) 0%, rgba(15, 23, 42, 0.78) 100%);
+        background: linear-gradient(160deg, rgba(26, 24, 22, 0.94) 0%, rgba(37, 34, 30, 0.94) 100%);
         display: flex;
         flex-direction: column;
         gap: 1rem;
@@ -203,8 +204,8 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, rgba(96, 165, 250, 0.9) 0%, rgba(56, 189, 248, 0.85) 50%, rgba(30, 64, 175, 0.95) 100%);
+        height: 1px;
+        background: var(--rule-color-strong);
         opacity: 0.9;
       }
 
@@ -214,7 +215,7 @@
 
       .product-lead-blurb {
         margin: 0.2rem 0 0;
-        color: #cfe1ff;
+        color: var(--gray-800);
         font-size: 0.98rem;
         line-height: 1.65;
       }
@@ -223,13 +224,22 @@
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 0.65rem;
+        align-items: stretch;
       }
 
       .graphic-panel {
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        width: 100%;
+        height: 11rem;
+        min-height: 11rem;
+        max-height: 11rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        border: 1px solid rgba(201, 149, 111, 0.2);
         border-radius: 14px;
         padding: 0.75rem;
-        background: rgba(15, 23, 42, 0.35);
+        background: linear-gradient(165deg, rgba(201, 149, 111, 0.08) 0%, rgba(30, 27, 24, 0.7) 40%, rgba(12, 11, 10, 0.9) 100%);
       }
 
       .graphic-title {
@@ -238,7 +248,7 @@
         font-weight: 700;
         letter-spacing: 0.07em;
         text-transform: uppercase;
-        color: #93c5fd;
+        color: var(--accent);
       }
 
       .signal-stack {
@@ -256,11 +266,11 @@
         align-items: center;
         gap: 0.4rem;
         font-size: 0.83rem;
-        color: #dbeafe;
+        color: var(--gray-800);
       }
 
       .signal-stack li strong {
-        color: #f8fafc;
+        color: var(--gray-900);
       }
 
       .benefit-bars {
@@ -272,13 +282,13 @@
       .benefit-bar {
         --bar-width: 70%;
         position: relative;
-        border: 1px solid rgba(148, 163, 184, 0.24);
+        border: 1px solid rgba(201, 149, 111, 0.24);
         border-radius: 10px;
         padding: 0.35rem 0.5rem;
         overflow: hidden;
         font-size: 0.78rem;
-        color: #dbeafe;
-        background: rgba(15, 23, 42, 0.42);
+        color: var(--gray-800);
+        background: rgba(22, 20, 18, 0.38);
       }
 
       .benefit-bar::before {
@@ -288,7 +298,7 @@
         top: 0;
         bottom: 0;
         width: var(--bar-width);
-        background: linear-gradient(90deg, rgba(59, 130, 246, 0.34) 0%, rgba(56, 189, 248, 0.2) 100%);
+        background: linear-gradient(90deg, rgba(201, 149, 111, 0.38) 0%, rgba(212, 165, 116, 0.22) 100%);
       }
 
       .benefit-bar span {
@@ -316,7 +326,7 @@
         font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-        color: #93c5fd;
+        color: var(--accent);
       }
 
       .proof-text {
@@ -341,7 +351,7 @@
 
       .product-spotlight .icon-circle {
         border-radius: 30%;
-        border: 1px solid rgba(147, 197, 253, 0.35);
+        border: 1px solid rgba(201, 149, 111, 0.35);
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 10px 20px rgba(2, 6, 23, 0.28);
       }
 
@@ -366,8 +376,8 @@
       .product-offerings-row > .product-spotlight:nth-child(1) {
         grid-area: product-lead;
         padding: 1.35rem;
-        border-color: rgba(125, 211, 252, 0.35);
-        background: linear-gradient(165deg, rgba(37, 99, 235, 0.24) 0%, rgba(30, 41, 59, 0.7) 38%, rgba(15, 23, 42, 0.82) 100%);
+        border-color: rgba(201, 149, 111, 0.28);
+        background: linear-gradient(165deg, rgba(201, 149, 111, 0.12) 0%, rgba(33, 30, 27, 0.82) 38%, rgba(12, 11, 10, 0.9) 100%);
       }
 
       .product-offerings-row > .product-spotlight:nth-child(1) .card-title {
@@ -427,10 +437,10 @@
       }
 
       .service-track {
-        border: 1px solid rgba(148, 163, 184, 0.23);
+        border: 1px solid rgba(201, 149, 111, 0.22);
         border-radius: 16px;
         padding: 0.9rem 1rem;
-        background: rgba(255, 255, 255, 0.02);
+        background: linear-gradient(165deg, rgba(201, 149, 111, 0.08) 0%, rgba(30, 27, 24, 0.72) 40%, rgba(12, 11, 10, 0.85) 100%);
       }
 
       .service-track h3 {
@@ -444,10 +454,10 @@
       }
 
       .step-card {
-        border: 1px solid rgba(148, 163, 184, 0.24);
+        border: 1px solid rgba(201, 149, 111, 0.22);
         border-radius: 16px;
         padding: 1rem;
-        background: rgba(15, 23, 42, 0.32);
+        background: linear-gradient(165deg, rgba(201, 149, 111, 0.06) 0%, rgba(30, 27, 24, 0.74) 44%, rgba(12, 11, 10, 0.9) 100%);
       }
 
       .step-index {
@@ -457,8 +467,9 @@
         width: 2rem;
         height: 2rem;
         border-radius: 999px;
-        border: 1px solid rgba(147, 197, 253, 0.4);
-        color: #bfdbfe;
+        border: 1px solid rgba(201, 149, 111, 0.4);
+        color: var(--gray-900);
+        background: linear-gradient(135deg, rgba(201, 149, 111, 0.22), rgba(212, 165, 116, 0.25));
         font-weight: 700;
         margin-bottom: 0.6rem;
       }
@@ -478,7 +489,7 @@
         font-weight: 700;
         padding: 0.95rem 1.2rem;
         letter-spacing: 0.01em;
-        box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+        box-shadow: 0 14px 28px rgba(201, 149, 111, 0.22);
       }
 
       .founder-bio {
@@ -486,10 +497,10 @@
         overflow: hidden;
         max-width: 920px;
         margin: 0 auto;
-        border: 1px solid rgba(125, 211, 252, 0.32);
+        border: 1px solid rgba(201, 149, 111, 0.22);
         border-radius: 20px;
         padding: 1.55rem 1.7rem 1.65rem;
-        background: linear-gradient(165deg, rgba(37, 99, 235, 0.18) 0%, rgba(30, 41, 59, 0.7) 40%, rgba(15, 23, 42, 0.84) 100%);
+        background: linear-gradient(165deg, rgba(201, 149, 111, 0.08) 0%, rgba(30, 27, 24, 0.72) 40%, rgba(12, 11, 10, 0.85) 100%);
       }
 
       .founder-bio::before {
@@ -499,7 +510,7 @@
         left: 0;
         right: 0;
         height: 3px;
-        background: linear-gradient(90deg, rgba(96, 165, 250, 0.9) 0%, rgba(56, 189, 248, 0.85) 50%, rgba(30, 64, 175, 0.95) 100%);
+        background: linear-gradient(90deg, rgba(201, 149, 111, 0.9) 0%, rgba(212, 165, 116, 0.7) 50%, rgba(122, 111, 99, 0.95) 100%);
       }
 
       .founder-identity {
@@ -511,12 +522,12 @@
         font-size: clamp(1.55rem, 2.5vw, 2.15rem);
         line-height: 1.15;
         letter-spacing: -0.02em;
-        color: #f8fafc;
+        color: var(--gray-900);
       }
 
       .founder-role {
         margin: 0;
-        color: #93c5fd;
+        color: var(--accent);
         font-size: 0.82rem;
         font-weight: 700;
         letter-spacing: 0.06em;
@@ -525,13 +536,13 @@
 
       .founder-location {
         margin: 0.35rem 0 0;
-        color: #cbd5e1;
+        color: var(--gray-800);
         font-size: 0.95rem;
       }
 
       .founder-copy p {
         margin: 0 0 0.95rem;
-        color: #dbeafe;
+        color: var(--gray-800);
         font-size: 1rem;
         line-height: 1.7;
       }
@@ -541,13 +552,13 @@
       }
 
       .founder-copy a {
-        color: #7dd3fc;
+        color: var(--accent);
         text-decoration: underline;
         text-underline-offset: 0.16em;
       }
 
       .founder-copy a:hover {
-        color: #e0f2fe;
+        color: #f0d0ab;
       }
 
       .founder-links {
@@ -562,14 +573,14 @@
         max-width: 1050px;
         padding: 1.05rem 1.2rem;
         border-radius: 16px;
-        border: 1px solid rgba(125, 211, 252, 0.3);
-        background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.45) 100%);
+        border: 1px solid rgba(201, 149, 111, 0.22);
+        background: linear-gradient(135deg, rgba(22, 20, 18, 0.65) 0%, rgba(35, 31, 28, 0.45) 100%);
       }
 
       .intent-strip p {
         margin: 0;
         text-align: center;
-        color: #dbeafe;
+        color: var(--gray-800);
         font-weight: 600;
       }
 
@@ -594,7 +605,7 @@
         letter-spacing: 0.06em;
         text-transform: uppercase;
         font-weight: 700;
-        color: #93c5fd;
+        color: var(--accent);
         margin-bottom: 0.7rem;
       }
 

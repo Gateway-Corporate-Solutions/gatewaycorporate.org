@@ -978,10 +978,10 @@ function renderPageShell(options: {
       }
 
       .forum-panel {
-        border: 1px solid rgba(148, 163, 184, 0.24);
+        border: 1px solid rgba(201, 149, 111, 0.22);
         border-radius: 14px;
-        background: linear-gradient(165deg, rgba(30, 41, 59, 0.82) 0%, rgba(15, 23, 42, 0.88) 100%);
-        box-shadow: 0 16px 38px rgba(2, 6, 23, 0.33);
+        background: linear-gradient(165deg, rgba(22, 19, 17, 0.82) 0%, rgba(30, 27, 24, 0.9) 100%);
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.25);
       }
 
       .forum-intro {
@@ -991,13 +991,13 @@ function renderPageShell(options: {
 
       .forum-intro h2 {
         margin: 0;
-        color: #f8fafc;
+        color: var(--gray-900);
         font-size: clamp(1.1rem, 2vw, 1.45rem);
       }
 
       .forum-intro p {
         margin-top: 0.5rem;
-        color: #cbd5e1;
+        color: var(--gray-800);
       }
 
       .forum-board-grid {
@@ -1008,21 +1008,21 @@ function renderPageShell(options: {
       }
 
       .forum-board-card {
-        border: 1px solid rgba(125, 211, 252, 0.24);
+        border: 1px solid rgba(201, 149, 111, 0.2);
         border-radius: 12px;
-        background: rgba(15, 23, 42, 0.72);
+        background: rgba(22, 19, 17, 0.72);
         padding: 0.85rem;
       }
 
       .forum-board-card h3 {
         margin: 0;
         font-size: 1.05rem;
-        color: #e2e8f0;
+        color: var(--gray-900);
       }
 
       .forum-board-subtitle {
         margin: 0.35rem 0 0;
-        color: #cbd5e1;
+        color: var(--gray-800);
         font-size: 0.92rem;
       }
 
@@ -1030,32 +1030,32 @@ function renderPageShell(options: {
         display: inline-block;
         margin: 0.35rem 0;
         font-family: "Courier New", monospace;
-        color: #93c5fd;
+        color: var(--accent);
       }
 
       .forum-meta {
-        color: #cbd5e1;
+        color: var(--gray-800);
         font-size: 0.9rem;
       }
 
       .forum-inline-link {
-        color: #bfdbfe;
+        color: var(--accent);
         font-weight: 700;
         text-decoration: underline;
         text-underline-offset: 2px;
       }
 
       .forum-inline-link:hover {
-        color: #dbeafe;
+        color: var(--warning);
       }
 
       .thread-composer,
       .reply-composer,
       .thread-card,
       .post-block {
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        border: 1px solid rgba(201, 149, 111, 0.18);
         border-radius: 12px;
-        background: rgba(15, 23, 42, 0.76);
+        background: rgba(22, 19, 17, 0.76);
       }
 
       .thread-composer,
@@ -1078,16 +1078,16 @@ function renderPageShell(options: {
         display: block;
         margin-bottom: 0.2rem;
         font-size: 0.88rem;
-        color: #cbd5e1;
+        color: var(--gray-800);
       }
 
       .forum-field input,
       .forum-field textarea {
         width: 100%;
-        background: rgba(15, 23, 42, 0.86);
-        border: 1px solid rgba(148, 163, 184, 0.3);
+        background: rgba(22, 19, 17, 0.86);
+        border: 1px solid rgba(201, 149, 111, 0.25);
         border-radius: 6px;
-        color: #f8fafc;
+        color: var(--gray-900);
         padding: 0.56rem;
         font: inherit;
       }
@@ -1115,16 +1115,16 @@ function renderPageShell(options: {
       .thread-title {
         margin: 0;
         font-size: 1.06rem;
-        color: #f8fafc;
+        color: var(--gray-900);
       }
 
       .thread-title a {
-        color: #e2e8f0;
+        color: var(--gray-900);
         text-decoration: none;
       }
 
       .thread-title a:hover {
-        color: #bfdbfe;
+        color: var(--accent);
         text-decoration: underline;
         text-underline-offset: 2px;
       }
@@ -1133,13 +1133,13 @@ function renderPageShell(options: {
       .post-meta {
         margin-top: 0.35rem;
         font-size: 0.86rem;
-        color: #94a3b8;
+        color: var(--gray-600);
       }
 
       .thread-snippet,
       .post-body {
         margin-top: 0.55rem;
-        color: #e2e8f0;
+        color: var(--gray-800);
         white-space: pre-wrap;
         overflow-wrap: anywhere;
         line-height: 1.5;
@@ -1180,23 +1180,23 @@ function renderPageShell(options: {
       }
 
       .post-body.markdown a {
-        color: #bfdbfe;
+        color: var(--accent);
         text-decoration: underline;
         text-underline-offset: 2px;
       }
 
       .post-body.markdown blockquote {
-        border-left: 3px solid rgba(59, 130, 246, 0.65);
+        border-left: 3px solid rgba(201, 149, 111, 0.7);
         padding-left: 0.7rem;
-        color: #cbd5e1;
+        color: var(--gray-800);
       }
 
       .post-index {
-        color: #fca5a5;
+        color: var(--accent);
       }
 
       .post-number-link {
-        color: #fca5a5;
+        color: var(--accent);
         font-weight: 700;
         text-decoration: underline;
         text-underline-offset: 2px;
@@ -1204,12 +1204,12 @@ function renderPageShell(options: {
       }
 
       .post-number-link:hover {
-        color: #fecaca;
+        color: var(--warning);
       }
 
       .post-quote-backlinks {
         margin-left: 0.35rem;
-        color: #93c5fd;
+        color: var(--accent);
       }
 
       .post-quote-backlinks .quote-ref {
@@ -1217,12 +1217,12 @@ function renderPageShell(options: {
       }
 
       .quote-ref {
-        color: #93c5fd;
+        color: var(--accent);
         font-weight: 700;
       }
 
       .quote-ref:hover {
-        color: #dbeafe;
+        color: var(--warning);
       }
 
       .quote-preview-tooltip {
@@ -1232,10 +1232,10 @@ function renderPageShell(options: {
         pointer-events: none;
         padding: 0.55rem 0.65rem;
         border-radius: 10px;
-        border: 1px solid rgba(147, 197, 253, 0.5);
-        background: rgba(2, 6, 23, 0.97);
-        box-shadow: 0 14px 30px rgba(2, 6, 23, 0.5);
-        color: #e2e8f0;
+        border: 1px solid rgba(201, 149, 111, 0.45);
+        background: rgba(22, 19, 17, 0.97);
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+        color: var(--gray-800);
         font-size: 0.84rem;
         line-height: 1.45;
       }
@@ -1243,7 +1243,7 @@ function renderPageShell(options: {
       .quote-preview-tooltip .meta {
         display: block;
         margin-bottom: 0.25rem;
-        color: #bfdbfe;
+        color: var(--accent);
         font-weight: 700;
       }
 
@@ -1271,22 +1271,22 @@ function renderPageShell(options: {
       .board-chip {
         display: inline-block;
         text-decoration: none;
-        border: 1px solid rgba(148, 163, 184, 0.45);
+        border: 1px solid rgba(201, 149, 111, 0.22);
         border-radius: 999px;
         padding: 0.27rem 0.58rem;
-        color: #dbeafe;
-        background: rgba(30, 41, 59, 0.74);
+        color: var(--gray-800);
+        background: rgba(22, 19, 17, 0.7);
         font-size: 0.85rem;
       }
 
       .board-chip.is-active {
-        background: #1d4ed8;
-        color: #eff6ff;
-        border-color: #1d4ed8;
+        background: var(--accent);
+        color: var(--white);
+        border-color: var(--accent);
       }
 
       .board-chip:hover {
-        background: rgba(59, 130, 246, 0.33);
+        background: rgba(201, 149, 111, 0.18);
       }
 
       .forum-page .hero.hero-compact {
@@ -1318,19 +1318,19 @@ function renderPageShell(options: {
         align-items: center;
         padding: 0.38rem 0.82rem;
         border-radius: 999px;
-        border: 1px solid rgba(147, 197, 253, 0.52);
-        color: #dbeafe;
-        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(201, 149, 111, 0.4);
+        color: var(--gray-900);
+        background: rgba(201, 149, 111, 0.12);
         margin-bottom: 0.85rem;
       }
 
       .forum-page .hero .hero-title {
-        color: #f8fafc;
-        text-shadow: 0 10px 24px rgba(2, 6, 23, 0.5);
+        color: var(--gray-900);
+        text-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
       }
 
       .forum-page .hero .hero-subtitle {
-        color: #dbeafe;
+        color: var(--gray-800);
       }
 
       @media (max-width: 768px) {
