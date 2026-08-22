@@ -2779,7 +2779,7 @@ router.get("/wss", async (context) => {
                 elapsedMs: Math.round(performance.now() - coalescedIdentifyStartedAt),
             });
 
-            const { identifyResult, fingerprintCandidates, exactMatchFound, closestMatch } = coreIdentify;
+            const { identifyResult, exactMatchFound, closestMatch } = coreIdentify;
 
             const resolvedDeviceId = typeof identifyResult.deviceId === "string"
                 ? identifyResult.deviceId
