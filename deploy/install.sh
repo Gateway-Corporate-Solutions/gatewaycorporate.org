@@ -36,11 +36,6 @@ if [[ ! -f "$SERVICE_TEMPLATE" ]]; then
     exit 1
 fi
 
-if [[ -z "$DENO_BIN" || ! -x "$DENO_BIN" ]]; then
-    echo "Deno was not found. Set DENO_BIN to its absolute executable path." >&2
-    exit 1
-fi
-
 if [[ ! -f "${APP_DIR}/deno.json" || ! -f "${APP_DIR}/main.ts" ]]; then
     echo "APP_DIR must contain deno.json and main.ts: ${APP_DIR}" >&2
     exit 1
@@ -53,7 +48,19 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y nginx
+apt-get install -y ca-certificates curl nginx unzip
+
+if [[ -z "$DENO_BIN" || ! -x "$DENO_BIN" ]]; then
+    curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
+    DENO_BIN="/usr/local/bin/deno"
+fi
+
+if [[ ! -x "$DENO_BIN" ]]; then
+    echo "Deno installation failed: ${DENO_BIN} is not executable." >&2
+    exit 1
+fi
+
+"$DENO_BIN" --version
 
 install -d -o "$APP_USER" -g "$APP_GROUP" -m 0755 "$DENO_DIR"
 
