@@ -2,5 +2,6 @@ node_modules/
 .env.list
 .unlighthouse/
 data/*.db
+data/deno-cache/
 content/experiment-events/*.jsonl
 content/forum/*.json
