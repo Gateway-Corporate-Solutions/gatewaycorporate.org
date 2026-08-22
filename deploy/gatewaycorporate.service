@@ -1,0 +1,23 @@
+[Unit]
+Description=Gateway Corporate website
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__APP_USER__
+Group=__APP_GROUP__
+WorkingDirectory=__APP_DIR__
+Environment=PORT=__APP_PORT__
+Environment=DENO_ENV=production
+Environment=DENO_DIR=__DENO_DIR__
+ExecStart=__DENO_BIN__ task start
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
