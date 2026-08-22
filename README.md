@@ -63,7 +63,7 @@ The site now includes a passive experimentation telemetry foundation for staged 
 Environment variables:
 
 - `EXPERIMENTS_ENABLED` (optional): `true/1` to enable assignment + telemetry, `false/0` to disable.
-- `DENO_ENV` (optional): set to `production` to keep production-safe defaults.
+- `DENO_ENV` (optional): production-safe defaults are used unless this is explicitly set to `development`.
 - `EXPERIMENT_EVENTS_DIR` (optional): override event output directory.
 - `EXPERIMENTS_DISABLED_IDS` (optional): comma-separated experiment ids to force-disable.
 - `EXPERIMENTS_DISABLED_FILE` (optional): JSON file path for persistent disabled experiments.

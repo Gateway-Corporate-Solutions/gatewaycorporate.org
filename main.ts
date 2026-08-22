@@ -59,7 +59,7 @@ import {
     createPeerManagerSqliteAdapter,
     createTlsManagerSqliteAdapter,
 } from "./sqlite.ts";
-import { clusterFingerprints } from "./libs/clustering.ts";
+import { clusterStoredFingerprints } from "./libs/clustering.ts";
 import {
     applySecurityHeaders,
     buildSessionCookieHeader,
@@ -81,7 +81,7 @@ const router = new Router();
 const app = new Application();
 const port = parseInt(Deno.env.get("PORT") || "8000");
 const siteOrigin = "https://gatewaycorporate.org";
-const isProduction = Deno.env.get("DENO_ENV") === "production";
+const isProduction = Deno.env.get("DENO_ENV") !== "development";
 const trustedProxyIps = parseTrustedProxyIps(Deno.env.get("FP_CICIS_TRUSTED_PROXIES"));
 const configuredOrigins = parseConfiguredOrigins(Deno.env.get("FP_CICIS_ALLOWED_ORIGINS"));
 const configuredPublicOrigin = Deno.env.get("FP_CICIS_PUBLIC_ORIGIN");
@@ -501,8 +501,8 @@ async function buildDevicerRuntime(): Promise<DevicerRuntime> {
 
 async function refreshFingerprintAnalytics(state: DevicerRuntime): Promise<void> {
     analytics.fingerprints = await state.adapters.device.getAllFingerprints();
-    [analytics.clusters, analytics.uniques] = await clusterFingerprints(
-        state.adapters.device,
+    [analytics.clusters, analytics.uniques] = clusterStoredFingerprints(
+        analytics.fingerprints,
         1 - state.confidenceThreshold / 100,
         2,
     );
@@ -531,10 +531,15 @@ async function refreshFingerprintAnalyticsIfNeeded(
     await analyticsRefreshInFlight;
 }
 
-const devicerRuntime = await buildDevicerRuntime();
-await refreshFingerprintAnalytics(devicerRuntime);
+let devicerRuntimePromise: Promise<DevicerRuntime> | null = null;
+
+function getDevicerRuntime(): Promise<DevicerRuntime> {
+    devicerRuntimePromise ||= buildDevicerRuntime();
+    return devicerRuntimePromise;
+}
+
 analyticsRefreshTimer = setInterval(() => {
-    void refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 30_000);
+    void getDevicerRuntime().then((runtime) => refreshFingerprintAnalyticsIfNeeded(runtime, 30_000));
 }, 600_000);
 
 function escapeHtml(value: string): string {
@@ -2653,6 +2658,7 @@ router.get("/wss", async (context) => {
         });
 
         try {
+            const devicerRuntime = await getDevicerRuntime();
             const fingerprintData = sanitizeFingerprintPayload(parsedMessage.value.data);
             const hash = devicer.getHash(JSON.stringify(fingerprintData));
             const includesBehavioralMetrics = hasBehavioralIntentPayload(parsedMessage.value.data);
@@ -3082,7 +3088,7 @@ router.get("/experiments/fingerprint-analytics", async (context) => {
             return;
         }
 
-        await refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 0);
+        await refreshFingerprintAnalyticsIfNeeded(await getDevicerRuntime(), 0);
 
         context.response.status = 200;
         context.response.body = {
@@ -3140,7 +3146,7 @@ router.get("/experiments/dashboard", async (context) => {
             return;
         }
 
-        await refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 0);
+        await refreshFingerprintAnalyticsIfNeeded(await getDevicerRuntime(), 0);
 
         const daysParam = context.request.url.searchParams.get("days");
         const days = daysParam ? Math.max(1, Number(daysParam)) : 7;

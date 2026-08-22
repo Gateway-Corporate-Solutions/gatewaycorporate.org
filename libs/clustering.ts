@@ -16,6 +16,14 @@ export async function clusterFingerprints(
   minClusterSize = 2,
 ): Promise<[StoredFingerprint[][], StoredFingerprint[]]> {
   const fingerprints = await storage.getAllFingerprints();
+  return clusterStoredFingerprints(fingerprints, distanceThreshold, minClusterSize);
+}
+
+export function clusterStoredFingerprints(
+  fingerprints: StoredFingerprint[],
+  distanceThreshold = 0.15,
+  minClusterSize = 2,
+): [StoredFingerprint[][], StoredFingerprint[]] {
   if (fingerprints.length === 0) {
     return [[], []];
   }
