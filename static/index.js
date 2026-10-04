@@ -933,8 +933,8 @@ function applyProductLayoutExperiments() {
     "/products/devicer": {
       experimentId: "product-devicer-layout-v1",
       variants: {
-        "pricing-first": ["problem", "pricing", "suite", "features", "comparison", "bundle", "cta"],
-        "comparison-first": ["problem", "comparison", "suite", "features", "pricing", "bundle", "cta"],
+        "pricing-first": ["pricing", "features", "problem", "suite", "comparison", "bundle", "faq", "cta"],
+        "comparison-first": ["comparison", "features", "problem", "suite", "pricing", "bundle", "faq", "cta"],
       },
     },
     "/products/hyperlocal": {
