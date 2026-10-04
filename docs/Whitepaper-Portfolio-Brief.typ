@@ -39,9 +39,9 @@ and implementation implications over abstract positioning.
   [#text(9.4pt, weight: "bold")[Best Fit]],
   [#text(9.4pt, weight: "bold")[Core Technical Scope]],
 
-  [#link("https://gatewaycorporate.org/papers/FP-Devicer.pdf")[#text(weight: "bold", fill: accent)[FP Devicer Whitepaper]]],
-  [Identity and trust operations],
-  [Server-side fingerprint confidence, enrichment modules, and request-level risk decisions],
+  [#link("https://gatewaycorporate.org/papers/Devicer-NEXT.pdf")[#text(weight: "bold", fill: accent)[Devicer NEXT Whitepaper]]],
+  [Browser changes and exact document duplicates],
+  [Engineering preview: versioned observations, explainable comparisons, calibration, retrieval, and governance],
 
   [#link("https://gatewaycorporate.org/papers/HyperLocal-2.pdf")[#text(weight: "bold", fill: accent)[HyperLocal 2 Whitepaper]]],
   [Messaging and CRM operators],
@@ -57,7 +57,7 @@ and implementation implications over abstract positioning.
 #v(0.35em)
 
 1. #link("https://gatewaycorporate.org/papers/GCS-One-Page-Brief.pdf")[GCS One-Page Brief] for context and stakeholder alignment.
-2. #link("https://gatewaycorporate.org/papers/FP-Devicer.pdf")[FP-Devicer] for identity assurance and fraud-resilience depth.
+2. #link("https://gatewaycorporate.org/papers/Devicer-NEXT.pdf")[Devicer NEXT] for comparison evidence, explicit uncertainty, and preview release scope.
 3. #link("https://gatewaycorporate.org/papers/HyperLocal-2.pdf")[HyperLocal 2] for communication workflow governance.
 
 #v(0.75em)
@@ -68,7 +68,12 @@ After review, route architecture-fit questions through
 #link("https://gatewaycorporate.org/contact")[gatewaycorporate.org/contact]
 to map paper findings to your production environment.
 
+One #link("https://gatewaycorporate.org/products/devicer#pricing")[Devicer license]
+includes all premium Devicer plugins and features forever, including those not yet
+developed, as they are released. The core remains open source. Confirm deployment,
+third-party services, and other product licensing separately.
+
 #v(0.7em)
 #line(length: 100%, stroke: 0.7pt + divider)
 #v(0.3em)
-#align(right)[#text(8.8pt, fill: muted)[Updated: 2026-07-20]]
+#align(right)[#text(8.8pt, fill: muted)[Updated: 2026-10-04]]

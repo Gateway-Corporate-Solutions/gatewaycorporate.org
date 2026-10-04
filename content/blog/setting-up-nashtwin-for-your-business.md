@@ -35,7 +35,7 @@ Used together, those screens describe a full operating workflow rather than a lo
 
 The cleanest place to begin is the marketplace. In the current UI, the installed first-party plugins include:
 
-- Devicer Intelligence Suite
+- Devicer integration (the legacy marketplace label is "Devicer Intelligence Suite")
 - Digital Twin
 - Nash Optimization
 - SaaS Model
@@ -47,7 +47,9 @@ The practical sequence is:
 1. Enable the **Digital Twin** plugin so the platform can maintain a live structural model of pipelines, stages, entities, and forecasts.
 2. Enable **Nash Optimization** so simulations and ranked recommendations are available.
 3. Add the **SaaS Model** plugin if your business depends on pricing, headcount, licensing, software portfolio decisions, or subscription economics.
-4. Add **Devicer Intelligence Suite** if you want CRM events enriched with device fingerprinting, bot-detection, or contact and deal signals from tracked website interactions.
+4. Add the **Devicer integration** if you want CRM events enriched with device fingerprinting, bot-detection, or contact and deal signals from tracked website interactions.
+
+**Devicer NEXT release update:** The [upcoming NEXT release](/products/devicer) adds versioned observations, explainable comparisons, exact document deduplication, and calibration as an engineering preview. The marketplace workflow shown here uses the existing DeviceManager integration; it does not demonstrate NEXT compatibility. One Devicer license includes all premium Devicer plugins and features forever, including those not yet developed, as they are released. Confirm NashTwin and deployment pricing separately.
 
 ![NashTwin plugin marketplace showing the core first-party plugins used to assemble a working operating model.](/images/plugin-marketplace.png)
 

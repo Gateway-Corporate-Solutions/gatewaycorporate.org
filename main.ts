@@ -1017,48 +1017,48 @@ function renderHomepageProductCard(productId: HomepageProductId): string {
         if (productId === "devicer") {
                 return `<article class="product-spotlight">
                         <div class="icon-circle icon-lg icon-primary">🔍</div>
-                        <h3 class="card-title">Devicer Intelligence Suite</h3>
+                        <h3 class="card-title">Devicer NEXT</h3>
                         <div class="product-meta">
-                            <span class="flair-tag flair-intelligence">Device Fingerprinting</span>
-                            <span class="flair-tag flair-security">KYC & Risk Analysis</span>
-                            <span class="flair-tag flair-scoring">Bot Blocking & Anti-Fraud</span>
+                            <span class="flair-tag flair-intelligence">Versioned Observations</span>
+                            <span class="flair-tag flair-security">Document Deduplication</span>
+                            <span class="flair-tag flair-scoring">Explainable Comparisons</span>
                         </div>
-                        <p class="card-text product-summary">Server-side identity confidence for teams that need fraud resistance, explainability, and measurable signal quality at scale. Devicer combines high-entropy telemetry sources into a scoring layer your operators can actually trust under pressure.</p>
-                        <p class="card-text product-lead-blurb">Devicer helps teams separate routine traffic from genuinely risky behavior faster, reduces time spent on blind manual review, and creates a common confidence language across product, risk, and support. Instead of treating fingerprinting as a black box, your team gets a transparent decision surface with enough context to automate safely and escalate only what deserves human judgment.</p>
-                        <p class="card-text product-lead-blurb">Teams can deploy this confidence layer across onboarding, authentication, and transaction review while maintaining auditability for every decision path, from automated approvals to analyst escalations.</p>
+                        <p class="card-text product-summary">The upcoming Devicer NEXT release turns application-supplied signals into versioned observations and explainable comparisons. Explore browser change detection, exact document deduplication, calibration, and governed storage in the engineering preview.</p>
+                        <p class="card-text product-lead-blurb">Inspect per-comparator evidence, declare the relationship you want to test, and calibrate on your own labeled data. NEXT keeps similarity, calibrated predictions, and application decisions separate, with explicit uncertainty when evidence is missing or configurations are incompatible.</p>
+                        <p class="card-text product-lead-blurb">One Devicer license includes ALL premium Devicer plugins and features FOREVER, including those not yet developed, as they are released. The core stays open source; existing IP, TLS, bot, and peer plugins retain their DeviceManager workflow.</p>
                         <div class="product-graphic">
                             <div class="graphic-panel">
-                                <p class="graphic-title">Signal Layers</p>
+                                <p class="graphic-title">NEXT Workflow</p>
                                 <ul class="signal-stack">
-                                    <li><strong>Device</strong><span>Browser + OS entropy</span></li>
-                                    <li><strong>TLS</strong><span>Handshake consistency</span></li>
-                                    <li><strong>IP + ASN</strong><span>Network reputation</span></li>
-                                    <li><strong>Peer Graph</strong><span>Cluster trust scoring</span></li>
+                                    <li><strong>Observe</strong><span>Versions + provenance</span></li>
+                                    <li><strong>Compare</strong><span>Inspect the evidence</span></li>
+                                    <li><strong>Calibrate</strong><span>Evaluate on your data</span></li>
+                                    <li><strong>Govern</strong><span>Retention + audit hooks</span></li>
                                 </ul>
                             </div>
                             <div class="graphic-panel">
-                                <p class="graphic-title">Outcome Map</p>
+                                <p class="graphic-title">Evaluation Priorities</p>
                                 <div class="benefit-bars">
-                                    <div class="benefit-bar" style="--bar-width: 86%;"><span>Faster risk triage</span></div>
-                                    <div class="benefit-bar" style="--bar-width: 80%;"><span>Lower false positives</span></div>
-                                    <div class="benefit-bar" style="--bar-width: 74%;"><span>Higher analyst trust</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 100%;"><span>Traceable observations</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 100%;"><span>Explicit uncertainty</span></div>
+                                    <div class="benefit-bar" style="--bar-width: 100%;"><span>Held-out evaluation</span></div>
                                 </div>
                             </div>
                         </div>
                         <div class="product-proof-grid">
                             <div class="proof-item">
                                 <span class="proof-label">Best For</span>
-                                <p class="proof-text">Identity-sensitive onboarding and transaction decisioning.</p>
+                                <p class="proof-text">Browser change detection, exact document duplicates, and custom signal adapters.</p>
                             </div>
                             <div class="proof-item">
                                 <span class="proof-label">Core Benefit</span>
-                                <p class="proof-text">Confidence scores with enough depth for human review and automation.</p>
+                                <p class="proof-text">Evidence you can inspect without treating similarity as proof of identity.</p>
                             </div>
                         </div>
                         <div class="btn-group mt-md product-actions">
-                            <a href="/products/devicer" class="btn btn-primary btn-sm">View Technical Overview</a>
-                            <a href="/demos/devicer" class="btn btn-secondary btn-sm">Open Interactive Demo</a>
-                            <a href="/papers/FP-Devicer.pdf" class="btn btn-secondary btn-sm">Whitepaper</a>
+                            <a href="/products/devicer" class="btn btn-primary btn-sm">Explore Devicer NEXT</a>
+                            <a href="/products/devicer#pricing" class="btn btn-accent btn-sm">Get Lifetime Access</a>
+                            <a href="/papers/Devicer-NEXT.pdf" class="btn btn-secondary btn-sm">NEXT Whitepaper</a>
                         </div>
                     </article>`;
         }

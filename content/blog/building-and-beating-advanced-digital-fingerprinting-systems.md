@@ -9,7 +9,9 @@ tags: [privacy, fingerprinting, browsers, cybersecurity, devicer]
 
 There’s an ancient Chinese parable about a merchant who sold both an impenetrable shield and a spear that could pierce anything. When a customer asked what would happen if the two collided, the paradox became clear: they could not both exist.
 
-At Gateway Corporate, we’ve intentionally embraced a similar tension. While developing the **Devicer Intelligence Suite**, our central mission has been to build world-class digital fingerprinting systems for enterprise use (technology that is, by design, a form of advanced surveillance) while simultaneously arming individual users with powerful anti-fingerprinting tools to reclaim their privacy.
+At Gateway Corporate, we’ve intentionally embraced a similar tension. While developing the **Devicer platform, now expanding through Devicer NEXT**, our central mission has been to build world-class digital fingerprinting systems for enterprise use (technology that is, by design, a form of advanced surveillance) while simultaneously arming individual users with powerful anti-fingerprinting tools to reclaim their privacy.
+
+**Release update:** This article discusses the earlier browser-fingerprinting work. The [upcoming Devicer NEXT release](/products/devicer) is an engineering preview for versioned observations, explainable comparisons, calibration, and exact document deduplication. A Devicer license includes all premium plugins and features forever, including those not yet developed, as they are released. The historical examples below are not NEXT accuracy or identity guarantees.
 
 We don’t see this as contradictory. It’s a deliberate two-pronged strategy: enterprises gain highly accurate, compliant KYC and fraud-prevention capabilities, while everyday users receive the means to defend themselves against invasive tracking.
 

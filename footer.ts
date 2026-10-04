@@ -57,12 +57,12 @@ const variantColumns: Record<FooterVariant, FooterColumn> = {
     ],
   },
   devicer: {
-    heading: "Devicer",
+    heading: "Devicer NEXT",
     links: [
-      { label: "Problem", href: "/products/devicer#problem" },
-      { label: "Suite", href: "/products/devicer#suite" },
-      { label: "Features", href: "/products/devicer#features" },
-      { label: "Pricing", href: "/products/devicer#pricing" },
+      { label: "Use Cases", href: "/products/devicer#problem" },
+      { label: "Premium Plugins", href: "/products/devicer#suite" },
+      { label: "Explore NEXT", href: "/products/devicer#features" },
+      { label: "Lifetime License", href: "/products/devicer#pricing" },
     ],
   },
   hyperlocal: {

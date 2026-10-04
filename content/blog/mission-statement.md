@@ -7,7 +7,7 @@ excerpt: Gateway Corporate exists to make intelligence practical, accessible, an
 tags: [mission, intelligence, strategy, software]
 ---
 
-Gateway Corporate has undergone a complete redesign over the past several months, but the visual refresh is only a reflection of a much larger change. As our products have matured, we've found that describing them individually no longer explains what we're actually building. HyperLocal, NashTwin, Devicer Intelligence, and the rest of our platform are not isolated applications. They are different expressions of the same philosophy.
+Gateway Corporate has undergone a complete redesign over the past several months, but the visual refresh is only a reflection of a much larger change. As our products have matured, we've found that describing them individually no longer explains what we're actually building. HyperLocal, NashTwin, Devicer NEXT, and the rest of our platform are not isolated applications. They are different expressions of the same philosophy.
 
 ## We exist to provide the highest quality intelligence software available.
 
@@ -31,7 +31,7 @@ A digital twin is often described as a virtual copy of a real-world system, but 
 
 The phrase often evokes military communications or government agencies, but the underlying principle is remarkably universal. Intelligence is simply the disciplined practice of extracting useful knowledge from signals. Those signals might be customer behavior, infrastructure events, browser fingerprints, production metrics, communication patterns, or financial transactions. Every organization produces them. Very few organizations learn to listen.
 
-That is why our technology stack continues to evolve around intelligence rather than individual markets. Whether we are analyzing infrastructure through Devicer Intelligence, modeling organizational behavior with NashTwin, or governing AI-assisted operations through HyperLocal, the objective remains consistent. Observe reality accurately, understand it deeply, simulate it responsibly, and help organizations make better decisions before uncertainty becomes expensive.
+That is why our technology stack continues to evolve around intelligence rather than individual markets. Whether we are evaluating versioned observations through the [Devicer NEXT engineering preview](/products/devicer), modeling organizational behavior with NashTwin, or governing AI-assisted operations through HyperLocal, the objective remains consistent. Observe reality accurately, understand it deeply, simulate it responsibly, and help organizations make better decisions before uncertainty becomes expensive.
 
 Even our engineering practices reflect that philosophy. The recent rebuild of [gatewaycorporate.org](https://gatewaycorporate.org) was never about aesthetics alone. We wanted the site itself to demonstrate the standards we expect from every product we ship: exceptional performance, accessibility, maintainability, and disciplined engineering. Quality rarely comes from last-minute heroics. It comes from measuring carefully, building deliberately, and establishing strong fundamentals from the beginning.
 
