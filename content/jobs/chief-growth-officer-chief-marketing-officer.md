@@ -37,6 +37,6 @@ We are willing to offer a **substantial equity stake** in return for meeting agr
 
 ## Applying
 
-Please review [our products](https://gatewaycorporate.org/products/) and reach out to **@apollyon** with your CV and a short introduction. Tell us about your relevant experience, your interest in the role, and how you would approach growing Gateway Corporate. You may also submit your introduction and CV through the application form on this page.
+Please review [our products](https://gatewaycorporate.org/products/) and reach out to us with your CV and a short introduction. Tell us about your relevant experience, your interest in the role, and how you would approach growing Gateway Corporate. You may also submit your introduction and CV through the application form on this page.
 
 We welcome all applicants and consider candidates without regard to race, gender, or other personal identity traits. We aim to select the most qualified and enthusiastic candidate for the role.
