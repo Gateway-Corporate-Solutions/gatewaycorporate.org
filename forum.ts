@@ -956,11 +956,11 @@ function renderPageShell(options: {
     <meta property="og:title" content="${escapeHtml(options.title)}">
     <meta property="og:description" content="${escapeHtml(options.description)}">
     <meta property="og:url" content="${escapeHtml(options.canonicalUrl)}">
-    <meta property="og:image" content="${SITE_URL}/embed.png">
+    <meta property="og:image" content="${SITE_URL}/forum.png?v=20261006">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHtml(options.title)}">
     <meta name="twitter:description" content="${escapeHtml(options.description)}">
-    <meta name="twitter:image" content="${SITE_URL}/embed.png">${recaptchaScript}
+    <meta name="twitter:image" content="${SITE_URL}/forum.png?v=20261006">${recaptchaScript}
     <link rel="stylesheet" href="/components.css">
     <link rel="stylesheet" href="/enhancements.css">
     <script src="/bundle.js" defer></script>

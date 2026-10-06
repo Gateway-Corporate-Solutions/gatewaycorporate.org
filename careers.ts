@@ -4,7 +4,7 @@ import { renderSiteFooter } from "./footer.ts";
 
 const JOBS_DIR = new URL("./content/jobs/", import.meta.url);
 const SITE_URL = "https://gatewaycorporate.org";
-const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/embed.png`;
+const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/careers.png?v=20261006`;
 const RECAPTCHA_SITE_KEY = "6LcIVHArAAAAAPZ1scQS8vrN_JRhCBzjOoJHuw2i";
 const RESUME_SIZE_LIMIT_MB = 5;
 

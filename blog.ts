@@ -4,7 +4,7 @@ import { renderSiteFooter } from "./footer.ts";
 
 const BLOG_DIR = new URL("./content/blog/", import.meta.url);
 const SITE_URL = "https://gatewaycorporate.org";
-const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/embed.png`;
+const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/blog.png?v=20261006`;
 
 export interface BlogPost {
   slug: string;
