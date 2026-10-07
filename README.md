@@ -25,6 +25,14 @@ The site also supports a markdown-powered careers section with direct email appl
 - Successful applications are emailed to `office@gatewaycorporate.org` through the configured mail provider
 - Required environment variables for application delivery: `RESEND_API_KEY`, `CAREERS_EMAIL_FROM`, and `RECAPTCHA_SECRET_KEY`
 - Optional environment variable: `CAREERS_EMAIL_TO` to override the default inbox
+- `CAREERS_EMAIL_FROM` **must** be an address on the Resend-verified sending domain
+  (e.g. `careers@send.gatewaycorporate.org`), not the bare apex domain. The apex
+  domain's SPF record (`v=spf1 include:secureserver.net -all`) hard-fails any mail
+  sent via Resend, so using an `@gatewaycorporate.org` from-address causes Resend
+  to report the send as accepted while the recipient mailbox silently quarantines
+  or drops the message — the app logs "Submitted application" with no delivery.
+  Confirm the `resend._domainkey.send.gatewaycorporate.org` DKIM CNAME exists and
+  that `_dmarc.gatewaycorporate.org` has exactly one DMARC TXT record.
 
 ## Contact and appointment booking
 
