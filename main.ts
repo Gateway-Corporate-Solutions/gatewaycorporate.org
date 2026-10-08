@@ -59,7 +59,7 @@ import {
     createPeerManagerSqliteAdapter,
     createTlsManagerSqliteAdapter,
 } from "./sqlite.ts";
-import { clusterStoredFingerprints } from "./libs/clustering.ts";
+import { clusterStoredFingerprintsAsync } from "./libs/clustering.ts";
 import {
     applySecurityHeaders,
     buildSessionCookieHeader,
@@ -501,7 +501,7 @@ async function buildDevicerRuntime(): Promise<DevicerRuntime> {
 
 async function refreshFingerprintAnalytics(state: DevicerRuntime): Promise<void> {
     analytics.fingerprints = await state.adapters.device.getAllFingerprints();
-    [analytics.clusters, analytics.uniques] = clusterStoredFingerprints(
+    [analytics.clusters, analytics.uniques] = await clusterStoredFingerprintsAsync(
         analytics.fingerprints,
         1 - state.confidenceThreshold / 100,
         2,
@@ -3003,9 +3003,8 @@ router.get("/wss", async (context) => {
                 exactMatchFound,
                 closestMatch: closestMatch || 0,
             });
-            // Keep admin analytics snapshot close to real time without
-            // recomputing for every single websocket payload.
-            void refreshFingerprintAnalyticsIfNeeded(devicerRuntime, 2_500);
+            // Analytics are refreshed by the periodic timer and admin endpoints;
+            // O(n^2) clustering must not run on the ingest path.
         } catch (error) {
             fingerprintIngestStats.identifyFailed += 1;
             logDevicerDiagnostic("message.failed", requestId, {
@@ -3088,7 +3087,7 @@ router.get("/experiments/fingerprint-analytics", async (context) => {
             return;
         }
 
-        await refreshFingerprintAnalyticsIfNeeded(await getDevicerRuntime(), 0);
+        await refreshFingerprintAnalyticsIfNeeded(await getDevicerRuntime(), 30_000);
 
         context.response.status = 200;
         context.response.body = {
@@ -3146,7 +3145,7 @@ router.get("/experiments/dashboard", async (context) => {
             return;
         }
 
-        await refreshFingerprintAnalyticsIfNeeded(await getDevicerRuntime(), 0);
+        await refreshFingerprintAnalyticsIfNeeded(await getDevicerRuntime(), 30_000);
 
         const daysParam = context.request.url.searchParams.get("days");
         const days = daysParam ? Math.max(1, Number(daysParam)) : 7;
