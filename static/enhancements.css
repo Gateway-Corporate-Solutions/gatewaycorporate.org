@@ -1084,6 +1084,21 @@
 }
 
 /* Icon circle improvements */
+@font-face {
+  font-family: "QBot Brand Symbol";
+  src: url("/qbot-brand-symbol.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+1F5EB;
+}
+
+.qbot-brand-icon {
+  font-family: "QBot Brand Symbol", "Noto Sans Symbols 2", "Segoe UI Symbol", sans-serif;
+  font-weight: 400;
+  color: var(--gray-900);
+}
+
 .icon-circle {
   background: color-mix(in oklab, var(--primary) 84%, var(--canvas));
   border: var(--rule);

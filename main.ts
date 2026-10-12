@@ -1167,7 +1167,7 @@ function renderHomepageProductCards(leadProduct: HomepageProductId): string {
         return `<div class="grid gap-lg product-offerings-row" data-lead-product="${leadProduct}">
             ${orderedProducts.map((productId) => renderHomepageProductCard(productId)).join("\n")}
             <article class="product-spotlight">
-                <div class="icon-circle icon-lg icon-primary" aria-hidden="true">🗫</div>
+                <div class="icon-circle icon-lg icon-primary qbot-brand-icon" aria-hidden="true">🗫</div>
                 <h3 class="card-title">QBot4K</h3>
                 <div class="product-meta">
                     <span class="flair-tag flair-intelligence">Community Intelligence</span>
