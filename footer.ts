@@ -8,7 +8,7 @@ interface FooterColumn {
   links: FooterLink[];
 }
 
-export type FooterVariant = "default" | "nashtwin" | "devicer" | "hyperlocal";
+export type FooterVariant = "default" | "nashtwin" | "devicer" | "hyperlocal" | "qbot4k";
 
 const brandCopy = "Premiere technology services for the St. Louis area and beyond. Guiding you towards unprecedented success.";
 
@@ -74,6 +74,15 @@ const variantColumns: Record<FooterVariant, FooterColumn> = {
       { label: "Pricing", href: "/products/hyperlocal#pricing" },
     ],
   },
+  qbot4k: {
+    heading: "QBot4K",
+    links: [
+      { label: "Capabilities", href: "/products/qbot4k#capabilities" },
+      { label: "Live Demo", href: "https://qbot4k.dev/" },
+      { label: "Operator Login", href: "https://qbot4k.dev/login" },
+      { label: "System Status", href: "https://qbot4k.dev/status" },
+    ],
+  },
 };
 
 function escapeHtml(value: string): string {
@@ -100,6 +109,7 @@ export function resolveFooterVariant(view?: string): FooterVariant {
     case "nashtwin":
     case "devicer":
     case "hyperlocal":
+    case "qbot4k":
       return view;
     default:
       return "default";

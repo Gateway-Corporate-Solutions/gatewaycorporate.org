@@ -363,7 +363,8 @@
         grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
         grid-template-areas:
           "product-lead product-top"
-          "product-lead product-bottom";
+          "product-lead product-bottom"
+          "product-community product-community";
         align-items: start;
         gap: var(--offerings-gap);
       }
@@ -423,6 +424,10 @@
 
       .product-offerings-row > .product-spotlight:nth-child(3) {
         grid-area: product-bottom;
+      }
+
+      .product-offerings-row > .product-spotlight:nth-child(4) {
+        grid-area: product-community;
       }
 
       .product-offerings-row > .product-spotlight:nth-child(2) .product-graphic,
@@ -632,7 +637,8 @@
           grid-template-columns: repeat(2, minmax(0, 1fr));
           grid-template-areas:
             "product-lead product-lead"
-            "product-top product-bottom";
+            "product-top product-bottom"
+            "product-community product-community";
         }
 
         .product-offerings-row > .product-spotlight:nth-child(1) {
@@ -673,7 +679,8 @@
           grid-template-areas:
             "product-lead"
             "product-top"
-            "product-bottom";
+            "product-bottom"
+            "product-community";
         }
 
         .product-offerings-row > .product-spotlight:nth-child(1),

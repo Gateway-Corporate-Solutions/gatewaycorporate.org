@@ -1166,6 +1166,19 @@ function renderHomepageProductCards(leadProduct: HomepageProductId): string {
 
         return `<div class="grid gap-lg product-offerings-row" data-lead-product="${leadProduct}">
             ${orderedProducts.map((productId) => renderHomepageProductCard(productId)).join("\n")}
+            <article class="product-spotlight">
+                <h3 class="card-title">QBot4K</h3>
+                <div class="product-meta">
+                    <span class="flair-tag flair-intelligence">Community Intelligence</span>
+                    <span class="flair-tag flair-security">Moderation</span>
+                    <span class="flair-tag flair-integration">Discord + Twitch</span>
+                </div>
+                <p class="card-text product-summary">Community intelligence for streamers and moderation teams. QBot4K brings Discord and Twitch context together with evidence-backed review queues, connected investigations, and live incident response.</p>
+                <div class="btn-group mt-md product-actions">
+                    <a href="/products/qbot4k" class="btn btn-primary btn-sm">Explore QBot4K</a>
+                    <a href="https://qbot4k.dev/login" class="btn btn-accent btn-sm">Open QBot4K</a>
+                </div>
+            </article>
         </div>`;
 }
 
