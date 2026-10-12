@@ -25,6 +25,13 @@ The site also supports a markdown-powered careers section with direct email appl
 - Successful applications are emailed to `office@gatewaycorporate.org` through the configured mail provider
 - Required environment variables for application delivery: `RESEND_API_KEY`, `CAREERS_EMAIL_FROM`, and `RECAPTCHA_SECRET_KEY`
 - Optional environment variable: `CAREERS_EMAIL_TO` to override the default inbox
+- `CAREERS_EMAIL_FROM` **must** be a sender address verified in the Resend
+  dashboard (Domains/Senders page), e.g. `frontdesk@gatewaycorporate.org`.
+  `careers@gatewaycorporate.org` is **not** a verified sender — mail sent from
+  it is still accepted by Resend's API (and logged by the app as "Submitted
+  application"), but lands in the recipient's junk folder instead of the
+  inbox. Check the Resend dashboard for the current list of verified senders
+  before changing this value.
 
 ## Contact and appointment booking
 
