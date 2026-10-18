@@ -9,6 +9,10 @@ const ALLOWED_RESUME_MIME_TYPES = new Set([
 ]);
 const BLOCKED_EMAILS = new Set([
   "mike7778uk@gmail.com",
+  "wulfzqie@firsthidden.com",
+]);
+export const BLOCKED_EMAIL_DOMAINS = new Set([
+  "rambler.ru",
 ]);
 
 export interface ApplicationSubmissionResult {
@@ -314,7 +318,8 @@ function isValidEmail(email: string): boolean {
 
 function isBlockedEmail(email: string): boolean {
   const normalized = email.trim().toLowerCase();
-  return BLOCKED_EMAILS.has(normalized);
+  const domain = normalized.slice(normalized.lastIndexOf("@") + 1);
+  return BLOCKED_EMAILS.has(normalized) || BLOCKED_EMAIL_DOMAINS.has(domain);
 }
 
 function looksLikePdf(bytes: Uint8Array): boolean {

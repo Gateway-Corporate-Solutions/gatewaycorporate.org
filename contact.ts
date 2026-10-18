@@ -1,5 +1,6 @@
 import twilio from "twilio";
 import { Database } from "sqlite";
+import { BLOCKED_EMAIL_DOMAINS } from "./applications.ts";
 
 const CONTACT_INBOX = "office@gatewaycorporate.org";
 const BLOCKED_EMAILS = new Set<string>(
@@ -422,7 +423,8 @@ function isValidEmail(email: string): boolean {
 
 function isBlockedEmail(email: string): boolean {
   const normalized = email.trim().toLowerCase();
-  return normalized.length > 0 && BLOCKED_EMAILS.has(normalized);
+  const domain = normalized.slice(normalized.lastIndexOf("@") + 1);
+  return normalized.length > 0 && (BLOCKED_EMAILS.has(normalized) || BLOCKED_EMAIL_DOMAINS.has(domain));
 }
 
 function escapeHtml(value: string): string {
